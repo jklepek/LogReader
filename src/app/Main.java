@@ -15,13 +15,13 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("mainWindow.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("fxml/mainWindow.fxml"));
         primaryStage.setTitle("Log reader");
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
             Platform.exit();
-            System.exit(0);
+            LogTailer.getInstance().exit();
         });
 
     }

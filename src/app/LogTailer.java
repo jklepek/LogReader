@@ -12,6 +12,7 @@ public class LogTailer implements Runnable {
     private long startFileLength;
     private File logFile;
     private long waitTime = 3000;
+    private boolean exit = false;
 
 
     private LogTailer() {
@@ -28,6 +29,10 @@ public class LogTailer implements Runnable {
             this.logFile = file;
             this.startFileLength = file.length();
         }
+    }
+
+    public void exit(){
+        this.exit = true;
     }
 
     public void setLastPosition(File file) {
@@ -55,10 +60,12 @@ public class LogTailer implements Runnable {
                         String currentLine;
                         while ((currentLine = randomAccess.readLine()) != null) {
                             buffer.append(currentLine + System.lineSeparator());
-                            System.out.println("Found new line in file: " + currentLine);
                         }
                         lastPosition = randomAccess.getFilePointer();
-                        Parser.getInstance().parseBuffer(buffer);
+                        if (buffer.length() > 0) {
+                            Parser.getInstance().parseBuffer(buffer);
+                            System.out.println("Found new entries in the log file:\n" + buffer.toString());
+                        }
                         buffer.setLength(0);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -79,7 +86,7 @@ public class LogTailer implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        while (!exit) {
             try {
                 Thread.sleep(waitTime);
             } catch (InterruptedException e) {

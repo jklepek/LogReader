@@ -129,8 +129,6 @@ public class Controller {
         if (level.equals("ALL")) {
             tableView.setItems(LogEventRepository.getLogEventList());
             tableView.refresh();
-        } else if (level.isEmpty()) {
-            return;
         } else {
             FilteredList<LogEvent> filteredList = new FilteredList<>(LogEventRepository.getLogEventList());
             filteredList.setPredicate(event -> event.getLevel().equals(level));
@@ -145,7 +143,7 @@ public class Controller {
         settingsDialog.initOwner(borderPane.getScene().getWindow());
         settingsDialog.setTitle("Settings");
         FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(getClass().getResource("settingsDialog.fxml"));
+        fxmlLoader.setLocation(getClass().getResource("fxml/settingsDialog.fxml"));
         try {
             settingsDialog.getDialogPane().setContent(fxmlLoader.load());
         } catch (IOException e) {
