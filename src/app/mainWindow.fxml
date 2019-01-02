@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.*?>
+<BorderPane fx:id="borderPane" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8"
+            fx:controller="app.Controller">
+    <top>
+        <HBox>
+            <children>
+                <Button fx:id="openFileButton" onAction="#openFile" text="Open File">
+                    <HBox.margin>
+                        <Insets/>
+                    </HBox.margin>
+                </Button>
+                <ComboBox fx:id="levelComboBox" promptText="Level filter">
+                    <HBox.margin>
+                        <Insets/>
+                    </HBox.margin>
+                </ComboBox>
+                <ToggleButton fx:id="toggleButton" onAction="#tail" text="Auto refresh">
+                    <HBox.margin>
+                        <Insets/>
+                    </HBox.margin>
+                </ToggleButton>
+                <Button fx:id="settingsButton" onAction="#openSettings">
+                    <HBox.margin>
+                        <Insets/>
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+    </top>
+    <center>
+        <TableView fx:id="tableView">
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+            <columns>
+                <TableColumn text="Timestamp">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="timestamp"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Level">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="level"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Emitter">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="emitter"/>
+                    </cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Message">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="message"/>
+                    </cellValueFactory>
+                </TableColumn>
+            </columns>
+        </TableView>
+    </center>
+    <bottom>
+        <TextArea fx:id="textArea">
+        </TextArea>
+    </bottom>
+</BorderPane>

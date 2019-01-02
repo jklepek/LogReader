@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Label?>
+<DialogPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="app.DialogController"
+            prefHeight="50.0" prefWidth="300.0">
+    <content>
+        <GridPane hgap="10">
+            <Label text="Timestamp format" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="timestampFormat" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        </GridPane>
+    </content>
+</DialogPane>
