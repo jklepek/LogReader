@@ -21,7 +21,7 @@ public class Main extends Application {
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
             Platform.exit();
-            LogTailer.getInstance().exit();
+            LogTailer.getInstance().stopTailing();
         });
 
     }

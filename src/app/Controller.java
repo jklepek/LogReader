@@ -43,8 +43,6 @@ public class Controller {
     private File currentLogFile;
 
     public void initialize() {
-        Thread tailThread = new Thread(LogTailer.getInstance());
-        tailThread.start();
         fileChooser = new FileChooser();
         configureFileChooser(fileChooser);
         textArea.setEditable(false);

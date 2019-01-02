@@ -17,7 +17,7 @@ class ParserTest {
 
     @Test
     void parseBufferTest() {
-        StringBuffer testString = new StringBuffer("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n");
+        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n");
         Parser.getInstance().parseBuffer(testString);
         LogEvent logEvent = LogEventRepository.getLogEventList().get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
@@ -29,7 +29,7 @@ class ParserTest {
 
     @Test
     void parseBufferWithStackTraceTest() {
-        StringBuffer testString = new StringBuffer("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)\n");
+        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)\n");
         Parser.getInstance().parseBuffer(testString);
         LogEvent logEvent = LogEventRepository.getLogEventList().get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
@@ -41,14 +41,14 @@ class ParserTest {
 
     @Test
     void parseWrongFormat() {
-        StringBuffer testString = new StringBuffer("2018-12-10 12:07:43 [ERROR] NewConnectionWizard ");
+        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43 [ERROR] NewConnectionWizard ");
         Parser.getInstance().parseBuffer(testString);
         assertEquals(0, LogEventRepository.getLogEventList().size());
     }
 
     @Test
     void parseWrongFormatWithMatches() {
-        StringBuffer testString = new StringBuffer("2018-12-10 12:07:43,330 [ERROR] NewConnectionWizard java.lang.InterruptedException\r\n");
+        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 [ERROR] NewConnectionWizard java.lang.InterruptedException\r\n");
         Parser.getInstance().parseBuffer(testString);
         LogEvent logEvent = LogEventRepository.getLogEventList().get(0);
         assertEquals(1, LogEventRepository.getLogEventList().size());

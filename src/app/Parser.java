@@ -77,8 +77,8 @@ public class Parser {
         return Optional.of(line.substring(index + 2));
     }
 
-    private StringBuffer readFileToBuffer(File log) {
-        StringBuffer buffer = new StringBuffer();
+    private StringBuilder readFileToBuffer(File log) {
+        StringBuilder buffer = new StringBuilder();
         if (log != null) {
             String currentLine;
             try (FileReader fileReader = new FileReader(log)) {
@@ -94,7 +94,7 @@ public class Parser {
         return buffer;
     }
 
-    public void parseBuffer(StringBuffer buffer) {
+    public void parseBuffer(StringBuilder buffer) {
         String dateTimeRegex = "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}";
         Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
         Matcher matcher = dateTimePattern.matcher(buffer);
@@ -112,7 +112,7 @@ public class Parser {
     }
 
     public void getLogEventsFromFile(File file) {
-        StringBuffer buffer = readFileToBuffer(file);
+        StringBuilder buffer = readFileToBuffer(file);
         parseBuffer(buffer);
     }
 }

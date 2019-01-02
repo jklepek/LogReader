@@ -35,8 +35,6 @@ class LogTailerTest {
 
     @Test
     void startTailTest() throws IOException, InterruptedException {
-        Thread thread = new Thread(LogTailer.getInstance());
-        thread.start();
         LogTailer.getInstance().setWaitTime(500);
         File file = new File(filePath);
         LogTailer.getInstance().setLastPosition(file);
@@ -44,15 +42,13 @@ class LogTailerTest {
         assertEquals(2, LogEventRepository.getLogEventList().size());
         LogTailer.getInstance().startTailing(file);
         Files.write(Paths.get(filePath), "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.APPEND);
-        Thread.sleep(1500);
+        Thread.sleep(1000);
         assertEquals(3, LogEventRepository.getLogEventList().size());
         LogTailer.getInstance().stopTailing();
     }
 
     @Test
     void stopTailTest() throws IOException, InterruptedException {
-        Thread thread = new Thread(LogTailer.getInstance());
-        thread.start();
         LogTailer.getInstance().setWaitTime(100);
         File file = new File(filePath);
         LogTailer.getInstance().setLastPosition(file);
@@ -60,7 +56,7 @@ class LogTailerTest {
         assertEquals(2, LogEventRepository.getLogEventList().size());
         LogTailer.getInstance().startTailing(file);
         Files.write(Paths.get(filePath), "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.APPEND);
-        Thread.sleep(1500);
+        Thread.sleep(1000);
         assertEquals(3, LogEventRepository.getLogEventList().size());
         LogTailer.getInstance().stopTailing();
         Thread.sleep(1000);
@@ -71,17 +67,15 @@ class LogTailerTest {
 
     @Test
     void resetLogTailTest() throws IOException, InterruptedException {
-        Thread thread = new Thread(LogTailer.getInstance());
         LogTailer.getInstance().setWaitTime(500);
-        thread.start();
         File file = new File(filePath);
         LogTailer.getInstance().setLastPosition(file);
         Parser.getInstance().getLogEventsFromFile(file);
         assertEquals(2, LogEventRepository.getLogEventList().size());
         LogTailer.getInstance().startTailing(file);
-        Thread.sleep(1500);
+        Thread.sleep(1000);
         Files.write(Paths.get(filePath), "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-        Thread.sleep(1500);
+        Thread.sleep(1000);
         assertEquals(1, LogEventRepository.getLogEventList().size());
     }
 }
