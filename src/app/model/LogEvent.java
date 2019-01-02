@@ -18,10 +18,6 @@ public class LogEvent {
         this.stackTrace = stackTrace;
     }
 
-    public void appendStackTrace(String line) {
-        this.stackTrace += line;
-    }
-
     public String getTimestamp() {
         return timestamp.get();
     }

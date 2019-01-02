@@ -9,7 +9,7 @@
     <top>
         <HBox>
             <children>
-                <Button fx:id="openFileButton" onAction="#openFile" text="Open File">
+                <Button onAction="#openFile" text="Open File">
                     <HBox.margin>
                         <Insets/>
                     </HBox.margin>

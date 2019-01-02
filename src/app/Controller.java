@@ -8,6 +8,8 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -28,13 +30,10 @@ public class Controller {
     private TextArea textArea;
 
     @FXML
-    private ComboBox levelComboBox;
+    private ComboBox<String> levelComboBox;
 
     @FXML
     private ToggleButton toggleButton;
-
-    @FXML
-    private Button openFileButton;
 
     @FXML
     private Button settingsButton;
@@ -89,6 +88,8 @@ public class Controller {
             }
         });
         toggleButton.setDisable(true);
+        Image settingsImage = new Image(getClass().getResourceAsStream("resources/settings.png"), 17, 17, true, true);
+        settingsButton.setGraphic(new ImageView(settingsImage));
     }
 
     @FXML
@@ -125,7 +126,7 @@ public class Controller {
 
     @FXML
     private void filterLogEvents() {
-        String level = (String) levelComboBox.getSelectionModel().getSelectedItem();
+        String level = levelComboBox.getSelectionModel().getSelectedItem();
         if (level.equals("ALL")) {
             tableView.setItems(LogEventRepository.getLogEventList());
             tableView.refresh();

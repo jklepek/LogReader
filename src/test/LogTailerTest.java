@@ -3,7 +3,6 @@ package test;
 import app.LogEventRepository;
 import app.LogTailer;
 import app.Parser;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LogTailerTest {
 
-    String filePath = System.getProperty("user.dir") + "\\src\\test\\log4j.log";
+    private String filePath = System.getProperty("user.dir") + "\\src\\test\\log4j.log";
 
     @BeforeEach
     void setUp() throws IOException {
