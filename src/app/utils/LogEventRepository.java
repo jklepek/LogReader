@@ -1,4 +1,4 @@
-package app;
+package app.utils;
 
 import app.model.LogEvent;
 import javafx.collections.FXCollections;

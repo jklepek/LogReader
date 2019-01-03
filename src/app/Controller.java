@@ -2,6 +2,7 @@ package app;
 
 import app.model.LogEvent;
 import app.model.LogLevel;
+import app.utils.LogEventRepository;
 import app.utils.LogTailer;
 import app.utils.Parser;
 import app.utils.PreferencesController;
@@ -19,33 +20,25 @@ import javafx.stage.Window;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.BatchUpdateException;
 import java.util.Optional;
 
 public class Controller {
 
+    private final PreferencesController preferences = PreferencesController.getInstance();
     @FXML
     private BorderPane borderPane;
-
     @FXML
     private TableView<LogEvent> tableView;
-
     @FXML
     private TextArea textArea;
-
     @FXML
     private ComboBox<String> levelComboBox;
-
     @FXML
     private ToggleButton toggleButton;
-
     @FXML
     private Button settingsButton;
-
-
     private FileChooser fileChooser;
     private File currentLogFile;
-    private PreferencesController preferences = PreferencesController.getInstance();
 
     public void initialize() {
         fileChooser = new FileChooser();
@@ -115,7 +108,7 @@ public class Controller {
     private void configureFileChooser(FileChooser chooser) {
         chooser.setTitle("Select log file");
         chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log"));
-        chooser.setInitialDirectory(new File(preferences.getPreferedDir()));
+        chooser.setInitialDirectory(new File(preferences.getPreferredDir()));
     }
 
     @FXML
@@ -156,8 +149,8 @@ public class Controller {
             e.printStackTrace();
             return;
         }
-        settingsDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         DialogController dialogController = fxmlLoader.getController();
+        settingsDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         Optional<ButtonType> result = settingsDialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             dialogController.savePreferences();

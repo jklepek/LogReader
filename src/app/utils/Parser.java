@@ -1,6 +1,5 @@
 package app.utils;
 
-import app.LogEventRepository;
 import app.model.LogEvent;
 
 import java.io.BufferedReader;

@@ -1,7 +1,7 @@
 package test;
 
 import app.model.LogEvent;
-import app.LogEventRepository;
+import app.utils.LogEventRepository;
 import app.utils.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

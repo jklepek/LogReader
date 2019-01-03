@@ -1,6 +1,6 @@
 package test;
 
-import app.LogEventRepository;
+import app.utils.LogEventRepository;
 import app.utils.LogTailer;
 import app.utils.Parser;
 import org.junit.jupiter.api.BeforeEach;

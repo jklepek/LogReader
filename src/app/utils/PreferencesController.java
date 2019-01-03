@@ -4,10 +4,10 @@ import java.util.prefs.Preferences;
 
 public class PreferencesController {
 
-    private static PreferencesController instance = new PreferencesController();
-    private String autoRefreshInterval = "REFRESH_INTERVAL";
-    private String preferredDir = "PREFERRED_DIR";
-    private Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
+    private static final PreferencesController instance = new PreferencesController();
+    private final String autoRefreshInterval = "REFRESH_INTERVAL";
+    private final String preferredDir = "PREFERRED_DIR";
+    private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
 
     public static PreferencesController getInstance() {
         return instance;
@@ -21,11 +21,11 @@ public class PreferencesController {
         preferences.put(autoRefreshInterval, String.valueOf(value));
     }
 
-    public String getPreferedDir() {
+    public String getPreferredDir() {
         return preferences.get(preferredDir, System.getProperty("user.dir"));
     }
 
-    public void setPreferedDir(String dir) {
+    public void setPreferredDir(String dir) {
         preferences.put(preferredDir, dir);
     }
 }
