@@ -1,5 +1,6 @@
-package app;
+package app.utils;
 
+import app.LogEventRepository;
 import app.model.LogEvent;
 
 import java.io.BufferedReader;
@@ -14,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class Parser {
 
-    private static Parser instance = new Parser();
+    private static final Parser instance = new Parser();
 
     private Parser() {
     }
@@ -53,7 +54,7 @@ public class Parser {
     }
 
     private Optional<String> parseEmitter(String line) {
-        String emitterRegex = "(\\[.*\\])";
+        String emitterRegex = "(\\[.*?\\])";
         Pattern threadPattern = Pattern.compile(emitterRegex);
         Matcher matcher = threadPattern.matcher(line);
         if (matcher.find()) {

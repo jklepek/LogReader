@@ -1,5 +1,6 @@
 package app;
 
+import app.utils.LogTailer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -17,11 +18,12 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("fxml/mainWindow.fxml"));
         primaryStage.setTitle("Log reader");
-        primaryStage.setScene(new Scene(root, 800, 600));
+        primaryStage.setScene(new Scene(root, primaryStage.getMaxWidth(), primaryStage.getMaxHeight()));
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
-            Platform.exit();
             LogTailer.getInstance().stopTailing();
+            Platform.exit();
+            System.exit(0);
         });
 
     }

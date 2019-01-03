@@ -8,28 +8,26 @@
             fx:controller="app.Controller">
     <top>
         <HBox>
-            <children>
-                <Button onAction="#openFile" text="Open File">
-                    <HBox.margin>
-                        <Insets/>
-                    </HBox.margin>
-                </Button>
-                <ComboBox fx:id="levelComboBox" promptText="Level filter">
-                    <HBox.margin>
-                        <Insets/>
-                    </HBox.margin>
-                </ComboBox>
-                <ToggleButton fx:id="toggleButton" onAction="#tail" text="Auto refresh">
-                    <HBox.margin>
-                        <Insets/>
-                    </HBox.margin>
-                </ToggleButton>
-                <Button fx:id="settingsButton" onAction="#openSettings">
-                    <HBox.margin>
-                        <Insets/>
-                    </HBox.margin>
-                </Button>
-            </children>
+            <Button onAction="#openFile" text="Open File">
+                <HBox.margin>
+                    <Insets/>
+                </HBox.margin>
+            </Button>
+            <ComboBox fx:id="levelComboBox" promptText="Level filter">
+                <HBox.margin>
+                    <Insets/>
+                </HBox.margin>
+            </ComboBox>
+            <ToggleButton fx:id="toggleButton" onAction="#tail" text="Auto refresh">
+                <HBox.margin>
+                    <Insets/>
+                </HBox.margin>
+            </ToggleButton>
+            <Button fx:id="settingsButton" onAction="#openSettings">
+                <HBox.margin>
+                    <Insets/>
+                </HBox.margin>
+            </Button>
         </HBox>
     </top>
     <center>

@@ -1,4 +1,6 @@
-package app;
+package app.utils;
+
+import app.LogEventRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,12 +12,12 @@ import java.util.concurrent.Future;
 
 public class LogTailer implements Runnable {
 
-    private static LogTailer instance = new LogTailer();
+    private static final LogTailer instance = new LogTailer();
     private long lastPosition;
     private long startFileLength;
     private File logFile;
-    private long waitTime = 1000;
-    private ExecutorService service = Executors.newSingleThreadExecutor();
+    private long refreshInterval = PreferencesController.getInstance().getAutoRefreshInterval();
+    private final ExecutorService service = Executors.newSingleThreadExecutor();
     private Future taskHandle;
 
 
@@ -39,8 +41,8 @@ public class LogTailer implements Runnable {
         this.lastPosition = file.length();
     }
 
-    public void setWaitTime(long waitTime) {
-        this.waitTime = waitTime;
+    public void setRefreshInterval(long refreshInterval) {
+        this.refreshInterval = refreshInterval;
     }
 
     public void stopTailing() {
@@ -51,7 +53,7 @@ public class LogTailer implements Runnable {
         StringBuilder buffer = new StringBuilder();
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(waitTime);
+                Thread.sleep(refreshInterval);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();
@@ -63,7 +65,7 @@ public class LogTailer implements Runnable {
                     randomAccess.seek(lastPosition);
                     String currentLine;
                     while ((currentLine = randomAccess.readLine()) != null) {
-                        buffer.append(currentLine + System.lineSeparator());
+                        buffer.append(currentLine).append(System.lineSeparator());
                     }
                     lastPosition = randomAccess.getFilePointer();
                     if (buffer.length() > 0) {

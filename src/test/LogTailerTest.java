@@ -1,8 +1,8 @@
 package test;
 
 import app.LogEventRepository;
-import app.LogTailer;
-import app.Parser;
+import app.utils.LogTailer;
+import app.utils.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LogTailerTest {
 
-    private String filePath = System.getProperty("user.dir") + "\\src\\test\\log4j.log";
+    private final String filePath = System.getProperty("user.dir") + "\\src\\test\\log4j.log";
 
     @BeforeEach
     void setUp() throws IOException {
@@ -35,7 +35,7 @@ class LogTailerTest {
 
     @Test
     void startTailTest() throws IOException, InterruptedException {
-        LogTailer.getInstance().setWaitTime(500);
+        LogTailer.getInstance().setRefreshInterval(500);
         File file = new File(filePath);
         LogTailer.getInstance().setLastPosition(file);
         Parser.getInstance().getLogEventsFromFile(file);
@@ -49,7 +49,7 @@ class LogTailerTest {
 
     @Test
     void stopTailTest() throws IOException, InterruptedException {
-        LogTailer.getInstance().setWaitTime(100);
+        LogTailer.getInstance().setRefreshInterval(100);
         File file = new File(filePath);
         LogTailer.getInstance().setLastPosition(file);
         Parser.getInstance().getLogEventsFromFile(file);
@@ -67,7 +67,7 @@ class LogTailerTest {
 
     @Test
     void resetLogTailTest() throws IOException, InterruptedException {
-        LogTailer.getInstance().setWaitTime(500);
+        LogTailer.getInstance().setRefreshInterval(500);
         File file = new File(filePath);
         LogTailer.getInstance().setLastPosition(file);
         Parser.getInstance().getLogEventsFromFile(file);

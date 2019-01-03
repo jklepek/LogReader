@@ -4,11 +4,11 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class LogEvent {
 
-    private SimpleStringProperty timestamp = new SimpleStringProperty("");
-    private SimpleStringProperty level = new SimpleStringProperty("");
-    private SimpleStringProperty emitter = new SimpleStringProperty("");
-    private SimpleStringProperty message = new SimpleStringProperty("");
-    private String stackTrace;
+    private final SimpleStringProperty timestamp = new SimpleStringProperty("");
+    private final SimpleStringProperty level = new SimpleStringProperty("");
+    private final SimpleStringProperty emitter = new SimpleStringProperty("");
+    private final SimpleStringProperty message = new SimpleStringProperty("");
+    private final String stackTrace;
 
     public LogEvent(String timestamp, String level, String emitter, String message, String stackTrace) {
         this.timestamp.set(timestamp);
@@ -22,35 +22,19 @@ public class LogEvent {
         return timestamp.get();
     }
 
-    public SimpleStringProperty timestampProperty() {
-        return timestamp;
-    }
-
     public String getLevel() {
         return level.get();
-    }
-
-    public SimpleStringProperty levelProperty() {
-        return level;
     }
 
     public String getEmitter() {
         return emitter.get();
     }
 
-    public SimpleStringProperty emitterProperty() {
-        return emitter;
-    }
-
     public String getMessage() {
         return message.get();
     }
 
-    public SimpleStringProperty messageProperty() {
-        return message;
-    }
-
-    public String getStackTrace(){
+    public String getStackTrace() {
         return this.stackTrace;
     }
 

@@ -2,6 +2,9 @@ package app;
 
 import app.model.LogEvent;
 import app.model.LogLevel;
+import app.utils.LogTailer;
+import app.utils.Parser;
+import app.utils.PreferencesController;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
@@ -16,6 +19,7 @@ import javafx.stage.Window;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.BatchUpdateException;
 import java.util.Optional;
 
 public class Controller {
@@ -41,10 +45,10 @@ public class Controller {
 
     private FileChooser fileChooser;
     private File currentLogFile;
+    private PreferencesController preferences = PreferencesController.getInstance();
 
     public void initialize() {
         fileChooser = new FileChooser();
-        configureFileChooser(fileChooser);
         textArea.setEditable(false);
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
             LogEvent logEvent = tableView.getSelectionModel().getSelectedItem();
@@ -92,6 +96,7 @@ public class Controller {
 
     @FXML
     public void openFile() {
+        configureFileChooser(fileChooser);
         Window window = borderPane.getScene().getWindow();
         File logFile = fileChooser.showOpenDialog(window);
         if (logFile != currentLogFile) {
@@ -110,14 +115,16 @@ public class Controller {
     private void configureFileChooser(FileChooser chooser) {
         chooser.setTitle("Select log file");
         chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log"));
-        chooser.setInitialDirectory(new File("C:\\Program Files\\SmartBear\\SoapUI-5.4.0\\bin"));
+        chooser.setInitialDirectory(new File(preferences.getPreferedDir()));
     }
 
     @FXML
     public void tail() {
         if (toggleButton.isSelected() && currentLogFile != null) {
+            System.out.println("Started tailing.");
             LogTailer.getInstance().startTailing(currentLogFile);
         } else if (!toggleButton.isSelected() && currentLogFile != null) {
+            System.out.println("Stopped tailing.");
             LogTailer.getInstance().stopTailing();
         }
     }
@@ -149,11 +156,11 @@ public class Controller {
             e.printStackTrace();
             return;
         }
-        settingsDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        settingsDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         DialogController dialogController = fxmlLoader.getController();
         Optional<ButtonType> result = settingsDialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            dialogController.saveTimestampFormat();
+            dialogController.savePreferences();
         }
     }
 }

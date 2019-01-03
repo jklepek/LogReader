@@ -6,7 +6,7 @@ import javafx.collections.ObservableList;
 
 public class LogEventRepository {
 
-    private static ObservableList<LogEvent> logEventList = FXCollections.observableArrayList();
+    private static final ObservableList<LogEvent> logEventList = FXCollections.observableArrayList();
 
     public static void addEvent(LogEvent event) {
         logEventList.add(event);
