@@ -14,6 +14,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -154,6 +156,22 @@ public class Controller {
         Optional<ButtonType> result = settingsDialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             dialogController.savePreferences();
+        }
+    }
+
+    @FXML
+    public void copyStackTrace() {
+        LogEvent event;
+        if (!tableView.getItems().isEmpty()) {
+            event = tableView.getSelectionModel().getSelectedItem();
+        } else {
+            return;
+        }
+        if (!event.getStackTrace().isEmpty()) {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            content.putString(event.getStackTrace());
+            clipboard.setContent(content);
         }
     }
 }
