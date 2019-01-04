@@ -13,7 +13,9 @@ Settings allow to set initial directory and auto-refresh interval, which is stor
 
 For now the log4j format is hardcoded as: %d{yyyy-MM-dd' 'HH:mm:ss,SSS} %-5level [%logger{0}] %msg%n
 
+
 TO DO:
+
   implement custom log formats
   
   multiple opened log files
