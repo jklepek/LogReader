@@ -6,7 +6,7 @@ public class PreferencesController {
 
     private static final PreferencesController instance = new PreferencesController();
     private final String autoRefreshInterval = "REFRESH_INTERVAL";
-    private final String preferredDir = "PREFERRED_DIR";
+    private final String initialDir = "PREFERRED_DIR";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
 
     public static PreferencesController getInstance() {
@@ -21,11 +21,11 @@ public class PreferencesController {
         preferences.put(autoRefreshInterval, String.valueOf(value));
     }
 
-    public String getPreferredDir() {
-        return preferences.get(preferredDir, System.getProperty("user.dir"));
+    public String getInitialDir() {
+        return preferences.get(initialDir, System.getProperty("user.dir"));
     }
 
-    public void setPreferredDir(String dir) {
-        preferences.put(preferredDir, dir);
+    public void setInitialDir(String dir) {
+        preferences.put(initialDir, dir);
     }
 }

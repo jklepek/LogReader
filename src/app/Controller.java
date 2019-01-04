@@ -110,7 +110,7 @@ public class Controller {
     private void configureFileChooser(FileChooser chooser) {
         chooser.setTitle("Select log file");
         chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log"));
-        chooser.setInitialDirectory(new File(preferences.getPreferredDir()));
+        chooser.setInitialDirectory(new File(preferences.getInitialDir()));
     }
 
     @FXML
@@ -153,6 +153,7 @@ public class Controller {
         }
         DialogController dialogController = fxmlLoader.getController();
         settingsDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        settingsDialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(dialogController.validContentProperty());
         Optional<ButtonType> result = settingsDialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             dialogController.savePreferences();

@@ -18,7 +18,7 @@
                     <Insets/>
                 </HBox.margin>
             </ComboBox>
-            <ToggleButton fx:id="toggleButton" onAction="#tail" text="Auto refresh">
+            <ToggleButton fx:id="toggleButton" onAction="#tail" text="Auto-refresh">
                 <HBox.margin>
                     <Insets/>
                 </HBox.margin>
