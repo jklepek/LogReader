@@ -6,7 +6,7 @@
 <DialogPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:id="dialogPane"
-            fx:controller="app.DialogController"
+            fx:controller="app.controllers.DialogController"
             prefHeight="100.0" prefWidth="600.0">
     <content>
         <GridPane hgap="10" vgap="10">

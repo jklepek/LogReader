@@ -94,25 +94,27 @@ public class Parser {
         return buffer;
     }
 
-    public void parseBuffer(StringBuilder buffer) {
+    public void parseBuffer(StringBuilder buffer, String fileName) {
         String dateTimeRegex = "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}";
         Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
         Matcher matcher = dateTimePattern.matcher(buffer);
         List<Integer> lineNumbers = new ArrayList<>();
+
         while (matcher.find()) {
             lineNumbers.add(matcher.start());
         }
         for (int i = 0; i < lineNumbers.size(); i++) {
             if (i + 1 >= lineNumbers.size()) {
-                LogEventRepository.addEvent(parse(buffer.substring(lineNumbers.get(i))));
+                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i))));
             } else {
-                LogEventRepository.addEvent(parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1))));
+                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1))));
             }
         }
     }
 
     public void getLogEventsFromFile(File file) {
+        String fileName = file.getName();
         StringBuilder buffer = readFileToBuffer(file);
-        parseBuffer(buffer);
+        parseBuffer(buffer, fileName);
     }
 }

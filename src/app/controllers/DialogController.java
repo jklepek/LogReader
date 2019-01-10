@@ -1,4 +1,4 @@
-package app;
+package app.controllers;
 
 import app.utils.PreferencesController;
 import javafx.beans.binding.BooleanBinding;
@@ -29,8 +29,8 @@ public class DialogController {
     private BooleanBinding validContent;
 
     public void initialize() {
-        Image openFolderImage = new Image(getClass().getResourceAsStream("resources/openFolder.png"), 17, 17, true, true);
-        Image errorImage = new Image(getClass().getResourceAsStream("resources/error.png"), 17, 17, true, true);
+        Image openFolderImage = new Image(getClass().getResourceAsStream("../resources/openFolder.png"), 17, 17, true, true);
+        Image errorImage = new Image(getClass().getResourceAsStream("../resources/error.png"), 17, 17, true, true);
         intervalErrorImageView.setImage(errorImage);
         intervalErrorImageView.setVisible(false);
         dirErrorImageView.setImage(errorImage);

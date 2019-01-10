@@ -1,6 +1,6 @@
 package app;
 
-import app.utils.LogTailer;
+import app.utils.notifications.NotificationService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -21,10 +21,9 @@ public class Main extends Application {
         primaryStage.setScene(new Scene(root, primaryStage.getMaxWidth(), primaryStage.getMaxHeight()));
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
-            LogTailer.getInstance().stopTailing();
             Platform.exit();
             System.exit(0);
         });
-
+        NotificationService.startService(primaryStage);
     }
 }

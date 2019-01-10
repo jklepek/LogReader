@@ -10,7 +10,6 @@ import java.util.concurrent.Future;
 
 public class LogTailer implements Runnable {
 
-    private static final LogTailer instance = new LogTailer();
     private long lastPosition;
     private long startFileLength;
     private File logFile;
@@ -18,29 +17,15 @@ public class LogTailer implements Runnable {
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private Future taskHandle;
 
-
-    private LogTailer() {
+    public LogTailer(File logFile) {
+        this.lastPosition = logFile.length();
+        this.startFileLength = logFile.length();
+        this.logFile = logFile;
     }
 
-    public static LogTailer getInstance() {
-        return instance;
-    }
-
-    public void startTailing(File file) {
+    public void startTailing() {
         stopTailing();
         taskHandle = service.submit(this);
-        if (file != logFile || file != null) {
-            this.logFile = file;
-            this.startFileLength = file.length();
-        }
-    }
-
-    public void setLastPosition(File file) {
-        this.lastPosition = file.length();
-    }
-
-    public void setRefreshInterval(long refreshInterval) {
-        this.refreshInterval = refreshInterval;
     }
 
     public void stopTailing() {
@@ -67,7 +52,7 @@ public class LogTailer implements Runnable {
                     }
                     lastPosition = randomAccess.getFilePointer();
                     if (buffer.length() > 0) {
-                        Parser.getInstance().parseBuffer(buffer);
+                        Parser.getInstance().parseBuffer(buffer, logFile.getName());
                         System.out.println("Found new entries in the log file:\n" + buffer.toString());
                     }
                     buffer.setLength(0);
@@ -78,7 +63,7 @@ public class LogTailer implements Runnable {
                 System.out.println("Log file has been reset.");
                 lastPosition = 0;
                 startFileLength = currentFileLength;
-                LogEventRepository.clearRepository();
+                LogEventRepository.clearRepository(logFile.getName());
             }
         }
     }
