@@ -13,15 +13,16 @@ public class NotificationService {
 
     public static void startService(Stage stage) {
         NOTIFICATIONS.addListener((ListChangeListener<EventNotification>) c -> {
-                    c.next();
-                    if (c.wasAdded()) {
-                        EventNotification notification = NOTIFICATIONS.get(NOTIFICATIONS.size() - 1);
-                        if (!stage.isFocused() || !stage.isShowing()) {
-                            Platform.runLater(() -> {
-                                stage.show();
-                                stage.requestFocus();
-                                createNotification(notification);
-                            });
+                    while (c.next()) {
+                        if (c.wasAdded()) {
+                            EventNotification notification = NOTIFICATIONS.get(NOTIFICATIONS.size() - 1);
+                            if (!stage.isFocused() || !stage.isShowing()) {
+                                Platform.runLater(() -> {
+                                    stage.show();
+                                    stage.requestFocus();
+                                    createNotification(notification);
+                                });
+                            }
                         }
                     }
                 }
@@ -65,7 +66,7 @@ public class NotificationService {
         NOTIFICATIONS.add(notification);
     }
 
-    public static ObservableList<EventNotification> getNotifications(){
+    public static ObservableList<EventNotification> getNotifications() {
         return NOTIFICATIONS;
     }
 }
