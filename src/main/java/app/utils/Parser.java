@@ -1,6 +1,9 @@
 package app.utils;
 
 import app.model.LogEvent;
+import app.utils.notifications.EventNotification;
+import app.utils.notifications.NotificationService;
+import app.utils.notifications.NotificationType;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -99,9 +102,11 @@ public class Parser {
         Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
         Matcher matcher = dateTimePattern.matcher(buffer);
         List<Integer> lineNumbers = new ArrayList<>();
-
         while (matcher.find()) {
             lineNumbers.add(matcher.start());
+        }
+        if (lineNumbers.size() == 0) {
+            NotificationService.addNotification(new EventNotification("No events", "No events were parsed from file", NotificationType.WARNING));
         }
         for (int i = 0; i < lineNumbers.size(); i++) {
             if (i + 1 >= lineNumbers.size()) {

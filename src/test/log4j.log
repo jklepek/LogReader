@@ -1,2 +1,0 @@
-2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException
-	at java.util.concurrent.FutureTask.get(FutureTask.java:206)

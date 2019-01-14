@@ -22,7 +22,6 @@
         </HBox>
     </top>
     <center>
-        <TabPane fx:id="tabPane">
-        </TabPane>
+        <TabPane fx:id="tabPane"/>
     </center>
 </BorderPane>

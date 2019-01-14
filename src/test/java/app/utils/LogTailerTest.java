@@ -1,4 +1,9 @@
-package test;
+/*
+ * Created 2019. Open source.
+ * @author jklepek
+ */
+
+package app.utils;
 
 import app.utils.LogEventRepository;
 import app.utils.LogTailer;
@@ -21,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LogTailerTest {
 
-    private static final Path filePath = Paths.get("src/test/log4j.log");
+    private static final Path filePath = Paths.get("src/test/java/app/utils/log4j.log");
 
     @BeforeAll
     static void initTests() {

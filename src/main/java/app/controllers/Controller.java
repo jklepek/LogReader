@@ -28,7 +28,7 @@ public class Controller {
 
     public void initialize() {
         fileChooser = new FileChooser();
-        Image settingsImage = new Image(getClass().getResourceAsStream("../resources/settings.png"), 17, 17, true, true);
+        Image settingsImage = new Image(getClass().getResourceAsStream("/icons/settings.png"), 17, 17, true, true);
         settingsButton.setGraphic(new ImageView(settingsImage));
     }
 
@@ -55,19 +55,19 @@ public class Controller {
         settingsDialog.initOwner(borderPane.getScene().getWindow());
         settingsDialog.setTitle("Settings");
         FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(getClass().getResource("../fxml/settingsDialog.fxml"));
+        fxmlLoader.setLocation(getClass().getResource("/fxml/settingsDialog.fxml"));
         try {
             settingsDialog.getDialogPane().setContent(fxmlLoader.load());
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-        DialogController dialogController = fxmlLoader.getController();
+        SettingsDialogController settingsDialogController = fxmlLoader.getController();
         settingsDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        settingsDialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(dialogController.validContentProperty());
+        settingsDialog.getDialogPane().lookupButton(ButtonType.OK).disableProperty().bind(settingsDialogController.validContentProperty());
         Optional<ButtonType> result = settingsDialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            dialogController.savePreferences();
+            settingsDialogController.savePreferences();
         }
     }
 
@@ -77,7 +77,7 @@ public class Controller {
             Parser.getInstance().getLogEventsFromFile(file);
         }
         FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(getClass().getResource("../fxml/tableTab.fxml"));
+        fxmlLoader.setLocation(getClass().getResource("/fxml/tableTab.fxml"));
         Tab tab = new Tab();
         try {
             tab = fxmlLoader.load();
@@ -95,8 +95,14 @@ public class Controller {
     private void setTabContent(Tab tab, File file) {
         TableView<LogEvent> tableView = (TableView<LogEvent>) tab.getContent().lookup("#tableView");
         tableView.setItems(LogEventRepository.getLogEventList(file.getName()));
+        if (!PreferencesController.getInstance().getWatchForDirChanges()){
+            return;
+        }
         Optional<DirectoryWatchService> dirListener = DirectoryWatchServiceFactory.getDirectoryWatchService(file);
         dirListener.ifPresent(DirectoryWatchService::startWatching);
-        tab.setOnCloseRequest(event -> dirListener.ifPresent(DirectoryWatchService::stopWatching));
+        tab.setOnCloseRequest(event -> {
+            dirListener.ifPresent(DirectoryWatchService::stopWatching);
+            DirectoryWatchServiceFactory.removeWatchedDir(file);
+        });
     }
 }

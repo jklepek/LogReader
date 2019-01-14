@@ -20,9 +20,9 @@ public class NotificationService {
                                 Platform.runLater(() -> {
                                     stage.show();
                                     stage.requestFocus();
-                                    createNotification(notification);
                                 });
                             }
+                            createNotification(notification);
                         }
                     }
                 }

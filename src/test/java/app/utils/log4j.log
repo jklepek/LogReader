@@ -1,0 +1,10 @@
+2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException
+2018-12-10 12:08:19,958 ERROR [RestoreUiStateRunnable] com.thoughtworks.xstream.io.StreamException:  : Premature end of file.
+java.util.concurrent.ExecutionException: com.thoughtworks.xstream.io.StreamException:  : Premature end of file.
+	at java.util.concurrent.FutureTask.report(FutureTask.java:122)
+	at java.util.concurrent.FutureTask.get(FutureTask.java:206)
+	at com.quest.toad.ui.state.restore.RestoreUiStateRunnable.waitForTasks(RestoreUiStateRunnable.java:179)
+	at com.quest.toad.ui.state.restore.RestoreUiStateRunnable.watchDirectory(RestoreUiStateRunnable.java:150)
+	at org.eclipse.jface.operation.ModalContext$ModalContextThread.watchDirectory(ModalContext.java:119)
+2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException
+	at java.util.concurrent.FutureTask.get(FutureTask.java:206)

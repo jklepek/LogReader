@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.*?>
 <Tab xmlns="http://javafx.com/javafx"
      xmlns:fx="http://javafx.com/fxml"
+     fx:id="tab"
      fx:controller="app.controllers.TabController">
     <BorderPane>
         <top>

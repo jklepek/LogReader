@@ -1,4 +1,9 @@
-package test;
+/*
+ * Created 2019. Open source.
+ * @author jklepek
+ */
+
+package app.utils;
 
 import app.utils.DirectoryWatchService;
 import app.utils.DirectoryWatchServiceFactory;
@@ -18,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DirectoryWatchServiceTest {
 
-    private static final File file = new File("src/test/log4j.log");
-    private static final Path newFile = Paths.get("src/test/log4j1.log");
+    private static final File file = new File("src/test/java/app/utils/log4j.log");
+    private static final Path newFile = Paths.get("src/test/java/app/utils/log4j1.log");
 
     @BeforeEach
     void setUp() {

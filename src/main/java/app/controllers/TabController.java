@@ -17,6 +17,8 @@ import java.io.File;
 public class TabController {
 
     private File file;
+    @FXML
+    private Tab tab;
     private LogTailer logTailer;
     @FXML
     private TableView<LogEvent> tableView;
@@ -109,5 +111,6 @@ public class TabController {
     public void initData(File logFile){
         this.file = logFile;
         logTailer = new LogTailer(file);
+        tab.setOnCloseRequest(event -> logTailer.stopTailing());
     }
 }

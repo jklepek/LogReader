@@ -1,4 +1,9 @@
-package test;
+/*
+ * Created 2019. Open source.
+ * @author jklepek
+ */
+
+package app.utils;
 
 import app.utils.PreferencesController;
 import org.junit.jupiter.api.Test;

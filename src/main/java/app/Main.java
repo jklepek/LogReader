@@ -16,7 +16,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("fxml/mainWindow.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/mainWindow.fxml"));
         primaryStage.setTitle("Log reader");
         primaryStage.setScene(new Scene(root, primaryStage.getMaxWidth(), primaryStage.getMaxHeight()));
         primaryStage.show();
