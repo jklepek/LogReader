@@ -15,8 +15,8 @@ import java.util.concurrent.Future;
 public class DirectoryWatchService implements Runnable {
 
     private final ExecutorService service = Executors.newSingleThreadExecutor();
-    private Path dirPath;
-    private long refreshInterval;
+    private final Path dirPath;
+    private final long refreshInterval;
     private WatchService watchService;
     private Future taskHandle;
 

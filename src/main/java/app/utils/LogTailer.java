@@ -12,8 +12,8 @@ public class LogTailer implements Runnable {
 
     private long lastPosition;
     private long startFileLength;
-    private File logFile;
-    private long refreshInterval = PreferencesController.getInstance().getAutoRefreshInterval();
+    private final File logFile;
+    private final long refreshInterval = PreferencesController.getInstance().getAutoRefreshInterval();
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private Future taskHandle;
 

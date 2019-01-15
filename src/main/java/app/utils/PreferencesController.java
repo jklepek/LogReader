@@ -14,6 +14,7 @@ public class PreferencesController {
     private final String autoRefreshInterval = "REFRESH_INTERVAL";
     private final String initialDir = "PREFERRED_DIR";
     private final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
+    private final String logPattern = "CURRENT_LOG_PATTERN";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
 
@@ -52,15 +53,8 @@ public class PreferencesController {
     }
 
     public Optional<Map<String, String>> getLogPatterns() {
-        try {
-            for (String child : logPatterns.childrenNames()){
-                System.out.println(child);
-            }
-        } catch (BackingStoreException e) {
-            e.printStackTrace();
-        }
         Map<String, String> map = new HashMap<>();
-        if (getPatterns().isEmpty()){
+        if (getPatterns().isEmpty()) {
             NotificationService.addNotification(new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR));
         }
         for (Object pattern : getPatterns()) {
@@ -80,5 +74,18 @@ public class PreferencesController {
 
     public void removePattern(String name) {
         logPatterns.remove(name);
+    }
+
+    public String getLogPattern() {
+        return preferences.get(logPattern,"");
+    }
+
+    public void setLogPattern(String pattern) {
+        preferences.put(logPattern, pattern);
+        try {
+            preferences.flush();
+        } catch (BackingStoreException e) {
+            e.printStackTrace();
+        }
     }
 }

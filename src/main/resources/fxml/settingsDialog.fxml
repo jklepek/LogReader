@@ -21,9 +21,10 @@
             <CheckBox fx:id="watchDir" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
             <Label text="Log4j pattern" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
             <ComboBox fx:id="patternsComboBox" onAction="#setLogPatternField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-            <Label text="Pattern name" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-            <TextField fx:id="patternNameField" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
-            <Button fx:id="deletePatternButton" onAction="#deletePattern" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
+            <Label text="Pattern name" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <TextField fx:id="patternField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+            <Button fx:id="deletePatternButton" onAction="#deletePattern" GridPane.columnIndex="3" GridPane.rowIndex="4"/>
+            <Button fx:id="addPatternButton" onAction="#addPattern" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
         </GridPane>
     </content>
 </DialogPane>

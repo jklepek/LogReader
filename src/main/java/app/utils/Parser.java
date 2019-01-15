@@ -9,9 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -121,5 +119,62 @@ public class Parser {
         String fileName = file.getName();
         StringBuilder buffer = readFileToBuffer(file);
         parseBuffer(buffer, fileName);
+    }
+
+
+    private class toImplement {
+
+        private String getTimestampRegex(String input) {
+            input = input.replaceAll("'", "");
+            return input.replaceAll("[yYmMdDhHsS]", "\\\\d");
+        }
+
+        private Map<Integer, String> getKeywords(String input) {
+            Pattern p = Pattern.compile("%.*?&");
+            Matcher matcher = p.matcher(input);
+            Map<Integer, String> map = new TreeMap<>();
+            int position = 0;
+            while (matcher.find()) {
+                map.put(position, input.substring(matcher.start() + 1, matcher.end() - 1));
+                position++;
+            }
+            return map;
+        }
+
+        private void parse(String line, Map<Integer, String> map, String pattern) {
+            String level = "";
+            String emitter = "";
+            String message = "";
+            String timestamp = "";
+            String stacktrace = "";
+            String thread = "";
+            Matcher matcher = Pattern.compile(pattern).matcher(line);
+            for (String value : map.values()) {
+                switch (value) {
+                    case "LEVEL":
+                        level = line.substring(0, line.indexOf(" "));
+                        line = line.replace(level, "").trim();
+                        break;
+                    case "EMITTER":
+                        emitter = line.substring(0, line.indexOf(" "));
+                        line = line.replace(emitter, "").trim();
+                        break;
+                    case "MESSAGE":
+                        message = line.substring(0, line.indexOf("\r\n"));
+                        stacktrace = line.substring(line.indexOf("\r\n") + 2);
+                        break;
+                    case "THREAD":
+                        thread = line.substring(0, line.indexOf(" "));
+                        line = line.replace(thread, "").trim();
+                    default:
+                        if (matcher.find()) {
+                            timestamp = line.substring(matcher.start(), matcher.end());
+                            line = line.replace(timestamp, "").trim();
+                        }
+                        break;
+                }
+            }
+            LogEvent logEvent = new LogEvent(timestamp, level, emitter, message, stacktrace);
+        }
     }
 }

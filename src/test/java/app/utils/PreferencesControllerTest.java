@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PreferencesControllerTest {
 
-    PreferencesController preferences = PreferencesController.getInstance();
+    final PreferencesController preferences = PreferencesController.getInstance();
 
     @Test
     void autoRefreshIntervalTest() {

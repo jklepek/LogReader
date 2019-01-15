@@ -95,7 +95,7 @@ public class Controller {
     private void setTabContent(Tab tab, File file) {
         TableView<LogEvent> tableView = (TableView<LogEvent>) tab.getContent().lookup("#tableView");
         tableView.setItems(LogEventRepository.getLogEventList(file.getName()));
-        if (!PreferencesController.getInstance().getWatchForDirChanges()){
+        if (!PreferencesController.getInstance().getWatchForDirChanges()) {
             return;
         }
         Optional<DirectoryWatchService> dirListener = DirectoryWatchServiceFactory.getDirectoryWatchService(file);

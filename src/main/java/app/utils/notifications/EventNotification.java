@@ -2,9 +2,9 @@ package app.utils.notifications;
 
 public class EventNotification {
 
-    private String title;
-    private String text;
-    private NotificationType type;
+    private final String title;
+    private final String text;
+    private final NotificationType type;
 
     public EventNotification(String title, String text, NotificationType type) {
         this.title = title;
