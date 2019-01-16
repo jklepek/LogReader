@@ -10,6 +10,8 @@ import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class SettingsDialogController {
@@ -37,6 +39,7 @@ public class SettingsDialogController {
     private TextField patternField;
     private BooleanBinding validContent;
     private Map<String, String> patternMap;
+    private List<String> patternsToDelete = new ArrayList<>();
 
     public void initialize() {
         Image openFolderImage = new Image(getClass().getResourceAsStream("/icons/openFolder.png"), 17, 17, true, true);
@@ -100,6 +103,9 @@ public class SettingsDialogController {
                 }
             });
         }
+        patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            patternField.textProperty().setValue(patternMap.get(newValue));
+        });
     }
 
     public void savePreferences() {
@@ -111,6 +117,9 @@ public class SettingsDialogController {
             preferences.setWatchForDirChanges(watchDir.isSelected());
             preferences.addLogPattern(patternsComboBox.getValue(), patternField.getText());
             preferences.setLogPattern(patternField.getText());
+            for (String pattern : patternsToDelete) {
+                preferences.removePattern(pattern);
+            }
         }
     }
 
@@ -128,20 +137,20 @@ public class SettingsDialogController {
         return validContent;
     }
 
-    @FXML
-    private void setLogPatternField() {
-        String patternName = patternsComboBox.getSelectionModel().getSelectedItem();
-        if (patternName != null) {
-            patternField.textProperty().setValue(patternMap.get(patternName));
-        }
-    }
+//    @FXML
+//    private void setLogPatternField() {
+//        String patternName = patternsComboBox.getSelectionModel().getSelectedItem();
+//        if (patternName != null) {
+//            patternField.textProperty().setValue(patternMap.get(patternName));
+//        }
+//    }
 
     @FXML
     public void deletePattern() {
         String patternName = patternsComboBox.getSelectionModel().getSelectedItem();
+        patternsToDelete.add(patternName);
         patternsComboBox.getItems().remove(patternName);
-        preferences.removePattern(patternName);
         patternMap.remove(patternName);
-        patternField.clear();
+//        patternField.clear();
     }
 }

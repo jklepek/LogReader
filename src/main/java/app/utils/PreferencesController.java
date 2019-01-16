@@ -47,9 +47,7 @@ public class PreferencesController {
     }
 
     public void addLogPattern(String name, String pattern) {
-        if (!getPatterns().contains(name)) {
-            logPatterns.put(name, pattern);
-        }
+        logPatterns.put(name, pattern);
     }
 
     public Map<String, String> getLogPatterns() {
@@ -77,7 +75,7 @@ public class PreferencesController {
     }
 
     public String getLogPattern() {
-        return preferences.get(logPattern,"");
+        return preferences.get(logPattern, "");
     }
 
     public void setLogPattern(String pattern) {

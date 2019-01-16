@@ -10,10 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +27,7 @@ public class Parser {
 
 
     private String getTimestampRegex() {
-        String pattern = getKeywords().get(0);
+        String pattern = getKeywords().get(1);
         pattern = pattern.replaceAll("'", "");
         return pattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
     }
@@ -39,12 +36,9 @@ public class Parser {
         Map<Integer, String> map = new TreeMap<>();
         String pattern = PreferencesController.getInstance().getLogPattern();
         if (!pattern.equals("")) {
-            Pattern p = Pattern.compile("%.*?&");
-            Matcher matcher = p.matcher(pattern);
-            int position = 0;
-            while (matcher.find()) {
-                map.put(position, pattern.substring(matcher.start() + 1, matcher.end() - 1));
-                position++;
+            List<String> keywords = Arrays.asList(pattern.split("%"));
+            for (int i = 1; i < keywords.size(); i++) {
+                map.put(i, keywords.get(i).trim());
             }
         }
         return map;
@@ -133,11 +127,5 @@ public class Parser {
         String fileName = file.getName();
         StringBuilder buffer = readFileToBuffer(file);
         parseBuffer(buffer, fileName);
-    }
-
-
-    private class toImplement {
-
-
     }
 }

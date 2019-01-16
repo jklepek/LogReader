@@ -54,6 +54,11 @@ public class TabController {
                                 case LogLevel.DEBUG:
                                     setStyle("-fx-background-color: honeydew;");
                                     break;
+                                case LogLevel.TRACE:
+                                    setStyle("-fx-background-color: ivory");
+                                    break;
+                                case LogLevel.FATAL:
+                                    setStyle("-fx-background-color: firebrick");
                                 default:
                                     setStyle("-fx-backgound-color: white;");
                                     break;
