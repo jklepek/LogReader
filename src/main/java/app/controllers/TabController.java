@@ -52,7 +52,7 @@ public class TabController {
                                     setStyle("-fx-background-color: orange;");
                                     break;
                                 case LogLevel.DEBUG:
-                                    setStyle("-fx-background-color: lightgolderrodyellow;");
+                                    setStyle("-fx-background-color: honeydew;");
                                     break;
                                 default:
                                     setStyle("-fx-backgound-color: white;");

@@ -52,7 +52,7 @@ public class PreferencesController {
         }
     }
 
-    public Optional<Map<String, String>> getLogPatterns() {
+    public Map<String, String> getLogPatterns() {
         Map<String, String> map = new HashMap<>();
         if (getPatterns().isEmpty()) {
             NotificationService.addNotification(new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR));
@@ -60,7 +60,7 @@ public class PreferencesController {
         for (Object pattern : getPatterns()) {
             map.put(pattern.toString(), logPatterns.get(pattern.toString(), ""));
         }
-        return Optional.of(map);
+        return map;
     }
 
     private List getPatterns() {
@@ -82,10 +82,5 @@ public class PreferencesController {
 
     public void setLogPattern(String pattern) {
         preferences.put(logPattern, pattern);
-        try {
-            preferences.flush();
-        } catch (BackingStoreException e) {
-            e.printStackTrace();
-        }
     }
 }

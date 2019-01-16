@@ -8,9 +8,11 @@ public class LogEvent {
     private final SimpleStringProperty level = new SimpleStringProperty("");
     private final SimpleStringProperty emitter = new SimpleStringProperty("");
     private final SimpleStringProperty message = new SimpleStringProperty("");
+    private final SimpleStringProperty thread = new SimpleStringProperty("");
+    private final SimpleStringProperty mdc = new SimpleStringProperty("");
     private final String stackTrace;
 
-    public LogEvent(String timestamp, String level, String emitter, String message, String stackTrace) {
+    public LogEvent(String timestamp, String level, String emitter, String message, String thread, String mdc, String stackTrace) {
         this.timestamp.set(timestamp);
         this.level.set(level);
         this.emitter.set(emitter);
@@ -36,6 +38,14 @@ public class LogEvent {
 
     public String getStackTrace() {
         return this.stackTrace;
+    }
+
+    public String getThread() {
+        return thread.get();
+    }
+
+    public String getMdc() {
+        return mdc.get();
     }
 
     @Override

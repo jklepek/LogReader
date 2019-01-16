@@ -2,7 +2,6 @@ package app.controllers;
 
 import app.utils.PreferencesController;
 import javafx.beans.binding.BooleanBinding;
-import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -11,6 +10,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.util.Map;
 
 public class SettingsDialogController {
 
@@ -34,9 +34,9 @@ public class SettingsDialogController {
     @FXML
     private ComboBox<String> patternsComboBox = new ComboBox<>();
     @FXML
-    private TextField patternNameField;
+    private TextField patternField;
     private BooleanBinding validContent;
-    private ObservableMap<String, String> patternMap;
+    private Map<String, String> patternMap;
 
     public void initialize() {
         Image openFolderImage = new Image(getClass().getResourceAsStream("/icons/openFolder.png"), 17, 17, true, true);
@@ -88,21 +88,29 @@ public class SettingsDialogController {
                         || !file.exists());
             }
         };
-        preferences.getLogPatterns().ifPresent(t -> {
-            patternMap = (ObservableMap<String, String>) t;
-            patternsComboBox.getItems().addAll(patternMap.keySet());
-        });
+        patternMap = preferences.getLogPatterns();
+        patternsComboBox.getItems().addAll(patternMap.keySet());
         patternsComboBox.setEditable(true);
+        String currentPattern = preferences.getLogPattern();
+        if (!currentPattern.equals("")) {
+            patternField.setText(currentPattern);
+            patternMap.forEach((key, value) -> {
+                if (value.equals(currentPattern)) {
+                    patternsComboBox.getSelectionModel().select(key);
+                }
+            });
+        }
     }
 
     public void savePreferences() {
         if (!initialDirField.getText().isEmpty() && !autoRefreshIntervalField.getText().isEmpty()
-                && !patternNameField.getText().isEmpty() && !patternsComboBox.getValue().isEmpty()) {
+                && patternField.getText() != null && patternsComboBox.getValue() != null) {
             String dir = initialDirField.getText();
             preferences.setInitialDir(dir);
             preferences.setAutoRefreshInterval(Long.valueOf(autoRefreshIntervalField.getText()));
             preferences.setWatchForDirChanges(watchDir.isSelected());
-            preferences.addLogPattern(patternsComboBox.getValue(), patternNameField.getText());
+            preferences.addLogPattern(patternsComboBox.getValue(), patternField.getText());
+            preferences.setLogPattern(patternField.getText());
         }
     }
 
@@ -123,13 +131,17 @@ public class SettingsDialogController {
     @FXML
     private void setLogPatternField() {
         String patternName = patternsComboBox.getSelectionModel().getSelectedItem();
-        if (!patternName.isEmpty()) {
-            patternNameField.textProperty().setValue(patternMap.get(patternName));
+        if (patternName != null) {
+            patternField.textProperty().setValue(patternMap.get(patternName));
         }
     }
 
     @FXML
     public void deletePattern() {
-        //TODO implement pattern deletion
+        String patternName = patternsComboBox.getSelectionModel().getSelectedItem();
+        patternsComboBox.getItems().remove(patternName);
+        preferences.removePattern(patternName);
+        patternMap.remove(patternName);
+        patternField.clear();
     }
 }

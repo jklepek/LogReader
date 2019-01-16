@@ -12,19 +12,18 @@
         <GridPane hgap="10" vgap="10">
             <Label text="Log directory" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
             <TextField fx:id="initialDirField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-            <ImageView fx:id="dirErrorIV" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-            <Button fx:id="browseButton" onAction="#selectDir" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+            <Button fx:id="browseButton" onAction="#selectDir" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <ImageView fx:id="dirErrorIV" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
             <Label text="Auto-refresh interval (ms)" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
             <TextField fx:id="autoRefreshIntervalField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <ImageView fx:id="intervalErrorIV" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+            <ImageView fx:id="intervalErrorIV" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
             <Label text="Watch for new files in directory" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
             <CheckBox fx:id="watchDir" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
             <Label text="Log4j pattern" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
             <ComboBox fx:id="patternsComboBox" onAction="#setLogPatternField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
             <Label text="Pattern name" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-            <TextField fx:id="patternField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-            <Button fx:id="deletePatternButton" onAction="#deletePattern" GridPane.columnIndex="3" GridPane.rowIndex="4"/>
-            <Button fx:id="addPatternButton" onAction="#addPattern" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
+            <TextField fx:id="patternField" prefWidth="450" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+            <Button fx:id="deletePatternButton" onAction="#deletePattern" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
         </GridPane>
     </content>
 </DialogPane>
