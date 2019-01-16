@@ -6,8 +6,6 @@
 package app.utils;
 
 import app.model.LogEvent;
-import app.utils.LogEventRepository;
-import app.utils.Parser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +17,7 @@ class ParserTest {
     private static final String repoName = "test";
 
     @BeforeAll
-    static void initTests(){
+    static void initTests() {
         LogEventRepository.newRepository(repoName);
     }
 
@@ -31,7 +29,7 @@ class ParserTest {
     @Test
     void parseBufferTest() {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n");
-        Parser.getInstance().parseBuffer(testString,repoName);
+        Parser.getInstance().parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
         assertEquals("ERROR", logEvent.getLevel());
@@ -43,7 +41,7 @@ class ParserTest {
     @Test
     void parseBufferWithStackTraceTest() {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)\n");
-        Parser.getInstance().parseBuffer(testString,repoName);
+        Parser.getInstance().parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
         assertEquals("ERROR", logEvent.getLevel());
