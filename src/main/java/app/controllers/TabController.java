@@ -4,15 +4,18 @@ import app.model.LogEvent;
 import app.model.LogLevel;
 import app.utils.LogEventRepository;
 import app.utils.LogTailer;
+import app.utils.Parser;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 
 import java.io.File;
+import java.util.List;
 
 public class TabController {
 
@@ -36,6 +39,12 @@ public class TabController {
                 textArea.setText(logEvent.getStackTrace());
             }
         });
+        List<String> keywords = Parser.getInstance().getKeywords();
+        for (String keyword : keywords) {
+            TableColumn<LogEvent, String> column = new TableColumn<>(keyword.toUpperCase());
+            column.setCellValueFactory(new PropertyValueFactory<>(keyword));
+            tableView.getColumns().add(column);
+        }
         tableView.setRowFactory(tableView -> new TableRow<>() {
                     @Override
                     protected void updateItem(LogEvent item, boolean empty) {
@@ -113,7 +122,7 @@ public class TabController {
         }
     }
 
-    public void initData(File logFile){
+    public void initData(File logFile) {
         this.file = logFile;
         logTailer = new LogTailer(file);
         tab.setOnCloseRequest(event -> logTailer.stopTailing());

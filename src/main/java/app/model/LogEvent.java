@@ -18,6 +18,8 @@ public class LogEvent {
         this.emitter.set(emitter);
         this.message.set(message);
         this.stackTrace = stackTrace;
+        this.thread.set(thread);
+        this.mdc.set(mdc);
     }
 
     public String getTimestamp() {
@@ -46,16 +48,5 @@ public class LogEvent {
 
     public String getMdc() {
         return mdc.get();
-    }
-
-    @Override
-    public String toString() {
-        return "LogEvent{" +
-                "timestamp=" + timestamp +
-                ", level=" + level +
-                ", emitter=" + emitter +
-                ", message=" + message +
-                ", stackTrace='" + stackTrace + '\'' +
-                '}';
     }
 }

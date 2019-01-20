@@ -16,6 +16,9 @@ import java.util.Map;
 
 public class SettingsDialogController {
 
+    private static final String OPEN_FOLDER_ICON = "/icons/openFolder.png";
+    private static final String ERROR_ICON = "/icons/error.png";
+    private static final String DELETE_ICON = "/icons/delete.png";
     private final PreferencesController preferences = PreferencesController.getInstance();
     @FXML
     private DialogPane dialogPane;
@@ -42,9 +45,9 @@ public class SettingsDialogController {
     private List<String> patternsToDelete = new ArrayList<>();
 
     public void initialize() {
-        Image openFolderImage = new Image(getClass().getResourceAsStream("/icons/openFolder.png"), 17, 17, true, true);
-        Image errorImage = new Image(getClass().getResourceAsStream("/icons/error.png"), 17, 17, true, true);
-        Image deleteImage = new Image(getClass().getResourceAsStream("/icons/delete.png"), 17, 17, true, true);
+        Image openFolderImage = new Image(getClass().getResourceAsStream(OPEN_FOLDER_ICON), 17, 17, true, true);
+        Image errorImage = new Image(getClass().getResourceAsStream(ERROR_ICON), 17, 17, true, true);
+        Image deleteImage = new Image(getClass().getResourceAsStream(DELETE_ICON), 17, 17, true, true);
         intervalErrorIV.setImage(errorImage);
         intervalErrorIV.setVisible(false);
         dirErrorIV.setImage(errorImage);
@@ -143,6 +146,9 @@ public class SettingsDialogController {
         patternsToDelete.add(patternName);
         patternsComboBox.getItems().remove(patternName);
         patternMap.remove(patternName);
-//        patternField.clear();
+    }
+
+    private void loadImages() {
+
     }
 }

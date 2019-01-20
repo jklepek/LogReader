@@ -27,21 +27,38 @@ public class Parser {
 
 
     private String getTimestampRegex() {
-        String pattern = getKeywords().get(1);
+        String pattern = getKeywordsFromPattern().get(0);
         pattern = pattern.replaceAll("'", "");
         return pattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
     }
 
-    private Map<Integer, String> getKeywords() {
+    private Map<Integer, String> getKeywordsFromPattern() {
         Map<Integer, String> map = new TreeMap<>();
         String pattern = PreferencesController.getInstance().getLogPattern();
         if (!pattern.equals("")) {
             List<String> keywords = Arrays.asList(pattern.split("%"));
-            for (int i = 1; i < keywords.size(); i++) {
-                map.put(i, keywords.get(i).trim());
+            int count = 0;
+            for (String word : keywords) {
+                if (!word.isEmpty()) {
+                    map.put(count, word.trim());
+                    count++;
+                }
             }
         }
         return map;
+    }
+
+    public List<String> getKeywords() {
+        List<String> keywords = new ArrayList<>();
+        Map<Integer, String> map = getKeywordsFromPattern();
+        for (int i = 0; i < map.size(); i++) {
+            if (i == 0) {
+                keywords.add("timestamp");
+            } else {
+                keywords.add(map.get(i).toLowerCase());
+            }
+        }
+        return keywords;
     }
 
     private LogEvent parse(String line, Map<Integer, String> map, String pattern) {
@@ -90,11 +107,10 @@ public class Parser {
         StringBuilder buffer = new StringBuilder();
         if (log != null) {
             String currentLine;
-            try (FileReader fileReader = new FileReader(log)) {
-                try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-                    while ((currentLine = bufferedReader.readLine()) != null) {
-                        buffer.append(currentLine).append(System.lineSeparator());
-                    }
+            try (FileReader fileReader = new FileReader(log);
+                 BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+                while ((currentLine = bufferedReader.readLine()) != null) {
+                    buffer.append(currentLine).append(System.lineSeparator());
                 }
             } catch (IOException e) {
                 System.out.println(e.getMessage());
@@ -116,9 +132,9 @@ public class Parser {
         }
         for (int i = 0; i < lineNumbers.size(); i++) {
             if (i + 1 >= lineNumbers.size()) {
-                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i)), getKeywords(), dateTimeRegex));
+                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i)), getKeywordsFromPattern(), dateTimeRegex));
             } else {
-                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), getKeywords(), dateTimeRegex));
+                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), getKeywordsFromPattern(), dateTimeRegex));
             }
         }
     }
