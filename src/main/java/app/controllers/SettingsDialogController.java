@@ -2,7 +2,6 @@ package app.controllers;
 
 import app.utils.PreferencesController;
 import javafx.beans.binding.BooleanBinding;
-import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -11,9 +10,15 @@ import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class SettingsDialogController {
 
+    private static final String OPEN_FOLDER_ICON = "/icons/openFolder.png";
+    private static final String ERROR_ICON = "/icons/error.png";
+    private static final String DELETE_ICON = "/icons/delete.png";
     private final PreferencesController preferences = PreferencesController.getInstance();
     @FXML
     private DialogPane dialogPane;
@@ -34,14 +39,15 @@ public class SettingsDialogController {
     @FXML
     private ComboBox<String> patternsComboBox = new ComboBox<>();
     @FXML
-    private TextField patternNameField;
+    private TextField patternField;
     private BooleanBinding validContent;
-    private ObservableMap<String, String> patternMap;
+    private Map<String, String> patternMap;
+    private List<String> patternsToDelete = new ArrayList<>();
 
     public void initialize() {
-        Image openFolderImage = new Image(getClass().getResourceAsStream("/icons/openFolder.png"), 17, 17, true, true);
-        Image errorImage = new Image(getClass().getResourceAsStream("/icons/error.png"), 17, 17, true, true);
-        Image deleteImage = new Image(getClass().getResourceAsStream("/icons/delete.png"), 17, 17, true, true);
+        Image openFolderImage = new Image(getClass().getResourceAsStream(OPEN_FOLDER_ICON), 17, 17, true, true);
+        Image errorImage = new Image(getClass().getResourceAsStream(ERROR_ICON), 17, 17, true, true);
+        Image deleteImage = new Image(getClass().getResourceAsStream(DELETE_ICON), 17, 17, true, true);
         intervalErrorIV.setImage(errorImage);
         intervalErrorIV.setVisible(false);
         dirErrorIV.setImage(errorImage);
@@ -88,21 +94,35 @@ public class SettingsDialogController {
                         || !file.exists());
             }
         };
-        preferences.getLogPatterns().ifPresent(t -> {
-            patternMap = (ObservableMap<String, String>) t;
-            patternsComboBox.getItems().addAll(patternMap.keySet());
-        });
+        patternMap = preferences.getLogPatterns();
+        patternsComboBox.getItems().addAll(patternMap.keySet());
         patternsComboBox.setEditable(true);
+        String currentPattern = preferences.getLogPattern();
+        if (!currentPattern.equals("")) {
+            patternField.setText(currentPattern);
+            patternMap.forEach((key, value) -> {
+                if (value.equals(currentPattern)) {
+                    patternsComboBox.getSelectionModel().select(key);
+                }
+            });
+        }
+        patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            patternField.textProperty().setValue(patternMap.get(newValue));
+        });
     }
 
     public void savePreferences() {
         if (!initialDirField.getText().isEmpty() && !autoRefreshIntervalField.getText().isEmpty()
-                && !patternNameField.getText().isEmpty() && !patternsComboBox.getValue().isEmpty()) {
+                && patternField.getText() != null && patternsComboBox.getValue() != null) {
             String dir = initialDirField.getText();
             preferences.setInitialDir(dir);
             preferences.setAutoRefreshInterval(Long.valueOf(autoRefreshIntervalField.getText()));
             preferences.setWatchForDirChanges(watchDir.isSelected());
-            preferences.addLogPattern(patternsComboBox.getValue(), patternNameField.getText());
+            preferences.addLogPattern(patternsComboBox.getValue(), patternField.getText());
+            preferences.setLogPattern(patternField.getText());
+            for (String pattern : patternsToDelete) {
+                preferences.removePattern(pattern);
+            }
         }
     }
 
@@ -121,15 +141,14 @@ public class SettingsDialogController {
     }
 
     @FXML
-    private void setLogPatternField() {
+    public void deletePattern() {
         String patternName = patternsComboBox.getSelectionModel().getSelectedItem();
-        if (!patternName.isEmpty()) {
-            patternNameField.textProperty().setValue(patternMap.get(patternName));
-        }
+        patternsToDelete.add(patternName);
+        patternsComboBox.getItems().remove(patternName);
+        patternMap.remove(patternName);
     }
 
-    @FXML
-    public void deletePattern() {
-        //TODO implement pattern deletion
+    private void loadImages() {
+
     }
 }

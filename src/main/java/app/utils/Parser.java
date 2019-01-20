@@ -1,6 +1,7 @@
 package app.utils;
 
 import app.model.LogEvent;
+import app.model.LogKeywords;
 import app.utils.notifications.EventNotification;
 import app.utils.notifications.NotificationService;
 import app.utils.notifications.NotificationType;
@@ -24,69 +25,92 @@ public class Parser {
         return instance;
     }
 
-    private LogEvent parse(String line) {
-        String timestamp = parseDate(line).map(String::toString).orElse("");
-        String level = parseLevel(line).map(String::toString).orElse("");
-        String emitter = parseEmitter(line).map(String::toString).orElse("");
-        String message = parseMessage(line).map(String::toString).orElse("");
-        String stackTrace = parseStackTrace(line).map(String::toString).orElse("");
-        return new LogEvent(timestamp, level, emitter, message, stackTrace);
+
+    private String getTimestampRegex() {
+        String pattern = getKeywordsFromPattern().get(0);
+        pattern = pattern.replaceAll("'", "");
+        return pattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
     }
 
-    private Optional<String> parseDate(String line) {
-        String dateTimeRegex = "^([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})";
-        Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
-        Matcher matcher = dateTimePattern.matcher(line);
-        if (matcher.find()) {
-            return Optional.of(line.substring(matcher.start(), matcher.end()).trim());
+    private Map<Integer, String> getKeywordsFromPattern() {
+        Map<Integer, String> map = new TreeMap<>();
+        String pattern = PreferencesController.getInstance().getLogPattern();
+        if (!pattern.equals("")) {
+            List<String> keywords = Arrays.asList(pattern.split("%"));
+            int count = 0;
+            for (String word : keywords) {
+                if (!word.isEmpty()) {
+                    map.put(count, word.trim());
+                    count++;
+                }
+            }
         }
-        return Optional.empty();
+        return map;
     }
 
-    private Optional<String> parseLevel(String line) {
-        String levelRegex = "([A-Z]){2,} ";
-        Pattern levelPattern = Pattern.compile(levelRegex);
-        Matcher matcher = levelPattern.matcher(line);
-        if (matcher.find()) {
-            return Optional.of(line.substring(matcher.start(), matcher.end()).trim());
+    public List<String> getKeywords() {
+        List<String> keywords = new ArrayList<>();
+        Map<Integer, String> map = getKeywordsFromPattern();
+        for (int i = 0; i < map.size(); i++) {
+            if (i == 0) {
+                keywords.add("timestamp");
+            } else {
+                keywords.add(map.get(i).toLowerCase());
+            }
         }
-        return Optional.empty();
+        return keywords;
     }
 
-    private Optional<String> parseEmitter(String line) {
-        String emitterRegex = "(\\[.*?\\])";
-        Pattern threadPattern = Pattern.compile(emitterRegex);
-        Matcher matcher = threadPattern.matcher(line);
-        if (matcher.find()) {
-            return Optional.of(line.substring(matcher.start(), matcher.end()).trim());
+    private LogEvent parse(String line, Map<Integer, String> map, String pattern) {
+        String level = "";
+        String emitter = "";
+        String message = "";
+        String timestamp = "";
+        String stacktrace = "";
+        String thread = "";
+        String mdc = "";
+        Matcher matcher = Pattern.compile(pattern).matcher(line);
+        for (String value : map.values()) {
+            switch (value) {
+                case LogKeywords.LEVEL:
+                    level = line.substring(0, line.indexOf(" "));
+                    line = line.replace(level, "").replaceFirst("^\\s++", "");
+                    break;
+                case LogKeywords.EMITTER:
+                    emitter = line.substring(0, line.indexOf(" "));
+                    line = line.replace(emitter, "").replaceFirst("^\\s++", "");
+                    break;
+                case LogKeywords.MESSAGE:
+                    message = line.substring(0, line.indexOf("\r\n"));
+                    stacktrace = line.substring(line.indexOf("\r\n") + 2);
+                    break;
+                case LogKeywords.THREAD:
+                    thread = line.substring(0, line.indexOf(" "));
+                    line = line.replace(thread, "").replaceFirst("^\\s++", "");
+                    break;
+                case LogKeywords.MDC:
+                    mdc = line.substring(0, line.indexOf(" "));
+                    line = line.replace(mdc, "").replaceFirst("^\\s++", "");
+                    break;
+                default:
+                    if (matcher.find()) {
+                        timestamp = line.substring(matcher.start(), matcher.end());
+                        line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
+                    }
+                    break;
+            }
         }
-        return Optional.empty();
-    }
-
-    private Optional<String> parseMessage(String line) {
-        String messageRegex = "\\] .*";
-        Pattern messagePattern = Pattern.compile(messageRegex);
-        Matcher matcher = messagePattern.matcher(line);
-        if (matcher.find()) {
-            return Optional.of(line.substring(matcher.start() + 2, line.indexOf("\r\n")));
-        }
-        return Optional.empty();
-    }
-
-    private Optional<String> parseStackTrace(String line) {
-        int index = line.indexOf("\r\n");
-        return Optional.of(line.substring(index + 2));
+        return new LogEvent(timestamp, level, emitter, message, thread, mdc, stacktrace);
     }
 
     private StringBuilder readFileToBuffer(File log) {
         StringBuilder buffer = new StringBuilder();
         if (log != null) {
             String currentLine;
-            try (FileReader fileReader = new FileReader(log)) {
-                try (BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-                    while ((currentLine = bufferedReader.readLine()) != null) {
-                        buffer.append(currentLine).append(System.lineSeparator());
-                    }
+            try (FileReader fileReader = new FileReader(log);
+                 BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+                while ((currentLine = bufferedReader.readLine()) != null) {
+                    buffer.append(currentLine).append(System.lineSeparator());
                 }
             } catch (IOException e) {
                 System.out.println(e.getMessage());
@@ -96,7 +120,7 @@ public class Parser {
     }
 
     public void parseBuffer(StringBuilder buffer, String fileName) {
-        String dateTimeRegex = "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}";
+        String dateTimeRegex = getTimestampRegex();
         Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
         Matcher matcher = dateTimePattern.matcher(buffer);
         List<Integer> lineNumbers = new ArrayList<>();
@@ -108,9 +132,9 @@ public class Parser {
         }
         for (int i = 0; i < lineNumbers.size(); i++) {
             if (i + 1 >= lineNumbers.size()) {
-                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i))));
+                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i)), getKeywordsFromPattern(), dateTimeRegex));
             } else {
-                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1))));
+                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), getKeywordsFromPattern(), dateTimeRegex));
             }
         }
     }
@@ -119,62 +143,5 @@ public class Parser {
         String fileName = file.getName();
         StringBuilder buffer = readFileToBuffer(file);
         parseBuffer(buffer, fileName);
-    }
-
-
-    private class toImplement {
-
-        private String getTimestampRegex(String input) {
-            input = input.replaceAll("'", "");
-            return input.replaceAll("[yYmMdDhHsS]", "\\\\d");
-        }
-
-        private Map<Integer, String> getKeywords(String input) {
-            Pattern p = Pattern.compile("%.*?&");
-            Matcher matcher = p.matcher(input);
-            Map<Integer, String> map = new TreeMap<>();
-            int position = 0;
-            while (matcher.find()) {
-                map.put(position, input.substring(matcher.start() + 1, matcher.end() - 1));
-                position++;
-            }
-            return map;
-        }
-
-        private void parse(String line, Map<Integer, String> map, String pattern) {
-            String level = "";
-            String emitter = "";
-            String message = "";
-            String timestamp = "";
-            String stacktrace = "";
-            String thread = "";
-            Matcher matcher = Pattern.compile(pattern).matcher(line);
-            for (String value : map.values()) {
-                switch (value) {
-                    case "LEVEL":
-                        level = line.substring(0, line.indexOf(" "));
-                        line = line.replace(level, "").trim();
-                        break;
-                    case "EMITTER":
-                        emitter = line.substring(0, line.indexOf(" "));
-                        line = line.replace(emitter, "").trim();
-                        break;
-                    case "MESSAGE":
-                        message = line.substring(0, line.indexOf("\r\n"));
-                        stacktrace = line.substring(line.indexOf("\r\n") + 2);
-                        break;
-                    case "THREAD":
-                        thread = line.substring(0, line.indexOf(" "));
-                        line = line.replace(thread, "").trim();
-                    default:
-                        if (matcher.find()) {
-                            timestamp = line.substring(matcher.start(), matcher.end());
-                            line = line.replace(timestamp, "").trim();
-                        }
-                        break;
-                }
-            }
-            LogEvent logEvent = new LogEvent(timestamp, level, emitter, message, stacktrace);
-        }
     }
 }
