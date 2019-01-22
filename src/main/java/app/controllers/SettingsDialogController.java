@@ -108,9 +108,7 @@ public class SettingsDialogController {
                 }
             });
         }
-        patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            patternField.textProperty().setValue(patternMap.get(newValue));
-        });
+        patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> patternField.textProperty().setValue(patternMap.get(newValue)));
     }
 
     public void savePreferences() {
@@ -148,9 +146,5 @@ public class SettingsDialogController {
         patternsToDelete.add(patternName);
         patternsComboBox.getItems().remove(patternName);
         patternMap.remove(patternName);
-    }
-
-    private void loadImages() {
-
     }
 }

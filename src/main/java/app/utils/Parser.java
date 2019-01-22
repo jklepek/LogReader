@@ -30,9 +30,9 @@ public class Parser {
     }
 
 
-    private String getTimestampRegex(String timestampPattern) {
-        timestampPattern = timestampPattern.replaceAll("'", "");
-        return timestampPattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
+    private String getTimestampRegex(String pattern) {
+        pattern = pattern.replaceAll("'", "");
+        return pattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
     }
 
     private Map<Integer, String> getKeywordsFromPattern() {
