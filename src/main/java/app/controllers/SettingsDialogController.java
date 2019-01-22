@@ -83,7 +83,8 @@ public class SettingsDialogController {
         validContent = new BooleanBinding() {
             {
                 bind(autoRefreshIntervalField.textProperty(),
-                        initialDirField.textProperty());
+                        initialDirField.textProperty(),
+                        patternField.textProperty());
             }
 
             @Override
@@ -91,7 +92,8 @@ public class SettingsDialogController {
                 File file = new File(initialDirField.getText());
                 return (!autoRefreshIntervalField.getText().matches("\\d*")
                         || autoRefreshIntervalField.getText().isEmpty()
-                        || !file.exists());
+                        || !file.exists()
+                );
             }
         };
         patternMap = preferences.getLogPatterns();

@@ -10,13 +10,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Parser {
 
     private static final Parser instance = new Parser();
+    private static String timestampPattern;
 
     private Parser() {
     }
@@ -26,21 +30,24 @@ public class Parser {
     }
 
 
-    private String getTimestampRegex() {
-        String pattern = getKeywordsFromPattern().get(0);
-        pattern = pattern.replaceAll("'", "");
-        return pattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
+    private String getTimestampRegex(String timestampPattern) {
+        timestampPattern = timestampPattern.replaceAll("'", "");
+        return timestampPattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
     }
 
     private Map<Integer, String> getKeywordsFromPattern() {
         Map<Integer, String> map = new TreeMap<>();
         String pattern = PreferencesController.getInstance().getLogPattern();
         if (!pattern.equals("")) {
-            List<String> keywords = Arrays.asList(pattern.split("%"));
+            String[] keywords = pattern.split("%");
             int count = 0;
             for (String word : keywords) {
                 if (!word.isEmpty()) {
-                    map.put(count, word.trim());
+                    if (word.toUpperCase().startsWith("D")) {
+                        timestampPattern = word.substring(word.indexOf("{") + 1, word.indexOf("}"));
+                        word = "TIMESTAMP";
+                    }
+                    map.put(count, word.toUpperCase().trim());
                     count++;
                 }
             }
@@ -51,10 +58,8 @@ public class Parser {
     public List<String> getKeywords() {
         List<String> keywords = new ArrayList<>();
         Map<Integer, String> map = getKeywordsFromPattern();
-        for (int i = 0; i < map.size(); i++) {
-            if (i == 0) {
-                keywords.add("timestamp");
-            } else {
+        if (!map.isEmpty()) {
+            for (int i = 0; i < map.size(); i++) {
                 keywords.add(map.get(i).toLowerCase());
             }
         }
@@ -72,6 +77,12 @@ public class Parser {
         Matcher matcher = Pattern.compile(pattern).matcher(line);
         for (String value : map.values()) {
             switch (value) {
+                case LogKeywords.TIMESTAMP:
+                    if (matcher.find()) {
+                        timestamp = line.substring(matcher.start(), matcher.end());
+                        line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
+                    }
+                    break;
                 case LogKeywords.LEVEL:
                     level = line.substring(0, line.indexOf(" "));
                     line = line.replace(level, "").replaceFirst("^\\s++", "");
@@ -81,8 +92,8 @@ public class Parser {
                     line = line.replace(emitter, "").replaceFirst("^\\s++", "");
                     break;
                 case LogKeywords.MESSAGE:
-                    message = line.substring(0, line.indexOf("\r\n"));
-                    stacktrace = line.substring(line.indexOf("\r\n") + 2);
+                    message = line.substring(0, line.indexOf(System.lineSeparator()));
+                    stacktrace = line.substring(line.indexOf(System.lineSeparator())).replaceFirst("^\\s++", "");
                     break;
                 case LogKeywords.THREAD:
                     thread = line.substring(0, line.indexOf(" "));
@@ -91,12 +102,6 @@ public class Parser {
                 case LogKeywords.MDC:
                     mdc = line.substring(0, line.indexOf(" "));
                     line = line.replace(mdc, "").replaceFirst("^\\s++", "");
-                    break;
-                default:
-                    if (matcher.find()) {
-                        timestamp = line.substring(matcher.start(), matcher.end());
-                        line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
-                    }
                     break;
             }
         }
@@ -120,7 +125,8 @@ public class Parser {
     }
 
     public void parseBuffer(StringBuilder buffer, String fileName) {
-        String dateTimeRegex = getTimestampRegex();
+        Map<Integer, String> keywords = getKeywordsFromPattern();
+        String dateTimeRegex = getTimestampRegex(timestampPattern);
         Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
         Matcher matcher = dateTimePattern.matcher(buffer);
         List<Integer> lineNumbers = new ArrayList<>();
@@ -132,9 +138,9 @@ public class Parser {
         }
         for (int i = 0; i < lineNumbers.size(); i++) {
             if (i + 1 >= lineNumbers.size()) {
-                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i)), getKeywordsFromPattern(), dateTimeRegex));
+                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i)), keywords, dateTimeRegex));
             } else {
-                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), getKeywordsFromPattern(), dateTimeRegex));
+                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), keywords, dateTimeRegex));
             }
         }
     }
