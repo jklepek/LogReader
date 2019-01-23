@@ -5,10 +5,6 @@
 
 package app.utils;
 
-import app.utils.LogEventRepository;
-import app.utils.LogTailer;
-import app.utils.Parser;
-import app.utils.PreferencesController;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +26,7 @@ class LogTailerTest {
 
     @BeforeAll
     static void initTests() {
-        PreferencesController.getInstance().setAutoRefreshInterval(100);
+        PreferenceRepository.setAutoRefreshInterval(100);
         LogEventRepository.newRepository(filePath.toFile().getName());
     }
 

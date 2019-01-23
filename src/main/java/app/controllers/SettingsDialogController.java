@@ -1,5 +1,6 @@
 package app.controllers;
 
+import app.utils.PreferenceRepository;
 import app.utils.PreferencesController;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
@@ -19,7 +20,6 @@ public class SettingsDialogController {
     private static final String OPEN_FOLDER_ICON = "/icons/openFolder.png";
     private static final String ERROR_ICON = "/icons/error.png";
     private static final String DELETE_ICON = "/icons/delete.png";
-    private final PreferencesController preferences = PreferencesController.getInstance();
     @FXML
     private DialogPane dialogPane;
     @FXML
@@ -58,7 +58,7 @@ public class SettingsDialogController {
         intervalErrorTooltip.setShowDelay(Duration.millis(150));
         browseButton.setGraphic(new ImageView(openFolderImage));
         deletePatternButton.setGraphic(new ImageView(deleteImage));
-        initialDirField.setText(preferences.getInitialDir());
+        initialDirField.setText(PreferenceRepository.getInitialDirectory());
         initialDirField.textProperty().addListener((observable, oldValue, newValue) -> {
             File file = new File(initialDirField.getText());
             if (!file.exists() && !file.isDirectory()) {
@@ -69,7 +69,7 @@ public class SettingsDialogController {
                 Tooltip.uninstall(dirErrorIV, dirErrorTooltip);
             }
         });
-        autoRefreshIntervalField.setText(String.valueOf(preferences.getAutoRefreshInterval()));
+        autoRefreshIntervalField.setText(String.valueOf(PreferenceRepository.getAutoRefreshInterval()));
         autoRefreshIntervalField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 intervalErrorIV.setVisible(true);
@@ -79,7 +79,7 @@ public class SettingsDialogController {
                 Tooltip.uninstall(intervalErrorIV, intervalErrorTooltip);
             }
         });
-        watchDir.setSelected(preferences.getWatchForDirChanges());
+        watchDir.setSelected(PreferenceRepository.isWatchDirForChanges());
         validContent = new BooleanBinding() {
             {
                 bind(autoRefreshIntervalField.textProperty(),
@@ -96,10 +96,10 @@ public class SettingsDialogController {
                 );
             }
         };
-        patternMap = preferences.getLogPatterns();
+        patternMap = PreferenceRepository.getAllLogPatterns();
         patternsComboBox.getItems().addAll(patternMap.keySet());
         patternsComboBox.setEditable(true);
-        String currentPattern = preferences.getLogPattern();
+        String currentPattern = PreferenceRepository.getCurrentLogPattern();
         if (!currentPattern.equals("")) {
             patternField.setText(currentPattern);
             patternMap.forEach((key, value) -> {
@@ -115,13 +115,13 @@ public class SettingsDialogController {
         if (!initialDirField.getText().isEmpty() && !autoRefreshIntervalField.getText().isEmpty()
                 && patternField.getText() != null && patternsComboBox.getValue() != null) {
             String dir = initialDirField.getText();
-            preferences.setInitialDir(dir);
-            preferences.setAutoRefreshInterval(Long.valueOf(autoRefreshIntervalField.getText()));
-            preferences.setWatchForDirChanges(watchDir.isSelected());
-            preferences.addLogPattern(patternsComboBox.getValue(), patternField.getText());
-            preferences.setLogPattern(patternField.getText());
+            PreferenceRepository.setInitialDirectory(dir);
+            PreferenceRepository.setAutoRefreshInterval(Long.valueOf(autoRefreshIntervalField.getText()));
+            PreferenceRepository.setWatchDirForChanges(watchDir.isSelected());
+            PreferenceRepository.addLogPattern(patternsComboBox.getValue(), patternField.getText());
+            PreferenceRepository.setCurrentLogPattern(patternField.getText());
             for (String pattern : patternsToDelete) {
-                preferences.removePattern(pattern);
+                PreferenceRepository.removePattern(pattern);
             }
         }
     }

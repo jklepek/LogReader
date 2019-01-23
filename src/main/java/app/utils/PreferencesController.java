@@ -52,16 +52,17 @@ public class PreferencesController {
 
     public Map<String, String> getLogPatterns() {
         Map<String, String> map = new HashMap<>();
-        if (getPatterns().isEmpty()) {
+        List<String> patterns = getPatterns();
+        if (patterns.isEmpty()) {
             NotificationService.addNotification(new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR));
         }
-        for (Object pattern : getPatterns()) {
-            map.put(pattern.toString(), logPatterns.get(pattern.toString(), ""));
+        for (String pattern : patterns) {
+            map.put(pattern, logPatterns.get(pattern, ""));
         }
         return map;
     }
 
-    private List getPatterns() {
+    private List<String> getPatterns() {
         try {
             return Arrays.asList(logPatterns.keys());
         } catch (BackingStoreException e) {

@@ -17,7 +17,6 @@ import java.util.Optional;
 
 public class Controller {
 
-    private final PreferencesController preferences = PreferencesController.getInstance();
     @FXML
     private BorderPane borderPane;
     @FXML
@@ -45,7 +44,7 @@ public class Controller {
     private void configureFileChooser(FileChooser chooser) {
         chooser.setTitle("Select log file");
         chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log"));
-        chooser.setInitialDirectory(new File(preferences.getInitialDir()));
+        chooser.setInitialDirectory(new File(PreferenceRepository.getInitialDirectory()));
     }
 
 
@@ -95,7 +94,7 @@ public class Controller {
     private void setTabContent(Tab tab, File file) {
         TableView<LogEvent> tableView = (TableView<LogEvent>) tab.getContent().lookup("#tableView");
         tableView.setItems(LogEventRepository.getLogEventList(file.getName()));
-        if (!PreferencesController.getInstance().getWatchForDirChanges()) {
+        if (!PreferenceRepository.isWatchDirForChanges()) {
             return;
         }
         Optional<DirectoryWatchService> dirListener = DirectoryWatchServiceFactory.getDirectoryWatchService(file);

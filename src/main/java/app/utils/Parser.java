@@ -37,7 +37,7 @@ public class Parser {
 
     private Map<Integer, String> getKeywordsFromPattern() {
         Map<Integer, String> map = new TreeMap<>();
-        String pattern = PreferencesController.getInstance().getLogPattern();
+        String pattern = PreferenceRepository.getCurrentLogPattern();
         if (!pattern.equals("")) {
             String[] keywords = pattern.split("%");
             int count = 0;

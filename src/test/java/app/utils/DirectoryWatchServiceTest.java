@@ -28,7 +28,7 @@ class DirectoryWatchServiceTest {
 
     @BeforeEach
     void setUp() {
-        PreferencesController.getInstance().setAutoRefreshInterval(100);
+        PreferenceRepository.setAutoRefreshInterval(100);
     }
 
     @AfterEach
