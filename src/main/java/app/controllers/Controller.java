@@ -44,7 +44,7 @@ public class Controller {
     private void configureFileChooser(FileChooser chooser) {
         chooser.setTitle("Select log file");
         chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log"));
-        chooser.setInitialDirectory(new File(PreferenceRepository.getInitialDirectory()));
+        chooser.setInitialDirectory(new File(PreferencesRepository.getInitialDirectory()));
     }
 
 
@@ -94,7 +94,7 @@ public class Controller {
     private void setTabContent(Tab tab, File file) {
         TableView<LogEvent> tableView = (TableView<LogEvent>) tab.getContent().lookup("#tableView");
         tableView.setItems(LogEventRepository.getLogEventList(file.getName()));
-        if (!PreferenceRepository.isWatchDirForChanges()) {
+        if (!PreferencesRepository.isWatchDirForChanges()) {
             return;
         }
         Optional<DirectoryWatchService> dirListener = DirectoryWatchServiceFactory.getDirectoryWatchService(file);

@@ -5,6 +5,8 @@
 
 package app.utils;
 
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,13 +28,16 @@ class LogTailerTest {
 
     @BeforeAll
     static void initTests() {
-        PreferenceRepository.setAutoRefreshInterval(100);
+        PreferencesRepository.loadPreferences();
+        PreferencesRepository.setCurrentLogPattern("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %EMITTER %MESSAGE");
+        PreferencesRepository.setAutoRefreshInterval(100);
         LogEventRepository.newRepository(filePath.toFile().getName());
     }
 
     @BeforeEach
     void setUp() throws IOException {
-        String content = "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\n" +
+        String content =
+                "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\n" +
                 "2018-12-10 12:08:19,958 ERROR [RestoreUiStateRunnable] com.thoughtworks.xstream.io.StreamException:  : Premature end of file.\n" +
                 "java.util.concurrent.ExecutionException: com.thoughtworks.xstream.io.StreamException:  : Premature end of file.\n" +
                 "\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)\n" +
@@ -55,9 +60,9 @@ class LogTailerTest {
         assertEquals(2, LogEventRepository.getLogEventList(file.getName()).size());
         LogTailer logTailer = new LogTailer(file);
         logTailer.startTailing();
+        Awaitility.await().atMost(Duration.ONE_HUNDRED_MILLISECONDS);
         Files.write(filePath, "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.APPEND);
-        Thread.sleep(300);
-        assertEquals(3, LogEventRepository.getLogEventList(file.getName()).size());
+        Awaitility.await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).untilAsserted(() -> assertEquals(3, LogEventRepository.getLogEventList(file.getName()).size()));
         logTailer.stopTailing();
     }
 

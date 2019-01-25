@@ -1,7 +1,7 @@
 package app.controllers;
 
-import app.utils.PreferenceRepository;
-import app.utils.PreferencesController;
+import app.utils.Parser;
+import app.utils.PreferencesRepository;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -9,11 +9,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
+import org.controlsfx.control.textfield.TextFields;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SettingsDialogController {
 
@@ -58,7 +60,7 @@ public class SettingsDialogController {
         intervalErrorTooltip.setShowDelay(Duration.millis(150));
         browseButton.setGraphic(new ImageView(openFolderImage));
         deletePatternButton.setGraphic(new ImageView(deleteImage));
-        initialDirField.setText(PreferenceRepository.getInitialDirectory());
+        initialDirField.setText(PreferencesRepository.getInitialDirectory());
         initialDirField.textProperty().addListener((observable, oldValue, newValue) -> {
             File file = new File(initialDirField.getText());
             if (!file.exists() && !file.isDirectory()) {
@@ -69,7 +71,7 @@ public class SettingsDialogController {
                 Tooltip.uninstall(dirErrorIV, dirErrorTooltip);
             }
         });
-        autoRefreshIntervalField.setText(String.valueOf(PreferenceRepository.getAutoRefreshInterval()));
+        autoRefreshIntervalField.setText(String.valueOf(PreferencesRepository.getAutoRefreshInterval()));
         autoRefreshIntervalField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 intervalErrorIV.setVisible(true);
@@ -79,7 +81,7 @@ public class SettingsDialogController {
                 Tooltip.uninstall(intervalErrorIV, intervalErrorTooltip);
             }
         });
-        watchDir.setSelected(PreferenceRepository.isWatchDirForChanges());
+        watchDir.setSelected(PreferencesRepository.isWatchDirForChanges());
         validContent = new BooleanBinding() {
             {
                 bind(autoRefreshIntervalField.textProperty(),
@@ -96,10 +98,10 @@ public class SettingsDialogController {
                 );
             }
         };
-        patternMap = PreferenceRepository.getAllLogPatterns();
+        patternMap = PreferencesRepository.getAllLogPatterns();
         patternsComboBox.getItems().addAll(patternMap.keySet());
         patternsComboBox.setEditable(true);
-        String currentPattern = PreferenceRepository.getCurrentLogPattern();
+        String currentPattern = PreferencesRepository.getCurrentLogPattern();
         if (!currentPattern.equals("")) {
             patternField.setText(currentPattern);
             patternMap.forEach((key, value) -> {
@@ -108,20 +110,27 @@ public class SettingsDialogController {
                 }
             });
         }
+        List<String> keywords = Parser.getInstance().getKeywords();
         patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> patternField.textProperty().setValue(patternMap.get(newValue)));
+        TextFields.bindAutoCompletion(patternField, s -> keywords
+                .stream()
+                .filter(k -> k.toLowerCase().startsWith(patternField
+                        .getText()
+                        .toLowerCase().replaceAll("%","")))
+                .collect(Collectors.toList()));
     }
 
     public void savePreferences() {
         if (!initialDirField.getText().isEmpty() && !autoRefreshIntervalField.getText().isEmpty()
                 && patternField.getText() != null && patternsComboBox.getValue() != null) {
             String dir = initialDirField.getText();
-            PreferenceRepository.setInitialDirectory(dir);
-            PreferenceRepository.setAutoRefreshInterval(Long.valueOf(autoRefreshIntervalField.getText()));
-            PreferenceRepository.setWatchDirForChanges(watchDir.isSelected());
-            PreferenceRepository.addLogPattern(patternsComboBox.getValue(), patternField.getText());
-            PreferenceRepository.setCurrentLogPattern(patternField.getText());
+            PreferencesRepository.setInitialDirectory(dir);
+            PreferencesRepository.setAutoRefreshInterval(Long.valueOf(autoRefreshIntervalField.getText()));
+            PreferencesRepository.setWatchDirForChanges(watchDir.isSelected());
+            PreferencesRepository.addLogPattern(patternsComboBox.getValue(), patternField.getText());
+            PreferencesRepository.setCurrentLogPattern(patternField.getText());
             for (String pattern : patternsToDelete) {
-                PreferenceRepository.removePattern(pattern);
+                PreferencesRepository.removePattern(pattern);
             }
         }
     }

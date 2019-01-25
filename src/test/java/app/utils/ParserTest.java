@@ -18,6 +18,8 @@ class ParserTest {
 
     @BeforeAll
     static void initTests() {
+        PreferencesRepository.loadPreferences();
+        PreferencesRepository.setCurrentLogPattern("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %EMITTER %MESSAGE");
         LogEventRepository.newRepository(repoName);
     }
 
@@ -47,7 +49,7 @@ class ParserTest {
         assertEquals("ERROR", logEvent.getLevel());
         assertEquals("[NewConnectionWizard]", logEvent.getEmitter());
         assertEquals("java.lang.InterruptedException", logEvent.getMessage());
-        assertEquals("\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)\n", logEvent.getStackTrace());
+        assertEquals("at java.util.concurrent.FutureTask.report(FutureTask.java:122)\n", logEvent.getStackTrace());
     }
 
     @Test
@@ -55,16 +57,6 @@ class ParserTest {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43 [ERROR] NewConnectionWizard ");
         Parser.getInstance().parseBuffer(testString, repoName);
         assertEquals(0, LogEventRepository.getLogEventList(repoName).size());
-    }
-
-    @Test
-    void parseWrongFormatWithMatches() {
-        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 [ERROR] NewConnectionWizard java.lang.InterruptedException\r\n");
-        Parser.getInstance().parseBuffer(testString, repoName);
-        LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
-        assertEquals(1, LogEventRepository.getLogEventList(repoName).size());
-        assertEquals("", logEvent.getLevel());
-        assertEquals("[ERROR]", logEvent.getEmitter());
     }
 
 }

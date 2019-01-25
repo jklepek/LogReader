@@ -12,7 +12,7 @@ import java.util.Map;
  * @author JKlepek
  * @project LogReader
  */
-public class PreferenceRepository {
+public class PreferencesRepository {
 
     private static final PreferencesController preferences = PreferencesController.getInstance();
     private static long AUTO_REFRESH_INTERVAL;

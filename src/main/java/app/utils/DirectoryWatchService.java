@@ -22,7 +22,7 @@ public class DirectoryWatchService implements Runnable {
 
     public DirectoryWatchService(File directory) {
         this.dirPath = directory.toPath();
-        this.refreshInterval = PreferenceRepository.getAutoRefreshInterval();
+        this.refreshInterval = PreferencesRepository.getAutoRefreshInterval();
     }
 
     public void startWatching() {

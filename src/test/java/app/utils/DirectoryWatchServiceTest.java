@@ -5,10 +5,9 @@
 
 package app.utils;
 
-import app.utils.DirectoryWatchService;
-import app.utils.DirectoryWatchServiceFactory;
-import app.utils.PreferencesController;
 import app.utils.notifications.NotificationService;
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -28,22 +31,26 @@ class DirectoryWatchServiceTest {
 
     @BeforeEach
     void setUp() {
-        PreferenceRepository.setAutoRefreshInterval(100);
+        PreferencesRepository.loadPreferences();
+        PreferencesRepository.setAutoRefreshInterval(100);
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        if (file.exists()) {
+        if (newFile.toFile().exists()) {
             Files.delete(newFile);
         }
     }
 
     @Test
-    void watchServiceTest() throws IOException, InterruptedException {
+    void watchServiceTest() throws IOException{
         DirectoryWatchServiceFactory.getDirectoryWatchService(file).ifPresent(DirectoryWatchService::startWatching);
-        Thread.sleep(300);
+        Awaitility.await().timeout(Duration.ONE_HUNDRED_MILLISECONDS);
         Files.createFile(newFile);
-        Thread.sleep(300);
-        assertEquals(1, NotificationService.getNotifications().size());
+        Awaitility.await().atMost(4000, TimeUnit.MILLISECONDS).until(isNotificationAdded());
+    }
+
+    private Callable<Boolean> isNotificationAdded() {
+        return () -> NotificationService.getNotifications().size() == 1;
     }
 }

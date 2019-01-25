@@ -1,6 +1,6 @@
 package app;
 
-import app.utils.PreferenceRepository;
+import app.utils.PreferencesRepository;
 import app.utils.notifications.NotificationService;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -24,11 +24,11 @@ public class Main extends Application {
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/reader.png")));
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
-            PreferenceRepository.saveAllPreferences();
+            PreferencesRepository.saveAllPreferences();
             Platform.exit();
             System.exit(0);
         });
-        PreferenceRepository.loadPreferences();
-        NotificationService.startService(primaryStage);
+        PreferencesRepository.loadPreferences();
+        NotificationService.startService();
     }
 }

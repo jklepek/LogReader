@@ -13,7 +13,7 @@ public class LogTailer implements Runnable {
     private long lastPosition;
     private long startFileLength;
     private final File logFile;
-    private final long refreshInterval = PreferenceRepository.getAutoRefreshInterval();
+    private final long refreshInterval = PreferencesRepository.getAutoRefreshInterval();
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private Future taskHandle;
 
