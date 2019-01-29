@@ -22,6 +22,8 @@ public class SettingsDialogController {
     private static final String OPEN_FOLDER_ICON = "/icons/openFolder.png";
     private static final String ERROR_ICON = "/icons/error.png";
     private static final String DELETE_ICON = "/icons/delete.png";
+    private Tooltip dirErrorTooltip;
+    private Tooltip intervalErrorTooltip;
     @FXML
     private DialogPane dialogPane;
     @FXML
@@ -47,57 +49,13 @@ public class SettingsDialogController {
     private List<String> patternsToDelete = new ArrayList<>();
 
     public void initialize() {
-        Image openFolderImage = new Image(getClass().getResourceAsStream(OPEN_FOLDER_ICON), 17, 17, true, true);
-        Image errorImage = new Image(getClass().getResourceAsStream(ERROR_ICON), 17, 17, true, true);
-        Image deleteImage = new Image(getClass().getResourceAsStream(DELETE_ICON), 17, 17, true, true);
-        intervalErrorIV.setImage(errorImage);
-        intervalErrorIV.setVisible(false);
-        dirErrorIV.setImage(errorImage);
-        dirErrorIV.setVisible(false);
-        Tooltip dirErrorTooltip = new Tooltip("Path is not valid.");
-        dirErrorTooltip.setShowDelay(Duration.millis(150));
-        Tooltip intervalErrorTooltip = new Tooltip("Value must be a number.");
-        intervalErrorTooltip.setShowDelay(Duration.millis(150));
-        browseButton.setGraphic(new ImageView(openFolderImage));
-        deletePatternButton.setGraphic(new ImageView(deleteImage));
+        initImages();
+        initTooltips();
+        initBindings();
+        initListeners();
         initialDirField.setText(PreferencesRepository.getInitialDirectory());
-        initialDirField.textProperty().addListener((observable, oldValue, newValue) -> {
-            File file = new File(initialDirField.getText());
-            if (!file.exists() && !file.isDirectory()) {
-                dirErrorIV.setVisible(true);
-                Tooltip.install(dirErrorIV, dirErrorTooltip);
-            } else {
-                dirErrorIV.setVisible(false);
-                Tooltip.uninstall(dirErrorIV, dirErrorTooltip);
-            }
-        });
         autoRefreshIntervalField.setText(String.valueOf(PreferencesRepository.getAutoRefreshInterval()));
-        autoRefreshIntervalField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                intervalErrorIV.setVisible(true);
-                Tooltip.install(intervalErrorIV, intervalErrorTooltip);
-            } else {
-                intervalErrorIV.setVisible(false);
-                Tooltip.uninstall(intervalErrorIV, intervalErrorTooltip);
-            }
-        });
         watchDir.setSelected(PreferencesRepository.isWatchDirForChanges());
-        validContent = new BooleanBinding() {
-            {
-                bind(autoRefreshIntervalField.textProperty(),
-                        initialDirField.textProperty(),
-                        patternField.textProperty());
-            }
-
-            @Override
-            protected boolean computeValue() {
-                File file = new File(initialDirField.getText());
-                return (!autoRefreshIntervalField.getText().matches("\\d*")
-                        || autoRefreshIntervalField.getText().isEmpty()
-                        || !file.exists()
-                );
-            }
-        };
         patternMap = PreferencesRepository.getAllLogPatterns();
         patternsComboBox.getItems().addAll(patternMap.keySet());
         patternsComboBox.setEditable(true);
@@ -111,12 +69,13 @@ public class SettingsDialogController {
             });
         }
         List<String> keywords = Parser.getInstance().getKeywords();
-        patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> patternField.textProperty().setValue(patternMap.get(newValue)));
         TextFields.bindAutoCompletion(patternField, s -> keywords
                 .stream()
                 .filter(k -> k.toLowerCase().startsWith(patternField
                         .getText()
-                        .toLowerCase().replaceAll("%","")))
+                        .toLowerCase()
+                        .substring(patternField.getText().indexOf("%"))
+                        .replaceAll("%", "")))
                 .collect(Collectors.toList()));
     }
 
@@ -155,5 +114,66 @@ public class SettingsDialogController {
         patternsToDelete.add(patternName);
         patternsComboBox.getItems().remove(patternName);
         patternMap.remove(patternName);
+    }
+
+    private void initImages() {
+        Image openFolderImage = new Image(getClass().getResourceAsStream(OPEN_FOLDER_ICON), 17, 17, true, true);
+        Image errorImage = new Image(getClass().getResourceAsStream(ERROR_ICON), 17, 17, true, true);
+        Image deleteImage = new Image(getClass().getResourceAsStream(DELETE_ICON), 17, 17, true, true);
+        intervalErrorIV.setImage(errorImage);
+        intervalErrorIV.setVisible(false);
+        dirErrorIV.setImage(errorImage);
+        dirErrorIV.setVisible(false);
+        browseButton.setGraphic(new ImageView(openFolderImage));
+        deletePatternButton.setGraphic(new ImageView(deleteImage));
+    }
+
+    private void initTooltips() {
+        dirErrorTooltip = new Tooltip("Path is not valid.");
+        dirErrorTooltip.setShowDelay(Duration.millis(150));
+        intervalErrorTooltip = new Tooltip("Value must be a number.");
+        intervalErrorTooltip.setShowDelay(Duration.millis(150));
+    }
+
+    private void initListeners() {
+        initialDirField.textProperty().addListener((observable, oldValue, newValue) -> {
+            File file = new File(initialDirField.getText());
+            if (!file.exists() && !file.isDirectory()) {
+                dirErrorIV.setVisible(true);
+                Tooltip.install(dirErrorIV, dirErrorTooltip);
+            } else {
+                dirErrorIV.setVisible(false);
+                Tooltip.uninstall(dirErrorIV, dirErrorTooltip);
+            }
+        });
+        autoRefreshIntervalField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                intervalErrorIV.setVisible(true);
+                Tooltip.install(intervalErrorIV, intervalErrorTooltip);
+            } else {
+                intervalErrorIV.setVisible(false);
+                Tooltip.uninstall(intervalErrorIV, intervalErrorTooltip);
+            }
+        });
+        patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> patternField.textProperty().setValue(patternMap.get(newValue)));
+    }
+
+    private void initBindings() {
+        validContent = new BooleanBinding() {
+            {
+                bind(autoRefreshIntervalField.textProperty(),
+                        initialDirField.textProperty(),
+                        patternField.textProperty());
+            }
+
+            @Override
+            protected boolean computeValue() {
+                File file = new File(initialDirField.getText());
+                return (!autoRefreshIntervalField.getText().matches("\\d*")
+                        || autoRefreshIntervalField.getText().isEmpty()
+                        || !file.exists()
+                );
+            }
+        };
     }
 }

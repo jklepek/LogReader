@@ -31,4 +31,8 @@ public class LogEventRepository {
         repository.put(fileName, logEventList);
         return true;
     }
+
+    public static void removeRepository(String filename) {
+        repository.remove(filename);
+    }
 }

@@ -13,8 +13,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import org.controlsfx.control.CheckComboBox;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.List;
 
 public class TabController {
@@ -30,7 +32,7 @@ public class TabController {
     @FXML
     private ToggleButton autoRefreshButton;
     @FXML
-    private ComboBox<String> levelComboBox;
+    private CheckComboBox<String> levelComboBox;
 
     public void initialize() {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
@@ -55,13 +57,13 @@ public class TabController {
                                     setStyle("-fx-background-color: indianred;");
                                     break;
                                 case LogLevel.INFO:
-                                    setStyle("-fx-background-color: lightblue;");
+                                    setStyle("-fx-background-color: cornflowerblue;");
                                     break;
                                 case LogLevel.WARNING:
                                     setStyle("-fx-background-color: orange;");
                                     break;
                                 case LogLevel.DEBUG:
-                                    setStyle("-fx-background-color: honeydew;");
+                                    setStyle("-fx-background-color: lightblue;");
                                     break;
                                 case LogLevel.TRACE:
                                     setStyle("-fx-background-color: ivory");
@@ -77,8 +79,11 @@ public class TabController {
                 }
 
         );
-        levelComboBox.setItems(FXCollections.observableArrayList("ALL", LogLevel.DEBUG, LogLevel.ERROR, LogLevel.INFO, LogLevel.WARNING));
-        levelComboBox.getSelectionModel().selectedItemProperty().addListener(observable -> filterLogEvents());
+        for (Field level : LogLevel.class.getDeclaredFields()){
+          levelComboBox.getItems().add(level.getName());
+        }
+        levelComboBox.getCheckModel().checkAll();
+        levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterLogEvents());
     }
 
     @FXML
@@ -110,16 +115,11 @@ public class TabController {
 
     @FXML
     private void filterLogEvents() {
-        String level = levelComboBox.getSelectionModel().getSelectedItem();
-        if (level.equals("ALL")) {
-            tableView.setItems(LogEventRepository.getLogEventList(file.getName()));
-            tableView.refresh();
-        } else {
-            FilteredList<LogEvent> filteredList = new FilteredList<>(LogEventRepository.getLogEventList(file.getName()));
-            filteredList.setPredicate(event -> event.getLevel().equals(level));
-            tableView.setItems(filteredList);
-            tableView.refresh();
-        }
+        List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
+        FilteredList<LogEvent> filteredList = new FilteredList<>(LogEventRepository.getLogEventList(file.getName()));
+        filteredList.setPredicate(logEvent -> levels.contains(logEvent.getLevel()));
+        tableView.setItems(filteredList);
+        tableView.refresh();
     }
 
     public void initData(File logFile) {

@@ -1,5 +1,9 @@
 package app.utils;
 
+import app.utils.notifications.EventNotification;
+import app.utils.notifications.NotificationService;
+import app.utils.notifications.NotificationType;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -10,11 +14,11 @@ import java.util.concurrent.Future;
 
 public class LogTailer implements Runnable {
 
-    private long lastPosition;
-    private long startFileLength;
     private final File logFile;
     private final long refreshInterval = PreferencesRepository.getAutoRefreshInterval();
     private final ExecutorService service = Executors.newSingleThreadExecutor();
+    private long lastPosition;
+    private long startFileLength;
     private Future taskHandle;
 
     public LogTailer(File logFile) {
@@ -61,6 +65,7 @@ public class LogTailer implements Runnable {
                 }
             } else {
                 System.out.println("Log file has been reset.");
+                NotificationService.addNotification(new EventNotification("Log file reset", "Log was has been reset", NotificationType.INFORMATION));
                 lastPosition = 0;
                 startFileLength = currentFileLength;
                 LogEventRepository.clearRepository(logFile.getName());

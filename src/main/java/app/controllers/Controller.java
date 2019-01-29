@@ -71,8 +71,7 @@ public class Controller {
     }
 
     private void createTab(File file) {
-        boolean created = LogEventRepository.newRepository(file.getName());
-        if (created) {
+        if (LogEventRepository.newRepository(file.getName())) {
             Parser.getInstance().getLogEventsFromFile(file);
         }
         FXMLLoader fxmlLoader = new FXMLLoader();
@@ -89,6 +88,7 @@ public class Controller {
         tab.setText(file.getName());
         tabPane.getTabs().add(tab);
         setTabContent(tab, file);
+        tabPane.getSelectionModel().select(tab);
     }
 
     private void setTabContent(Tab tab, File file) {
@@ -100,6 +100,7 @@ public class Controller {
         Optional<DirectoryWatchService> dirListener = DirectoryWatchServiceFactory.getDirectoryWatchService(file);
         dirListener.ifPresent(DirectoryWatchService::startWatching);
         tab.setOnCloseRequest(event -> {
+            LogEventRepository.removeRepository(file.getName());
             dirListener.ifPresent(DirectoryWatchService::stopWatching);
             DirectoryWatchServiceFactory.removeWatchedDir(file);
         });
