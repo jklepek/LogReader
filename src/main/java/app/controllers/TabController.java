@@ -5,7 +5,6 @@ import app.model.LogLevel;
 import app.utils.LogEventRepository;
 import app.utils.LogTailer;
 import app.utils.Parser;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
@@ -59,7 +58,7 @@ public class TabController {
                                 case LogLevel.INFO:
                                     setStyle("-fx-background-color: cornflowerblue;");
                                     break;
-                                case LogLevel.WARNING:
+                                case LogLevel.WARN:
                                     setStyle("-fx-background-color: orange;");
                                     break;
                                 case LogLevel.DEBUG:
@@ -79,8 +78,12 @@ public class TabController {
                 }
 
         );
-        for (Field level : LogLevel.class.getDeclaredFields()){
-          levelComboBox.getItems().add(level.getName());
+        for (Field level : LogLevel.class.getDeclaredFields()) {
+            try {
+                levelComboBox.getItems().add(level.get(LogLevel.class).toString());
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
         levelComboBox.getCheckModel().checkAll();
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterLogEvents());
@@ -113,7 +116,6 @@ public class TabController {
         }
     }
 
-    @FXML
     private void filterLogEvents() {
         List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
         FilteredList<LogEvent> filteredList = new FilteredList<>(LogEventRepository.getLogEventList(file.getName()));

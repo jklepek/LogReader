@@ -67,32 +67,29 @@ class LogTailerTest {
     }
 
     @Test
-    void stopTailTest() throws IOException, InterruptedException {
+    void stopTailTest() throws IOException {
         File file = new File(filePath.toString());
         Parser.getInstance().getLogEventsFromFile(file);
         assertEquals(2, LogEventRepository.getLogEventList(file.getName()).size());
         LogTailer logTailer = new LogTailer(file);
         logTailer.startTailing();
         Files.write(filePath, "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.APPEND);
-        Thread.sleep(300);
-        assertEquals(3, LogEventRepository.getLogEventList(file.getName()).size());
+        Awaitility.await().untilAsserted(() -> assertEquals(3, LogEventRepository.getLogEventList(file.getName()).size()));
         logTailer.stopTailing();
-        Thread.sleep(300);
+        Awaitility.await().atMost(Duration.TWO_HUNDRED_MILLISECONDS);
         Files.write(filePath, "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.APPEND);
-        Thread.sleep(300);
-        assertEquals(3, LogEventRepository.getLogEventList(file.getName()).size());
+        Awaitility.await().untilAsserted(() -> assertEquals(3, LogEventRepository.getLogEventList(file.getName()).size()));
     }
 
     @Test
-    void resetLogTailTest() throws IOException, InterruptedException {
+    void resetLogTailTest() throws IOException {
         File file = new File(filePath.toString());
         Parser.getInstance().getLogEventsFromFile(file);
         assertEquals(2, LogEventRepository.getLogEventList(file.getName()).size());
         LogTailer logTailer = new LogTailer(file);
         logTailer.startTailing();
-        Thread.sleep(300);
+        Awaitility.await().atMost(Duration.TWO_HUNDRED_MILLISECONDS);
         Files.write(filePath, "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-        Thread.sleep(300);
-        assertEquals(1, LogEventRepository.getLogEventList(file.getName()).size());
+        Awaitility.await().untilAsserted(() -> assertEquals(1, LogEventRepository.getLogEventList(file.getName()).size()));
     }
 }

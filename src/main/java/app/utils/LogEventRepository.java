@@ -24,7 +24,7 @@ public class LogEventRepository {
     }
 
     public static boolean newRepository(String fileName) {
-        if (repository.containsKey(fileName)){
+        if (repository.containsKey(fileName)) {
             return false;
         }
         ObservableList<LogEvent> logEventList = FXCollections.observableArrayList();
