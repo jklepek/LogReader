@@ -11,6 +11,9 @@ import java.util.Map;
 /**
  * @author JKlepek
  * @project LogReader
+ *
+ * Runtime repository so the user can change preferences
+ * without the application immediately storing or loading them from system register
  */
 public class PreferencesRepository {
 

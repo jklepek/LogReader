@@ -8,6 +8,12 @@ import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+/**
+ * Controller that loads and stores user preferences
+ * to system
+ * These methods are called at the start of the application
+ * and at the closing of the application
+ */
 public class PreferencesController {
 
     private static final PreferencesController INSTANCE = new PreferencesController();

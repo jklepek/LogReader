@@ -12,6 +12,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * Class for reading new lines in the opened log file
+ * and adding them to UI
+ */
 public class LogTailer implements Runnable {
 
     private final File logFile;
@@ -22,20 +26,31 @@ public class LogTailer implements Runnable {
     private Future taskHandle;
 
     public LogTailer(File logFile) {
-        this.lastPosition = logFile.length();
         this.startFileLength = logFile.length();
+        this.lastPosition = startFileLength;
         this.logFile = logFile;
     }
 
+    /**
+     * Starts checking the file for new content
+     */
     public void startTailing() {
         stopTailing();
         taskHandle = service.submit(this);
     }
 
+    /**
+     * Stops checking the file for new content
+     */
     public void stopTailing() {
         Optional.ofNullable(taskHandle).ifPresent(future -> future.cancel(true));
     }
 
+    /**
+     * Periodically checks if the file has new content
+     * and if it does, it parses the new lines
+     * and adds them to corresponding repository
+     */
     private void tail() {
         StringBuilder buffer = new StringBuilder();
         while (!Thread.currentThread().isInterrupted()) {

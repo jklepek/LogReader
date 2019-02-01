@@ -14,23 +14,24 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.controlsfx.control.Notifications;
 
+/**
+ * Service watches for changes in ObservableList of EventNotifications
+ * if a new event is added, notification is displayed
+ */
 public class NotificationService {
 
     private static final ObservableList<EventNotification> NOTIFICATIONS = FXCollections.observableArrayList();
     private static Stage stage;
 
+    /**
+     * Starts the service
+     */
     public static void startService() {
 
         NOTIFICATIONS.addListener((ListChangeListener<EventNotification>) c -> {
                     while (c.next()) {
                         if (c.wasAdded()) {
                             EventNotification notification = NOTIFICATIONS.get(NOTIFICATIONS.size() - 1);
-//                            if (!stage.isFocused() || !stage.isShowing()) {
-//                                Platform.runLater(() -> {
-//                                    stage.show();
-//                                    stage.requestFocus();
-//                                });
-//                            }
                             createHiddenStage();
                             Platform.runLater(() -> createNotification(notification));
                         }
@@ -39,6 +40,10 @@ public class NotificationService {
         );
     }
 
+    /**
+     * Creates notification based on it's type
+     * @param notification EventNotification
+     */
     private static void createNotification(EventNotification notification) {
         switch (notification.getType()) {
             case ERROR:
@@ -72,6 +77,10 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Adds new notification to the ObservableList
+     * @param notification EventNotification
+     */
     public static void addNotification(EventNotification notification) {
         NOTIFICATIONS.add(notification);
     }
@@ -80,6 +89,11 @@ public class NotificationService {
         return NOTIFICATIONS;
     }
 
+    /**
+     * Hidden stage is necessary to avoid null pointer exception
+     * when the application is minimized or not focused.
+     * This hidden stage allows notifications to be displayed at all times.
+     */
     private static void createHiddenStage() {
         Platform.runLater(() -> {
             stage = new Stage(StageStyle.TRANSPARENT);

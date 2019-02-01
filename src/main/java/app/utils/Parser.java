@@ -30,11 +30,20 @@ public class Parser {
     }
 
 
+    /**
+     * @param pattern string form of a timestamp pattern e.g. yyyy-MM-dd' 'HH:mm:SSS,S
+     * @return timestamp regex
+     */
     private String getTimestampRegex(String pattern) {
         pattern = pattern.replaceAll("'", "");
         return pattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
     }
 
+    /**
+     * Takes stored pattern and saves individual keywords in a map,
+     * where the key is the order of the keyword
+     * @return map
+     */
     private Map<Integer, String> getKeywordsFromPattern() {
         Map<Integer, String> map = new TreeMap<>();
         String pattern = PreferencesRepository.getCurrentLogPattern();
@@ -55,6 +64,10 @@ public class Parser {
         return map;
     }
 
+
+    /**
+     * @return list of keywords used in the currently selected pattern
+     */
     public List<String> getKeywords() {
         List<String> keywords = new ArrayList<>();
         Map<Integer, String> map = getKeywordsFromPattern();
@@ -66,6 +79,13 @@ public class Parser {
         return keywords;
     }
 
+    /**
+     * Parsing line from logfile and creating a new LogEvent object
+     * @param line one line from the log4j log file
+     * @param map map with the keywords
+     * @param pattern timestamp regex pattern
+     * @return new LogEvent
+     */
     private LogEvent parse(String line, Map<Integer, String> map, String pattern) {
         String level = "";
         String emitter = "";
@@ -108,6 +128,11 @@ public class Parser {
         return new LogEvent(timestamp, level, emitter, message, thread, mdc, stacktrace);
     }
 
+    /**
+     * Reads log file into a StringBuilder
+     * @param log logfile to be parsed
+     * @return StringBuilder with whole file content in it
+     */
     private StringBuilder readFileToBuffer(File log) {
         StringBuilder buffer = new StringBuilder();
         if (log != null) {
@@ -124,6 +149,13 @@ public class Parser {
         return buffer;
     }
 
+    /**
+     * Parses the content of the log file and stores the LogEvent
+     * objects in repository, where the filename
+     * defines the repository
+     * @param buffer content of the log file
+     * @param fileName name of the file
+     */
     public void parseBuffer(StringBuilder buffer, String fileName) {
         Map<Integer, String> keywords = getKeywordsFromPattern();
         String dateTimeRegex = getTimestampRegex(timestampPattern);
@@ -145,6 +177,10 @@ public class Parser {
         }
     }
 
+    /**
+     * Public method to be called from controller
+     * @param file log file to be parsed
+     */
     public void getLogEventsFromFile(File file) {
         String fileName = file.getName();
         StringBuilder buffer = readFileToBuffer(file);

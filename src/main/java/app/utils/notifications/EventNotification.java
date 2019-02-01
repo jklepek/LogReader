@@ -1,5 +1,8 @@
 package app.utils.notifications;
 
+/**
+ * Notification object
+ */
 public class EventNotification {
 
     private final String title;

@@ -2,6 +2,9 @@ package app.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
+/**
+ * LogEvent object is stored in ObservableList, to be displayed in UI table.
+ */
 public class LogEvent {
 
     private final SimpleStringProperty timestamp = new SimpleStringProperty("");

@@ -12,6 +12,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * Service that watches the parent directory of the opened log file
+ * for new log files
+ */
 public class DirectoryWatchService implements Runnable {
 
     private final ExecutorService service = Executors.newSingleThreadExecutor();
@@ -25,15 +29,24 @@ public class DirectoryWatchService implements Runnable {
         this.refreshInterval = PreferencesRepository.getAutoRefreshInterval();
     }
 
+    /**
+     * Starts watching the directory
+     */
     public void startWatching() {
         System.out.println("Watching " + dirPath.toString());
         taskHandle = service.submit(this);
     }
 
+    /**
+     * Stops watching the directory
+     */
     public void stopWatching() {
         Optional.ofNullable(taskHandle).ifPresent(future -> future.cancel(true));
     }
 
+    /**
+     * Registers the directory to watch for new files
+     */
     private void registerDir() {
         try {
             watchService = FileSystems.getDefault().newWatchService();
@@ -43,6 +56,10 @@ public class DirectoryWatchService implements Runnable {
         }
     }
 
+    /**
+     * Periodically checks the folder for new files
+     * and fires a notification when there is a new log file
+     */
     private void watchDirectory() {
         registerDir();
         while (!Thread.currentThread().isInterrupted()) {
