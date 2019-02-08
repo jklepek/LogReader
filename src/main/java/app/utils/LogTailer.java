@@ -72,15 +72,13 @@ public class LogTailer implements Runnable {
                     lastPosition = randomAccess.getFilePointer();
                     if (buffer.length() > 0) {
                         Parser.getInstance().parseBuffer(buffer, logFile.getName());
-                        System.out.println("Found new entries in the log file:\n" + buffer.toString());
                     }
                     buffer.setLength(0);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else {
-                System.out.println("Log file has been reset.");
-                NotificationService.addNotification(new EventNotification("Log file reset", "Log was has been reset", NotificationType.INFORMATION));
+                NotificationService.addNotification(new EventNotification("Log file reset", "Log has been reset", NotificationType.INFORMATION));
                 lastPosition = 0;
                 startFileLength = currentFileLength;
                 LogEventRepository.clearRepository(logFile.getName());

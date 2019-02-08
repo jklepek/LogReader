@@ -68,15 +68,6 @@ public class SettingsDialogController {
                 }
             });
         }
-        List<String> keywords = Parser.getInstance().getKeywords();
-        TextFields.bindAutoCompletion(patternField, s -> keywords
-                .stream()
-                .map(s1 -> String.format("%%%s",s1))
-                .filter(k -> k.toLowerCase().startsWith(patternField
-                        .getText()
-                        .toLowerCase()
-                        .substring(patternField.getText().indexOf("%"))))
-                .collect(Collectors.toList()));
     }
 
     public void savePreferences() {

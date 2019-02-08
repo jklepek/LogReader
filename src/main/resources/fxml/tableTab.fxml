@@ -10,21 +10,21 @@
         <top>
             <HBox spacing="5.0">
                 <CheckComboBox fx:id="levelComboBox">
-                    <!--<padding>-->
-                        <!--<Insets right="5.0"/>-->
-                    <!--</padding>-->
                 </CheckComboBox>
                 <ToggleButton fx:id="autoRefreshButton" onAction="#autoRefresh" text="Auto-refresh"/>
                 <padding>
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                 </padding>
+                <ComboBox fx:id="filterCombo" promptText="Filter by..."/>
+                <TextField fx:id="filterField"/>
             </HBox>
         </top>
+        <left>
+            <TreeView fx:id="treeView">
+            </TreeView>
+        </left>
         <center>
             <TableView fx:id="tableView">
-                <columnResizePolicy>
-                    <!--<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>-->
-                </columnResizePolicy>
             </TableView>
         </center>
         <bottom>

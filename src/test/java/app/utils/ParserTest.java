@@ -37,7 +37,7 @@ class ParserTest {
         assertEquals("ERROR", logEvent.getLevel());
         assertEquals("[NewConnectionWizard]", logEvent.getEmitter());
         assertEquals("java.lang.InterruptedException", logEvent.getMessage());
-        assertEquals("", logEvent.getStackTrace());
+        assertEquals("", logEvent.getStacktrace());
     }
 
     @Test
@@ -49,7 +49,7 @@ class ParserTest {
         assertEquals("ERROR", logEvent.getLevel());
         assertEquals("[NewConnectionWizard]", logEvent.getEmitter());
         assertEquals("java.lang.InterruptedException", logEvent.getMessage());
-        assertEquals("at java.util.concurrent.FutureTask.report(FutureTask.java:122)\n", logEvent.getStackTrace());
+        assertEquals("at java.util.concurrent.FutureTask.report(FutureTask.java:122)\n", logEvent.getStacktrace());
     }
 
     @Test

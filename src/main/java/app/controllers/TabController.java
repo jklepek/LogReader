@@ -5,7 +5,9 @@ import app.model.LogLevel;
 import app.utils.LogEventRepository;
 import app.utils.LogTailer;
 import app.utils.Parser;
+import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -15,12 +17,14 @@ import javafx.scene.input.ClipboardContent;
 import org.controlsfx.control.CheckComboBox;
 
 import java.io.File;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TabController {
 
-    private File file;
+    private final TreeItem<String> rootNode = new TreeItem<>("Emitters:");
     @FXML
     private Tab tab;
     private LogTailer logTailer;
@@ -32,18 +36,30 @@ public class TabController {
     private ToggleButton autoRefreshButton;
     @FXML
     private CheckComboBox<String> levelComboBox;
+    @FXML
+    private ComboBox<String> filterCombo;
+    @FXML
+    private TextField filterField;
+    @FXML
+    private TreeView<String> treeView;
+    private ObservableList<LogEvent> events;
+    private FilteredList<LogEvent> filteredList;
 
     public void initialize() {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
             LogEvent logEvent = tableView.getSelectionModel().getSelectedItem();
             if (logEvent != null) {
-                textArea.setText(logEvent.getStackTrace());
+                textArea.setText(logEvent.getStacktrace());
             }
         });
-        List<String> keywords = Parser.getInstance().getKeywords();
+        List<String> keywords = Parser.getInstance().getKeywords()
+                .stream()
+                .map(String::toUpperCase)
+                .collect(Collectors.toList());
+
         for (String keyword : keywords) {
-            TableColumn<LogEvent, String> column = new TableColumn<>(keyword.toUpperCase());
-            column.setCellValueFactory(new PropertyValueFactory<>(keyword));
+            TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
+            column.setCellValueFactory(new PropertyValueFactory<>(keyword.toLowerCase()));
             tableView.getColumns().add(column);
         }
         tableView.setRowFactory(tableView -> new TableRow<>() {
@@ -69,6 +85,7 @@ public class TabController {
                                     break;
                                 case LogLevel.FATAL:
                                     setStyle("-fx-background-color: firebrick");
+                                    break;
                                 default:
                                     setStyle("-fx-backgound-color: white;");
                                     break;
@@ -78,15 +95,9 @@ public class TabController {
                 }
 
         );
-        for (Field level : LogLevel.class.getDeclaredFields()) {
-            try {
-                levelComboBox.getItems().add(level.get(LogLevel.class).toString());
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        levelComboBox.getCheckModel().checkAll();
-        levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterLogEvents());
+        levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
+        filterCombo.getItems().addAll(keywords);
+        filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
     }
 
     @FXML
@@ -97,10 +108,10 @@ public class TabController {
         } else {
             return;
         }
-        if (!event.getStackTrace().isEmpty()) {
+        if (!event.getStacktrace().isEmpty()) {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();
-            content.putString(event.getStackTrace());
+            content.putString(event.getStacktrace());
             clipboard.setContent(content);
         }
     }
@@ -116,17 +127,93 @@ public class TabController {
         }
     }
 
-    private void filterLogEvents() {
+    private void filterEventBySeverity() {
         List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
-        FilteredList<LogEvent> filteredList = new FilteredList<>(LogEventRepository.getLogEventList(file.getName()));
         filteredList.setPredicate(logEvent -> levels.contains(logEvent.getLevel()));
-        tableView.setItems(filteredList);
         tableView.refresh();
     }
 
+    private void filterEvents(String text) {
+        String property = filterCombo.getSelectionModel().getSelectedItem().toLowerCase();
+        if (!property.isEmpty() && text != null) {
+            filteredList.setPredicate(event -> {
+                String value = "";
+                try {
+                    value = ((StringProperty) event.getPropertyByName(property)).getValue();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return value.toUpperCase().contains(text.toUpperCase());
+            });
+        }
+        tableView.refresh();
+    }
+
+    /**
+     * Method for initializing data from outside
+     * the tab controller
+     *
+     * @param logFile opened log file
+     */
     public void initData(File logFile) {
-        this.file = logFile;
-        logTailer = new LogTailer(file);
+        logTailer = new LogTailer(logFile);
         tab.setOnCloseRequest(event -> logTailer.stopTailing());
+        events = LogEventRepository.getLogEventList(logFile.getName());
+        filteredList = new FilteredList<>(events);
+        tableView.setItems(filteredList);
+        levelComboBox.getItems().addAll(getSeverityLevels());
+        levelComboBox.getCheckModel().checkAll();
+        rootNode.getChildren().addAll(getTreeItems());
+        treeView.setRoot(rootNode);
+        rootNode.setExpanded(true);
+        initEventsChangeListeners();
+    }
+
+    /**
+     * @return list of levels used in opened file
+     */
+    private List<String> getSeverityLevels() {
+        return events
+                .stream()
+                .map(LogEvent::getLevel)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Stores distinct values to a map where keys are distinct emitters
+     * and value is the emitter's occurrence count
+     */
+    private Map<Object, Long> getDistinctEmitters() {
+        return events
+                .stream()
+                .collect(Collectors.groupingBy(LogEvent::getEmitter, Collectors.counting()));
+    }
+
+    /**
+     * ObservableList of tree items to populate tree view
+     */
+    private List<TreeItem<String>> getTreeItems() {
+        return getDistinctEmitters()
+                .entrySet()
+                .stream()
+                .map(e -> String.format("%s : [%s]", e.getKey(), e.getValue()))
+                .map(TreeItem::new)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Refreshes tree view when new events are added
+     */
+    private void initEventsChangeListeners() {
+        events.addListener((ListChangeListener<? super LogEvent>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    rootNode.getChildren().clear();
+                    rootNode.getChildren().addAll(getTreeItems());
+                    tableView.refresh();
+                }
+            }
+        });
     }
 }

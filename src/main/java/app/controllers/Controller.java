@@ -1,6 +1,5 @@
 package app.controllers;
 
-import app.model.LogEvent;
 import app.utils.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -87,18 +86,15 @@ public class Controller {
         tabController.initData(file);
         tab.setText(file.getName());
         tabPane.getTabs().add(tab);
-        setTabContent(tab, file);
+        initDirectoryWatchService(tab, file);
         tabPane.getSelectionModel().select(tab);
     }
 
-    private void setTabContent(Tab tab, File file) {
-        TableView<LogEvent> tableView = (TableView<LogEvent>) tab.getContent().lookup("#tableView");
-        tableView.setItems(LogEventRepository.getLogEventList(file.getName()));
-        if (!PreferencesRepository.isWatchDirForChanges()) {
-            return;
-        }
+    private void initDirectoryWatchService(Tab tab, File file) {
         Optional<DirectoryWatchService> dirListener = DirectoryWatchServiceFactory.getDirectoryWatchService(file);
-        dirListener.ifPresent(DirectoryWatchService::startWatching);
+        if (PreferencesRepository.isWatchDirForChanges()) {
+            dirListener.ifPresent(DirectoryWatchService::startWatching);
+        }
         tab.setOnCloseRequest(event -> {
             LogEventRepository.removeRepository(file.getName());
             dirListener.ifPresent(DirectoryWatchService::stopWatching);
