@@ -3,7 +3,9 @@ package app.model;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * LogEvent object is stored in ObservableList, to be displayed in UI table.
@@ -84,8 +86,14 @@ public class LogEvent {
         return mdc.get();
     }
 
-    public Object getPropertyByName(String propertyName) throws Exception {
-        Method method = this.getClass().getMethod(propertyName.toLowerCase() + "Property");
-        return method.invoke(this);
+    public Object getPropertyByName(String propertyName) {
+        Method method;
+        try {
+            method = this.getClass().getMethod(propertyName.toLowerCase() + "Property");
+            return method.invoke(this);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 }
