@@ -1,5 +1,6 @@
 package app.utils;
 
+import app.model.EmitterTreeItem;
 import app.model.LogEvent;
 import app.model.LogKeywords;
 import app.utils.notifications.EventNotification;
@@ -170,9 +171,13 @@ public class Parser {
         }
         for (int i = 0; i < lineNumbers.size(); i++) {
             if (i + 1 >= lineNumbers.size()) {
-                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i)), keywords, dateTimeRegex));
+                LogEvent event = parse(buffer.substring(lineNumbers.get(i)), keywords, dateTimeRegex);
+                LogEventRepository.addEvent(fileName, event);
+                LogEventRepository.addEmitterTreeItem(fileName, new EmitterTreeItem(event.getEmitter()));
             } else {
-                LogEventRepository.addEvent(fileName, parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), keywords, dateTimeRegex));
+                LogEvent event = parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), keywords, dateTimeRegex);
+                LogEventRepository.addEvent(fileName, event);
+                LogEventRepository.addEmitterTreeItem(fileName, new EmitterTreeItem(event.getEmitter()));
             }
         }
     }

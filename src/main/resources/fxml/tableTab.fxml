@@ -17,11 +17,12 @@
                 </padding>
                 <ComboBox fx:id="filterCombo" promptText="Filter by..."/>
                 <TextField fx:id="filterField"/>
+                <Button fx:id="resetFilterButton" text="Reset filters" onAction="#resetFilters"/>
             </HBox>
         </top>
         <left>
-            <TreeView fx:id="treeView">
-            </TreeView>
+            <TreeTableView fx:id="treeView">
+            </TreeTableView>
         </left>
         <center>
             <TableView fx:id="tableView">

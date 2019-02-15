@@ -1,10 +1,12 @@
 package app.controllers;
 
+import app.model.EmitterTreeItem;
 import app.model.LogEvent;
-import app.model.LogLevel;
+import app.model.LogEventTableRow;
 import app.utils.LogEventRepository;
 import app.utils.LogTailer;
 import app.utils.Parser;
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -12,19 +14,19 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import org.controlsfx.control.CheckComboBox;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class TabController {
 
-    private final TreeItem<String> rootNode = new TreeItem<>("Emitters:");
+    private final TreeItem<EmitterTreeItem> rootNode = new TreeItem<>();
     @FXML
     private Tab tab;
     private LogTailer logTailer;
@@ -41,7 +43,9 @@ public class TabController {
     @FXML
     private TextField filterField;
     @FXML
-    private TreeView<String> treeView;
+    private TreeTableView<EmitterTreeItem> treeView;
+    private TreeTableColumn<EmitterTreeItem, String> treeNameColumn = new TreeTableColumn<>("Emitter");
+    private TreeTableColumn<EmitterTreeItem, String> treeCountColumn = new TreeTableColumn<>("Count");
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
 
@@ -52,52 +56,24 @@ public class TabController {
                 textArea.setText(logEvent.getStacktrace());
             }
         });
-        List<String> keywords = Parser.getInstance().getKeywords()
-                .stream()
-                .map(String::toUpperCase)
-                .collect(Collectors.toList());
-
+        List<String> keywords = getKeywords();
         for (String keyword : keywords) {
             TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
             column.setCellValueFactory(new PropertyValueFactory<>(keyword.toLowerCase()));
             tableView.getColumns().add(column);
         }
-        tableView.setRowFactory(tableView -> new TableRow<>() {
-                    @Override
-                    protected void updateItem(LogEvent item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item != null) {
-                            switch (item.getLevel()) {
-                                case LogLevel.ERROR:
-                                    setStyle("-fx-background-color: indianred;");
-                                    break;
-                                case LogLevel.INFO:
-                                    setStyle("-fx-background-color: cornflowerblue;");
-                                    break;
-                                case LogLevel.WARN:
-                                    setStyle("-fx-background-color: orange;");
-                                    break;
-                                case LogLevel.DEBUG:
-                                    setStyle("-fx-background-color: lightblue;");
-                                    break;
-                                case LogLevel.TRACE:
-                                    setStyle("-fx-background-color: ivory");
-                                    break;
-                                case LogLevel.FATAL:
-                                    setStyle("-fx-background-color: firebrick");
-                                    break;
-                                default:
-                                    setStyle("-fx-backgound-color: white;");
-                                    break;
-                            }
-                        }
-                    }
-                }
-
-        );
+        tableView.setRowFactory(tableView -> new LogEventTableRow());
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
         filterCombo.getItems().addAll(keywords);
         filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
+        textArea.setEditable(false);
+        createTreeTableView();
+    }
+
+    @FXML
+    public void resetFilters() {
+        filteredList.setPredicate(event -> true);
+        filterField.clear();
     }
 
     @FXML
@@ -127,12 +103,29 @@ public class TabController {
         }
     }
 
+
+    /**
+     * Filters events by selected severity levels
+     */
     private void filterEventBySeverity() {
         List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
         filteredList.setPredicate(logEvent -> levels.contains(logEvent.getLevel()));
         tableView.refresh();
     }
 
+    /**
+     * @return list of keywords used in current log4j pattern
+     */
+    private List<String> getKeywords() {
+        return Parser.getInstance().getKeywords()
+                .stream()
+                .map(String::toUpperCase)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * @param text filter events by selected property containing typed text
+     */
     private void filterEvents(String text) {
         String property = filterCombo.getSelectionModel().getSelectedItem().toLowerCase();
         if (!property.isEmpty() && text != null) {
@@ -163,9 +156,7 @@ public class TabController {
         tableView.setItems(filteredList);
         levelComboBox.getItems().addAll(getSeverityLevels());
         levelComboBox.getCheckModel().checkAll();
-        rootNode.getChildren().addAll(getTreeItems());
-        treeView.setRoot(rootNode);
-        rootNode.setExpanded(true);
+        rootNode.getChildren().addAll(LogEventRepository.getTreeItems(logFile.getName()));
         initEventsChangeListeners();
     }
 
@@ -181,38 +172,38 @@ public class TabController {
     }
 
     /**
-     * Stores distinct values to a map where keys are distinct emitters
-     * and value is the emitter's occurrence count
-     */
-    private Map<Object, Long> getDistinctEmitters() {
-        return events
-                .stream()
-                .collect(Collectors.groupingBy(LogEvent::getEmitter, Collectors.counting()));
-    }
-
-    /**
-     * ObservableList of tree items to populate tree view
-     */
-    private List<TreeItem<String>> getTreeItems() {
-        return getDistinctEmitters()
-                .entrySet()
-                .stream()
-                .map(e -> String.format("%s : [%s]", e.getKey(), e.getValue()))
-                .map(TreeItem::new)
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    /**
-     * Refreshes tree view when new events are added
+     * Adds new severity levels to the checkComboBox if there are any new and checks them
      */
     private void initEventsChangeListeners() {
         events.addListener((ListChangeListener<? super LogEvent>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    rootNode.getChildren().clear();
-                    rootNode.getChildren().addAll(getTreeItems());
-                    tableView.refresh();
+                    c.getAddedSubList().forEach(i -> Platform.runLater(() -> {
+                        if (!levelComboBox.getItems().contains(i.getLevel())) {
+                            levelComboBox.getItems().add(i.getLevel());
+                            levelComboBox.getCheckModel().checkAll();
+                        }
+                    }));
                 }
+            }
+        });
+    }
+
+    /**
+     * Initializes the emitters TreeTableView
+     */
+    private void createTreeTableView() {
+        treeView.getColumns().setAll(treeNameColumn, treeCountColumn);
+        treeNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory("name"));
+        treeCountColumn.setCellValueFactory(new TreeItemPropertyValueFactory("count"));
+        treeView.setRoot(rootNode);
+        rootNode.setExpanded(true);
+        treeView.setShowRoot(false);
+        treeView.setOnMouseClicked(event -> {
+            TreeItem<EmitterTreeItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
+            if (event.getClickCount() == 2 && selectedItem != null) {
+                filteredList.setPredicate(event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getEmitter()));
+                tableView.refresh();
             }
         });
     }

@@ -1,6 +1,7 @@
 package app.model;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import java.lang.reflect.Method;
 
@@ -9,13 +10,13 @@ import java.lang.reflect.Method;
  */
 public class LogEvent {
 
-    private final SimpleStringProperty timestamp = new SimpleStringProperty("");
-    private final SimpleStringProperty level = new SimpleStringProperty("");
-    private final SimpleStringProperty emitter = new SimpleStringProperty("");
-    private final SimpleStringProperty message = new SimpleStringProperty("");
-    private final SimpleStringProperty thread = new SimpleStringProperty("");
-    private final SimpleStringProperty mdc = new SimpleStringProperty("");
-    private final SimpleStringProperty stacktrace = new SimpleStringProperty("");
+    private final StringProperty timestamp = new SimpleStringProperty("");
+    private final StringProperty level = new SimpleStringProperty("");
+    private final StringProperty emitter = new SimpleStringProperty("");
+    private final StringProperty message = new SimpleStringProperty("");
+    private final StringProperty thread = new SimpleStringProperty("");
+    private final StringProperty mdc = new SimpleStringProperty("");
+    private final StringProperty stacktrace = new SimpleStringProperty("");
 
     public LogEvent(String timestamp, String level, String emitter, String message, String thread, String mdc, String stacktrace) {
         this.timestamp.set(timestamp);
@@ -27,31 +28,31 @@ public class LogEvent {
         this.mdc.set(mdc);
     }
 
-    public SimpleStringProperty timestampProperty() {
+    public StringProperty timestampProperty() {
         return timestamp;
     }
 
-    public SimpleStringProperty levelProperty() {
+    public StringProperty levelProperty() {
         return level;
     }
 
-    public SimpleStringProperty emitterProperty() {
+    public StringProperty emitterProperty() {
         return emitter;
     }
 
-    public SimpleStringProperty messageProperty() {
+    public StringProperty messageProperty() {
         return message;
     }
 
-    public SimpleStringProperty threadProperty() {
+    public StringProperty threadProperty() {
         return thread;
     }
 
-    public SimpleStringProperty mdcProperty() {
+    public StringProperty mdcProperty() {
         return mdc;
     }
 
-    public SimpleStringProperty stacktraceProperty() {
+    public StringProperty stacktraceProperty() {
         return stacktrace;
     }
 
