@@ -21,7 +21,6 @@ import org.controlsfx.control.CheckComboBox;
 
 import java.io.File;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class TabController {
@@ -74,6 +73,7 @@ public class TabController {
     public void resetFilters() {
         filteredList.setPredicate(event -> true);
         filterField.clear();
+        levelComboBox.getCheckModel().checkAll();
     }
 
     @FXML
@@ -95,10 +95,10 @@ public class TabController {
     @FXML
     public void autoRefresh() {
         if (autoRefreshButton.isSelected()) {
-            System.out.println("Started tailing.");
+            System.out.println("Auto-refresh ON.");
             logTailer.startTailing();
         } else if (!autoRefreshButton.isSelected()) {
-            System.out.println("Stopped tailing.");
+            System.out.println("Auto-refresh OFF.");
             logTailer.stopTailing();
         }
     }
@@ -109,7 +109,7 @@ public class TabController {
      */
     private void filterEventBySeverity() {
         List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
-        filteredList.setPredicate(logEvent -> levels.contains(logEvent.getLevel()));
+        filteredList.setPredicate(logEvent -> levels.contains((logEvent.getLevel())));
         tableView.refresh();
     }
 
@@ -193,7 +193,7 @@ public class TabController {
      * Initializes the emitters TreeTableView
      */
     private void createTreeTableView() {
-        treeView.getColumns().setAll(treeNameColumn, treeCountColumn);
+        treeView.getColumns().setAll(treeCountColumn, treeNameColumn);
         treeNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory("name"));
         treeCountColumn.setCellValueFactory(new TreeItemPropertyValueFactory("count"));
         treeView.setRoot(rootNode);
