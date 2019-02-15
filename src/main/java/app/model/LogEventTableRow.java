@@ -39,6 +39,8 @@ public class LogEventTableRow extends TableRow<LogEvent> {
                     setStyle("-fx-backgound-color: white;");
                     break;
             }
+        } else {
+            setStyle("-fx-backgound-color: white;");
         }
     }
 }

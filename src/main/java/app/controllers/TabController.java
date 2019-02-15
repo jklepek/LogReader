@@ -8,6 +8,7 @@ import app.utils.LogTailer;
 import app.utils.Parser;
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -47,6 +48,7 @@ public class TabController {
     private TreeTableColumn<EmitterTreeItem, String> treeCountColumn = new TreeTableColumn<>("Count");
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
+    private ObservableList<TreeItem<EmitterTreeItem>> treeItems = FXCollections.observableArrayList();
 
     public void initialize() {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
@@ -110,7 +112,6 @@ public class TabController {
     private void filterEventBySeverity() {
         List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
         filteredList.setPredicate(logEvent -> levels.contains((logEvent.getLevel())));
-        tableView.refresh();
     }
 
     /**
@@ -130,16 +131,10 @@ public class TabController {
         String property = filterCombo.getSelectionModel().getSelectedItem().toLowerCase();
         if (!property.isEmpty() && text != null) {
             filteredList.setPredicate(event -> {
-                String value = "";
-                try {
-                    value = ((StringProperty) event.getPropertyByName(property)).getValue();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                String value = ((StringProperty) event.getPropertyByName(property)).getValue();
                 return value.toUpperCase().contains(text.toUpperCase());
             });
         }
-        tableView.refresh();
     }
 
     /**
@@ -156,7 +151,8 @@ public class TabController {
         tableView.setItems(filteredList);
         levelComboBox.getItems().addAll(getSeverityLevels());
         levelComboBox.getCheckModel().checkAll();
-        rootNode.getChildren().addAll(LogEventRepository.getTreeItems(logFile.getName()));
+        treeItems = LogEventRepository.getTreeItems(logFile.getName());
+        rootNode.getChildren().addAll(treeItems);
         initEventsChangeListeners();
     }
 
@@ -203,7 +199,6 @@ public class TabController {
             TreeItem<EmitterTreeItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
             if (event.getClickCount() == 2 && selectedItem != null) {
                 filteredList.setPredicate(event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getEmitter()));
-                tableView.refresh();
             }
         });
     }
