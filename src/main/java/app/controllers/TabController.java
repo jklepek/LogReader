@@ -154,6 +154,7 @@ public class TabController {
         treeItems = LogEventRepository.getTreeItems(logFile.getName());
         rootNode.getChildren().addAll(treeItems);
         initEventsChangeListeners();
+        initTreeItemsChangeListener();
     }
 
     /**
@@ -199,6 +200,21 @@ public class TabController {
             TreeItem<EmitterTreeItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
             if (event.getClickCount() == 2 && selectedItem != null) {
                 filteredList.setPredicate(event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getEmitter()));
+            }
+        });
+    }
+
+    /**
+     * Initializes change listener on TreeItem observable list, to handle removing or adding items to TreeTable
+     */
+    private void initTreeItemsChangeListener() {
+        treeItems.addListener((ListChangeListener<? super TreeItem<EmitterTreeItem>>) c -> {
+            while (c.next()) {
+                if (c.wasRemoved()) {
+                    c.getRemoved().forEach(o -> rootNode.getChildren().remove(o));
+                } else if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(o -> rootNode.getChildren().add(o));
+                }
             }
         });
     }
