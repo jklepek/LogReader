@@ -8,7 +8,6 @@ import app.utils.LogTailer;
 import app.utils.Parser;
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -48,7 +47,7 @@ public class TabController {
     private TreeTableColumn<EmitterTreeItem, String> treeCountColumn = new TreeTableColumn<>("Count");
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
-    private ObservableList<TreeItem<EmitterTreeItem>> treeItems = FXCollections.observableArrayList();
+    private ObservableList<TreeItem<EmitterTreeItem>> treeItems;
 
     public void initialize() {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
@@ -211,7 +210,7 @@ public class TabController {
         treeItems.addListener((ListChangeListener<? super TreeItem<EmitterTreeItem>>) c -> {
             while (c.next()) {
                 if (c.wasRemoved()) {
-                    c.getRemoved().forEach(o -> rootNode.getChildren().remove(o));
+                    rootNode.getChildren().removeAll(c.getRemoved());
                 } else if (c.wasAdded()) {
                     c.getAddedSubList().forEach(o -> rootNode.getChildren().add(o));
                 }

@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.*?>
 <BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
@@ -26,6 +27,7 @@
             <padding>
                 <Insets left="5" top="5" right="5" bottom="5"/>
             </padding>
+            <ProgressBar fx:id="progressBar" visible="false"/>
         </HBox>
     </top>
     <center>

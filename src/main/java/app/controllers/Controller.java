@@ -1,6 +1,7 @@
 package app.controllers;
 
 import app.utils.*;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -22,6 +23,8 @@ public class Controller {
     private Button settingsButton;
     @FXML
     private TabPane tabPane;
+    @FXML
+    private ProgressBar progressBar;
     private FileChooser fileChooser;
 
     public void initialize() {
@@ -71,7 +74,24 @@ public class Controller {
 
     private void createTab(File file) {
         if (LogEventRepository.newRepository(file.getName())) {
-            Parser.getInstance().getLogEventsFromFile(file);
+            progressBar.setVisible(true);
+            Task<Void> task = new Task<>() {
+                @Override
+                protected Void call() {
+                    Parser.getInstance().getLogEventsFromFile(file);
+                    return null;
+                }
+            };
+            progressBar.progressProperty().bind(task.progressProperty());
+            task.setOnSucceeded(event -> progressBar.setVisible(false));
+            task.setOnFailed(event -> progressBar.setVisible(false));
+            Thread thread = new Thread(task);
+            thread.start();
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         FXMLLoader fxmlLoader = new FXMLLoader();
         fxmlLoader.setLocation(getClass().getResource("/fxml/tableTab.fxml"));
