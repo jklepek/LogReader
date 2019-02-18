@@ -37,9 +37,29 @@ public class Controller {
     public void openFile() {
         configureFileChooser(fileChooser);
         Window window = borderPane.getScene().getWindow();
-        File currentLogFile = fileChooser.showOpenDialog(window);
-        if (currentLogFile != null) {
-            createTab(currentLogFile);
+        File file = fileChooser.showOpenDialog(window);
+        if (file != null) {
+            if (LogEventRepository.newRepository(file.getName())) {
+                progressBar.setVisible(true);
+                Task<Void> task = new Task<>() {
+                    @Override
+                    protected Void call() {
+                        Parser.getInstance().getLogEventsFromFile(file);
+                        return null;
+                    }
+                };
+                progressBar.progressProperty().bind(task.progressProperty());
+                task.setOnSucceeded(event -> progressBar.setVisible(false));
+                task.setOnFailed(event -> progressBar.setVisible(false));
+                Thread thread = new Thread(task);
+                thread.start();
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            createTab(file);
         }
     }
 
@@ -73,26 +93,6 @@ public class Controller {
     }
 
     private void createTab(File file) {
-        if (LogEventRepository.newRepository(file.getName())) {
-            progressBar.setVisible(true);
-            Task<Void> task = new Task<>() {
-                @Override
-                protected Void call() {
-                    Parser.getInstance().getLogEventsFromFile(file);
-                    return null;
-                }
-            };
-            progressBar.progressProperty().bind(task.progressProperty());
-            task.setOnSucceeded(event -> progressBar.setVisible(false));
-            task.setOnFailed(event -> progressBar.setVisible(false));
-            Thread thread = new Thread(task);
-            thread.start();
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
         FXMLLoader fxmlLoader = new FXMLLoader();
         fxmlLoader.setLocation(getClass().getResource("/fxml/tableTab.fxml"));
         Tab tab = new Tab();
