@@ -20,16 +20,12 @@ import java.util.regex.Pattern;
 
 public class Parser {
 
-    private static final Parser instance = new Parser();
     private static String timestampPattern;
+    private static Map<Integer, String> pattern;
 
-    private Parser() {
+    public Parser() {
+        pattern = getKeywordsFromPattern();
     }
-
-    public static Parser getInstance() {
-        return instance;
-    }
-
 
     /**
      * @param pattern string form of a timestamp pattern e.g. yyyy-MM-dd' 'HH:mm:SSS,S
@@ -71,10 +67,9 @@ public class Parser {
      */
     public List<String> getKeywords() {
         List<String> keywords = new ArrayList<>();
-        Map<Integer, String> map = getKeywordsFromPattern();
-        if (!map.isEmpty()) {
-            for (int i = 0; i < map.size(); i++) {
-                keywords.add(map.get(i).toLowerCase());
+        if (!pattern.isEmpty()) {
+            for (int i = 0; i < pattern.size(); i++) {
+                keywords.add(pattern.get(i).toLowerCase());
             }
         }
         return keywords;
@@ -158,7 +153,6 @@ public class Parser {
      * @param fileName name of the file
      */
     public void parseBuffer(StringBuilder buffer, String fileName) {
-        Map<Integer, String> keywords = getKeywordsFromPattern();
         String dateTimeRegex = getTimestampRegex(timestampPattern);
         Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
         Matcher matcher = dateTimePattern.matcher(buffer);
@@ -171,11 +165,11 @@ public class Parser {
         }
         for (int i = 0; i < lineNumbers.size(); i++) {
             if (i + 1 >= lineNumbers.size()) {
-                LogEvent event = parse(buffer.substring(lineNumbers.get(i)), keywords, dateTimeRegex);
+                LogEvent event = parse(buffer.substring(lineNumbers.get(i)), pattern, dateTimeRegex);
                 LogEventRepository.addEvent(fileName, event);
                 LogEventRepository.addEmitterTreeItem(fileName, new EmitterTreeItem(event.getEmitter()));
             } else {
-                LogEvent event = parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), keywords, dateTimeRegex);
+                LogEvent event = parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), pattern, dateTimeRegex);
                 LogEventRepository.addEvent(fileName, event);
                 LogEventRepository.addEmitterTreeItem(fileName, new EmitterTreeItem(event.getEmitter()));
             }

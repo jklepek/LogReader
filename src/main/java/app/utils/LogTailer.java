@@ -24,11 +24,13 @@ public class LogTailer implements Runnable {
     private long lastPosition;
     private long startFileLength;
     private Future taskHandle;
+    private Parser parser;
 
-    public LogTailer(File logFile) {
+    public LogTailer(File logFile, Parser parser) {
         this.startFileLength = logFile.length();
         this.lastPosition = startFileLength;
         this.logFile = logFile;
+        this.parser = parser;
     }
 
     /**
@@ -71,7 +73,7 @@ public class LogTailer implements Runnable {
                     }
                     lastPosition = randomAccess.getFilePointer();
                     if (buffer.length() > 0) {
-                        Parser.getInstance().parseBuffer(buffer, logFile.getName());
+                        parser.parseBuffer(buffer, logFile.getName());
                     }
                     buffer.setLength(0);
                 } catch (IOException e) {

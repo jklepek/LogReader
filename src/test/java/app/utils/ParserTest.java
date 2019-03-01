@@ -15,12 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ParserTest {
 
     private static final String repoName = "test";
+    private static Parser parser;
 
     @BeforeAll
     static void initTests() {
         PreferencesRepository.loadPreferences();
         PreferencesRepository.setCurrentLogPattern("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %EMITTER %MESSAGE");
         LogEventRepository.newRepository(repoName);
+        parser = new Parser();
     }
 
     @BeforeEach
@@ -31,7 +33,7 @@ class ParserTest {
     @Test
     void parseBufferTest() {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n");
-        Parser.getInstance().parseBuffer(testString, repoName);
+        parser.parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
         assertEquals("ERROR", logEvent.getLevel());
@@ -43,7 +45,7 @@ class ParserTest {
     @Test
     void parseBufferWithStackTraceTest() {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)\n");
-        Parser.getInstance().parseBuffer(testString, repoName);
+        parser.parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
         assertEquals("ERROR", logEvent.getLevel());
@@ -55,7 +57,7 @@ class ParserTest {
     @Test
     void parseWrongFormat() {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43 [ERROR] NewConnectionWizard ");
-        Parser.getInstance().parseBuffer(testString, repoName);
+        parser.parseBuffer(testString, repoName);
         assertEquals(0, LogEventRepository.getLogEventList(repoName).size());
     }
 

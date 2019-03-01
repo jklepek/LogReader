@@ -5,10 +5,9 @@
 
 package app.utils;
 
-import app.utils.PreferencesController;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PreferencesControllerTest {
 

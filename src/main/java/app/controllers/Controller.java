@@ -44,7 +44,7 @@ public class Controller {
                 Task<Void> task = new Task<>() {
                     @Override
                     protected Void call() {
-                        Parser.getInstance().getLogEventsFromFile(file);
+                        new Parser().getLogEventsFromFile(file);
                         return null;
                     }
                 };

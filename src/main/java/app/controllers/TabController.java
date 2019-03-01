@@ -48,6 +48,7 @@ public class TabController {
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
     private ObservableList<TreeItem<EmitterTreeItem>> treeItems;
+    private Parser parser = new Parser();
 
     public void initialize() {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
@@ -117,7 +118,7 @@ public class TabController {
      * @return list of keywords used in current log4j pattern
      */
     private List<String> getKeywords() {
-        return Parser.getInstance().getKeywords()
+        return parser.getKeywords()
                 .stream()
                 .map(String::toUpperCase)
                 .collect(Collectors.toList());
@@ -143,7 +144,7 @@ public class TabController {
      * @param logFile opened log file
      */
     public void initData(File logFile) {
-        logTailer = new LogTailer(logFile);
+        logTailer = new LogTailer(logFile, parser);
         tab.setOnCloseRequest(event -> logTailer.stopTailing());
         events = LogEventRepository.getLogEventList(logFile.getName());
         filteredList = new FilteredList<>(events);
