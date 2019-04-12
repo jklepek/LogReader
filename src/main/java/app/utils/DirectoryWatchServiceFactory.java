@@ -1,8 +1,8 @@
 package app.utils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -10,21 +10,23 @@ import java.util.Optional;
  */
 public class DirectoryWatchServiceFactory {
 
-    private static final List<File> DIRECTORIES = new ArrayList<>();
+    private static final Map<File, Integer> DIRECTORIES = new HashMap<>();
 
     /**
      * If the parent directory of the log file already has watch service assigned,
      * empty Optional is returned
+     *
      * @param file opened log file
      * @return Optional of DirectoryWatchService
      */
     public static Optional<DirectoryWatchService> getDirectoryWatchService(File file) {
         File parentDir = file.getParentFile();
-        if (!DIRECTORIES.contains(parentDir)) {
-            DIRECTORIES.add(parentDir);
+        if (!DIRECTORIES.keySet().contains(parentDir)) {
+            DIRECTORIES.put(parentDir, 1);
             return Optional.of(new DirectoryWatchService(parentDir));
         } else {
-            System.out.println("Directory is already being watched");
+            int count = DIRECTORIES.get(parentDir);
+            DIRECTORIES.put(parentDir, count + 1);
         }
         return Optional.empty();
     }
@@ -32,10 +34,16 @@ public class DirectoryWatchServiceFactory {
     /**
      * Removes the parent directory from list of watched directories,
      * when the file is closed
+     *
      * @param file closed log file
      */
     public static void removeWatchedDir(File file) {
         File parentDir = file.getParentFile();
-        DIRECTORIES.remove(parentDir);
+        int count = DIRECTORIES.get(parentDir);
+        if (count > 1) {
+            DIRECTORIES.put(parentDir, count - 1);
+        } else {
+            DIRECTORIES.remove(parentDir);
+        }
     }
 }
