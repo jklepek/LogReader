@@ -16,23 +16,23 @@ public class LogEventTableRow extends TableRow<LogEvent> {
     protected void updateItem(LogEvent item, boolean empty) {
         super.updateItem(item, empty);
         if (item != null) {
-            switch (item.getLevel()) {
-                case LogLevel.ERROR:
+            switch (LogLevel.valueOf(item.getLevel())) {
+                case ERROR:
                     setStyle("-fx-background-color: indianred;");
                     break;
-                case LogLevel.INFO:
+                case INFO:
                     setStyle("-fx-background-color: cornflowerblue;");
                     break;
-                case LogLevel.WARN:
+                case WARN:
                     setStyle("-fx-background-color: orange;");
                     break;
-                case LogLevel.DEBUG:
+                case DEBUG:
                     setStyle("-fx-background-color: lightblue;");
                     break;
-                case LogLevel.TRACE:
+                case TRACE:
                     setStyle("-fx-background-color: ivory");
                     break;
-                case LogLevel.FATAL:
+                case FATAL:
                     setStyle("-fx-background-color: firebrick");
                     break;
                 default:

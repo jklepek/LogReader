@@ -2,7 +2,6 @@ package app.utils;
 
 import app.model.EmitterTreeItem;
 import app.model.LogEvent;
-import app.model.LogKeywords;
 import app.utils.notifications.EventNotification;
 import app.utils.notifications.NotificationService;
 import app.utils.notifications.NotificationType;
@@ -17,6 +16,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static app.model.LogKeywords.valueOf;
 
 public class Parser {
 
@@ -39,6 +40,7 @@ public class Parser {
     /**
      * Takes stored pattern and saves individual keywords in a map,
      * where the key is the order of the keyword
+     *
      * @return map
      */
     private Map<Integer, String> getKeywordsFromPattern() {
@@ -77,8 +79,9 @@ public class Parser {
 
     /**
      * Parsing line from logfile and creating a new LogEvent object
-     * @param line one line from the log4j log file
-     * @param map map with the keywords
+     *
+     * @param line    one line from the log4j log file
+     * @param map     map with the keywords
      * @param pattern timestamp regex pattern
      * @return new LogEvent
      */
@@ -92,30 +95,30 @@ public class Parser {
         String mdc = "";
         Matcher matcher = Pattern.compile(pattern).matcher(line);
         for (String value : map.values()) {
-            switch (value) {
-                case LogKeywords.TIMESTAMP:
+            switch (valueOf(value)) {
+                case TIMESTAMP:
                     if (matcher.find()) {
                         timestamp = line.substring(matcher.start(), matcher.end());
                         line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
                     }
                     break;
-                case LogKeywords.LEVEL:
+                case LEVEL:
                     level = line.substring(0, line.indexOf(" "));
                     line = line.replace(level, "").replaceFirst("^\\s++", "");
                     break;
-                case LogKeywords.EMITTER:
+                case EMITTER:
                     emitter = line.substring(0, line.indexOf(" "));
                     line = line.replace(emitter, "").replaceFirst("^\\s++", "");
                     break;
-                case LogKeywords.MESSAGE:
+                case MESSAGE:
                     message = line.substring(0, line.indexOf(System.lineSeparator()));
                     stacktrace = line.substring(line.indexOf(System.lineSeparator())).replaceFirst("^\\s++", "");
                     break;
-                case LogKeywords.THREAD:
+                case THREAD:
                     thread = line.substring(0, line.indexOf(" "));
                     line = line.replace(thread, "").replaceFirst("^\\s++", "");
                     break;
-                case LogKeywords.MDC:
+                case MDC:
                     mdc = line.substring(0, line.indexOf(" "));
                     line = line.replace(mdc, "").replaceFirst("^\\s++", "");
                     break;
@@ -126,6 +129,7 @@ public class Parser {
 
     /**
      * Reads log file into a StringBuilder
+     *
      * @param log logfile to be parsed
      * @return StringBuilder with whole file content in it
      */
@@ -149,7 +153,8 @@ public class Parser {
      * Parses the content of the log file and stores the LogEvent
      * objects in repository, where the filename
      * defines the repository
-     * @param buffer content of the log file
+     *
+     * @param buffer   content of the log file
      * @param fileName name of the file
      */
     public void parseBuffer(StringBuilder buffer, String fileName) {
@@ -178,6 +183,7 @@ public class Parser {
 
     /**
      * Public method to be called from controller
+     *
      * @param file log file to be parsed
      */
     public void getLogEventsFromFile(File file) {

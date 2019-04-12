@@ -1,6 +1,5 @@
 package app.controllers;
 
-import app.utils.Parser;
 import app.utils.PreferencesRepository;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
@@ -9,13 +8,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
-import org.controlsfx.control.textfield.TextFields;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SettingsDialogController {
 

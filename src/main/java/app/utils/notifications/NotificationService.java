@@ -27,7 +27,6 @@ public class NotificationService {
      * Starts the service
      */
     public static void startService() {
-
         NOTIFICATIONS.addListener((ListChangeListener<EventNotification>) c -> {
                     while (c.next()) {
                         if (c.wasAdded()) {
