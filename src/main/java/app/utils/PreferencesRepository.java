@@ -11,26 +11,26 @@ import java.util.Map;
 /**
  * @author JKlepek
  * @project LogReader
- *
- * Runtime repository so the user can change preferences
+ * <p>
+ * Runtime repository so the user can change PREFERENCES
  * without the application immediately storing or loading them from system register
  */
 public class PreferencesRepository {
 
-    private static final PreferencesController preferences = PreferencesController.getInstance();
+    private static final PreferencesController PREFERENCES = PreferencesController.getInstance();
+    private static final List<String> PATTERNS_TO_DELETE = new ArrayList<>();
     private static long AUTO_REFRESH_INTERVAL;
     private static String INITIAL_DIRECTORY;
     private static boolean WATCH_DIR_FOR_CHANGES;
     private static String CURRENT_LOG_PATTERN;
     private static Map<String, String> ALL_LOG_PATTERNS;
-    private static final List<String> PATTERNS_TO_DELETE = new ArrayList<>();
 
     public static void loadPreferences() {
-        AUTO_REFRESH_INTERVAL = preferences.getAutoRefreshInterval();
-        INITIAL_DIRECTORY = preferences.getInitialDir();
-        WATCH_DIR_FOR_CHANGES = preferences.getWatchForDirChanges();
-        CURRENT_LOG_PATTERN = preferences.getLogPattern();
-        ALL_LOG_PATTERNS = preferences.getLogPatterns();
+        AUTO_REFRESH_INTERVAL = PREFERENCES.getAutoRefreshInterval();
+        INITIAL_DIRECTORY = PREFERENCES.getInitialDir();
+        WATCH_DIR_FOR_CHANGES = PREFERENCES.getWatchForDirChanges();
+        CURRENT_LOG_PATTERN = PREFERENCES.getLogPattern();
+        ALL_LOG_PATTERNS = PREFERENCES.getLogPatterns();
     }
 
     public static long getAutoRefreshInterval() {
@@ -74,17 +74,18 @@ public class PreferencesRepository {
     }
 
     public static void saveAllPreferences() {
-        preferences.setAutoRefreshInterval(AUTO_REFRESH_INTERVAL);
-        preferences.setInitialDir(INITIAL_DIRECTORY);
-        preferences.setLogPattern(CURRENT_LOG_PATTERN);
-        preferences.setWatchForDirChanges(WATCH_DIR_FOR_CHANGES);
+        PREFERENCES.setAutoRefreshInterval(AUTO_REFRESH_INTERVAL);
+        PREFERENCES.setInitialDir(INITIAL_DIRECTORY);
+        PREFERENCES.setLogPattern(CURRENT_LOG_PATTERN);
+        PREFERENCES.setWatchForDirChanges(WATCH_DIR_FOR_CHANGES);
         for (Map.Entry<String, String> pattern : ALL_LOG_PATTERNS.entrySet()) {
-            preferences.addLogPattern(pattern.getKey(), pattern.getValue());
+            PREFERENCES.addLogPattern(pattern.getKey(), pattern.getValue());
         }
-        for (String pattern : PATTERNS_TO_DELETE){
-            preferences.removePattern(pattern);
+        for (String pattern : PATTERNS_TO_DELETE) {
+            PREFERENCES.removePattern(pattern);
         }
     }
+
     public static void removePattern(String pattern) {
         PATTERNS_TO_DELETE.add(pattern);
     }
