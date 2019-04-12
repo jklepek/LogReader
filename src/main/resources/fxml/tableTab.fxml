@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.CheckComboBox?>
@@ -17,7 +17,7 @@
                 </padding>
                 <ComboBox fx:id="filterCombo" promptText="Filter by..."/>
                 <TextField fx:id="filterField"/>
-                <Button fx:id="resetFilterButton" text="Reset filters" onAction="#resetFilters"/>
+                <Button text="Reset filters" onAction="#resetFilters"/>
             </HBox>
         </top>
         <left>

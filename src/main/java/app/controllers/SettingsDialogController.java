@@ -43,7 +43,7 @@ public class SettingsDialogController {
     private TextField patternField;
     private BooleanBinding validContent;
     private Map<String, String> patternMap;
-    private List<String> patternsToDelete = new ArrayList<>();
+    private final List<String> patternsToDelete = new ArrayList<>();
 
     public void initialize() {
         initImages();

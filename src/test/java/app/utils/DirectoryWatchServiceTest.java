@@ -17,12 +17,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.FileAttribute;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DirectoryWatchServiceTest {
 
@@ -43,7 +39,7 @@ class DirectoryWatchServiceTest {
     }
 
     @Test
-    void watchServiceTest() throws IOException{
+    void watchServiceTest() throws IOException {
         DirectoryWatchServiceFactory.getDirectoryWatchService(file).ifPresent(DirectoryWatchService::startWatching);
         Awaitility.await().timeout(Duration.ONE_HUNDRED_MILLISECONDS);
         Files.createFile(newFile);

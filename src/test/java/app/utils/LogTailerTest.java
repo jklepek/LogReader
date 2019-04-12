@@ -56,7 +56,7 @@ class LogTailerTest {
     }
 
     @Test
-    void startTailTest() throws IOException, InterruptedException {
+    void startTailTest() throws IOException {
         File file = new File(filePath.toString());
         parser.getLogEventsFromFile(file);
         assertEquals(2, LogEventRepository.getLogEventList(file.getName()).size());

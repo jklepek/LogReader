@@ -24,7 +24,7 @@ public class LogTailer implements Runnable {
     private long lastPosition;
     private long startFileLength;
     private Future taskHandle;
-    private Parser parser;
+    private final Parser parser;
 
     public LogTailer(File logFile, Parser parser) {
         this.startFileLength = logFile.length();

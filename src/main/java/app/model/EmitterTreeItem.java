@@ -15,8 +15,8 @@ import javafx.beans.property.StringProperty;
  */
 public class EmitterTreeItem {
 
-    private StringProperty name = new SimpleStringProperty("");
-    private LongProperty count = new SimpleLongProperty(1L);
+    private final StringProperty name = new SimpleStringProperty("");
+    private final LongProperty count = new SimpleLongProperty(1L);
 
     public EmitterTreeItem(String nameProperty) {
         this.name.set(nameProperty);

@@ -16,7 +16,13 @@ import java.util.prefs.Preferences;
  */
 public class PreferencesController {
 
-    private static final PreferencesController INSTANCE = new PreferencesController();
+    private PreferencesController() {
+    }
+
+    public static PreferencesController getInstance() {
+        return LazyHolder.INSTANCE;
+    }
+
     private final String autoRefreshInterval = "REFRESH_INTERVAL";
     private final String initialDir = "PREFERRED_DIR";
     private final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
@@ -24,8 +30,8 @@ public class PreferencesController {
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
 
-    public static PreferencesController getInstance() {
-        return INSTANCE;
+    private static class LazyHolder {
+        static final PreferencesController INSTANCE = new PreferencesController();
     }
 
     public boolean getWatchForDirChanges() {

@@ -23,7 +23,7 @@ public class PreferencesRepository {
     private static boolean WATCH_DIR_FOR_CHANGES;
     private static String CURRENT_LOG_PATTERN;
     private static Map<String, String> ALL_LOG_PATTERNS;
-    private static List<String> PATTERNS_TO_DELETE = new ArrayList<>();
+    private static final List<String> PATTERNS_TO_DELETE = new ArrayList<>();
 
     public static void loadPreferences() {
         AUTO_REFRESH_INTERVAL = preferences.getAutoRefreshInterval();

@@ -43,12 +43,12 @@ public class TabController {
     private TextField filterField;
     @FXML
     private TreeTableView<EmitterTreeItem> treeView;
-    private TreeTableColumn<EmitterTreeItem, String> treeNameColumn = new TreeTableColumn<>("Emitter");
-    private TreeTableColumn<EmitterTreeItem, String> treeCountColumn = new TreeTableColumn<>("Count");
+    private final TreeTableColumn<EmitterTreeItem, String> treeNameColumn = new TreeTableColumn<>("Emitter");
+    private final TreeTableColumn<EmitterTreeItem, String> treeCountColumn = new TreeTableColumn<>("Count");
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
     private ObservableList<TreeItem<EmitterTreeItem>> treeItems;
-    private Parser parser = new Parser();
+    private final Parser parser = new Parser();
 
     public void initialize() {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
