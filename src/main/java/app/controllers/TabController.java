@@ -80,12 +80,10 @@ public class TabController {
 
     @FXML
     public void copyStackTrace() {
-        LogEvent event;
-        if (!tableView.getItems().isEmpty()) {
-            event = tableView.getSelectionModel().getSelectedItem();
-        } else {
+        if (tableView.getItems().isEmpty()) {
             return;
         }
+        LogEvent event = tableView.getSelectionModel().getSelectedItem();
         if (!event.getStacktrace().isEmpty()) {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();

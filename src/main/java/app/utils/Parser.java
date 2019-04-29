@@ -23,9 +23,11 @@ public class Parser {
 
     private static String timestampPattern;
     private static Map<Integer, String> pattern;
+    private static String dateTimeRegex;
 
     public Parser() {
         pattern = getKeywordsFromPattern();
+        dateTimeRegex = getTimestampRegex(timestampPattern);
     }
 
     /**
@@ -82,10 +84,9 @@ public class Parser {
      *
      * @param line    one line from the log4j log file
      * @param map     map with the keywords
-     * @param pattern timestamp regex pattern
      * @return new LogEvent
      */
-    private LogEvent parse(String line, Map<Integer, String> map, String pattern) {
+    private LogEvent parse(String line, Map<Integer, String> map) {
         String level = "";
         String emitter = "";
         String message = "";
@@ -93,7 +94,7 @@ public class Parser {
         String stacktrace = "";
         String thread = "";
         String mdc = "";
-        Matcher matcher = Pattern.compile(pattern).matcher(line);
+        Matcher matcher = Pattern.compile(dateTimeRegex).matcher(line);
         for (String value : map.values()) {
             switch (valueOf(value)) {
                 case TIMESTAMP:
@@ -158,7 +159,6 @@ public class Parser {
      * @param fileName name of the file
      */
     public void parseBuffer(StringBuilder buffer, String fileName) {
-        String dateTimeRegex = getTimestampRegex(timestampPattern);
         Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
         Matcher matcher = dateTimePattern.matcher(buffer);
         List<Integer> lineNumbers = new ArrayList<>();
@@ -168,16 +168,16 @@ public class Parser {
         if (lineNumbers.size() == 0) {
             NotificationService.addNotification(new EventNotification("No events", "No events were parsed from file", NotificationType.WARNING));
         }
+        String line;
         for (int i = 0; i < lineNumbers.size(); i++) {
             if (i + 1 >= lineNumbers.size()) {
-                LogEvent event = parse(buffer.substring(lineNumbers.get(i)), pattern, dateTimeRegex);
-                LogEventRepository.addEvent(fileName, event);
-                LogEventRepository.addEmitterTreeItem(fileName, new EmitterTreeItem(event.getEmitter()));
+                line = buffer.substring(lineNumbers.get(i));
             } else {
-                LogEvent event = parse(buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1)), pattern, dateTimeRegex);
-                LogEventRepository.addEvent(fileName, event);
-                LogEventRepository.addEmitterTreeItem(fileName, new EmitterTreeItem(event.getEmitter()));
+                line = buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1));
             }
+            LogEvent event = parse(line, pattern);
+            LogEventRepository.addEvent(fileName, event);
+            LogEventRepository.addEmitterTreeItem(fileName, new EmitterTreeItem(event.getEmitter()));
         }
     }
 
