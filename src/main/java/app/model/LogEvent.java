@@ -12,22 +12,15 @@ import java.util.Optional;
  */
 public class LogEvent {
 
-    private final StringProperty timestamp = new SimpleStringProperty("");
-    private final StringProperty level = new SimpleStringProperty("");
-    private final StringProperty emitter = new SimpleStringProperty("");
-    private final StringProperty message = new SimpleStringProperty("");
-    private final StringProperty thread = new SimpleStringProperty("");
-    private final StringProperty mdc = new SimpleStringProperty("");
-    private final StringProperty stacktrace = new SimpleStringProperty("");
+    private StringProperty timestamp;
+    private StringProperty level;
+    private StringProperty emitter;
+    private StringProperty message;
+    private StringProperty thread;
+    private StringProperty mdc;
+    private StringProperty stacktrace;
 
-    public LogEvent(String timestamp, String level, String emitter, String message, String thread, String mdc, String stacktrace) {
-        this.timestamp.set(timestamp);
-        this.level.set(level);
-        this.emitter.set(emitter);
-        this.message.set(message);
-        this.stacktrace.set(stacktrace);
-        this.thread.set(thread);
-        this.mdc.set(mdc);
+    private LogEvent() {
     }
 
     public StringProperty timestampProperty() {
@@ -95,5 +88,66 @@ public class LogEvent {
             e.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    public static class Builder {
+
+        private StringProperty timestamp = new SimpleStringProperty("");
+        private StringProperty level = new SimpleStringProperty("");
+        private StringProperty emitter = new SimpleStringProperty("");
+        private StringProperty message = new SimpleStringProperty("");
+        private StringProperty thread = new SimpleStringProperty("");
+        private StringProperty mdc = new SimpleStringProperty("");
+        private StringProperty stacktrace = new SimpleStringProperty("");
+
+        public Builder() {
+        }
+
+        public Builder timestamp(String timestamp) {
+            this.timestamp.set(timestamp);
+            return this;
+        }
+
+        public Builder level(String level) {
+            this.level.set(level);
+            return this;
+        }
+
+        public Builder emitter(String emitter) {
+            this.emitter.set(emitter);
+            return this;
+        }
+
+        public Builder message(String message) {
+            this.message.set(message);
+            return this;
+        }
+
+        public Builder stacktrace(String stacktrace) {
+            this.stacktrace.set(stacktrace);
+            return this;
+        }
+
+        public Builder mdc(String mdc) {
+            this.mdc.set(mdc);
+            return this;
+        }
+
+        public Builder thread(String thread) {
+            this.thread.set(thread);
+            return this;
+        }
+
+        public LogEvent build() {
+            LogEvent event = new LogEvent();
+            event.timestamp = this.timestamp;
+            event.level = this.level;
+            event.emitter = this.emitter;
+            event.message = this.message;
+            event.stacktrace = this.stacktrace;
+            event.mdc = this.mdc;
+            event.thread = this.thread;
+            return event;
+        }
     }
 }

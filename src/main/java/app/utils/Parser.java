@@ -82,50 +82,51 @@ public class Parser {
     /**
      * Parsing line from logfile and creating a new LogEvent object
      *
-     * @param line    one line from the log4j log file
-     * @param map     map with the keywords
+     * @param line one line from the log4j log file
+     * @param map  map with the keywords
      * @return new LogEvent
      */
     private LogEvent parse(String line, Map<Integer, String> map) {
-        String level = "";
-        String emitter = "";
-        String message = "";
-        String timestamp = "";
-        String stacktrace = "";
-        String thread = "";
-        String mdc = "";
+        LogEvent.Builder builder = new LogEvent.Builder();
         Matcher matcher = Pattern.compile(dateTimeRegex).matcher(line);
         for (String value : map.values()) {
             switch (valueOf(value)) {
                 case TIMESTAMP:
                     if (matcher.find()) {
-                        timestamp = line.substring(matcher.start(), matcher.end());
+                        String timestamp = line.substring(matcher.start(), matcher.end());
+                        builder.timestamp(timestamp);
                         line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
                     }
                     break;
                 case LEVEL:
-                    level = line.substring(0, line.indexOf(" "));
+                    String level = line.substring(0, line.indexOf(" "));
+                    builder.level(level);
                     line = line.replace(level, "").replaceFirst("^\\s++", "");
                     break;
                 case EMITTER:
-                    emitter = line.substring(0, line.indexOf(" "));
+                    String emitter = line.substring(0, line.indexOf(" "));
+                    builder.emitter(emitter);
                     line = line.replace(emitter, "").replaceFirst("^\\s++", "");
                     break;
                 case MESSAGE:
-                    message = line.substring(0, line.indexOf(System.lineSeparator()));
-                    stacktrace = line.substring(line.indexOf(System.lineSeparator())).replaceFirst("^\\s++", "");
+                    String message = line.substring(0, line.indexOf(System.lineSeparator()));
+                    builder.message(message);
+                    String stacktrace = line.substring(line.indexOf(System.lineSeparator())).replaceFirst("^\\s++", "");
+                    builder.stacktrace(stacktrace);
                     break;
                 case THREAD:
-                    thread = line.substring(0, line.indexOf(" "));
+                    String thread = line.substring(0, line.indexOf(" "));
+                    builder.thread(thread);
                     line = line.replace(thread, "").replaceFirst("^\\s++", "");
                     break;
                 case MDC:
-                    mdc = line.substring(0, line.indexOf(" "));
+                    String mdc = line.substring(0, line.indexOf(" "));
+                    builder.mdc(mdc);
                     line = line.replace(mdc, "").replaceFirst("^\\s++", "");
                     break;
             }
         }
-        return new LogEvent(timestamp, level, emitter, message, thread, mdc, stacktrace);
+        return builder.build();
     }
 
     /**
