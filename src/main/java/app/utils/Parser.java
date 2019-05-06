@@ -87,46 +87,46 @@ public class Parser {
      * @return new LogEvent
      */
     private LogEvent parse(String line, Map<Integer, String> map) {
-        LogEvent.Builder builder = new LogEvent.Builder();
+        LogEvent.Builder eventBuilder = new LogEvent.Builder();
         Matcher matcher = Pattern.compile(dateTimeRegex).matcher(line);
         for (String value : map.values()) {
             switch (valueOf(value)) {
                 case TIMESTAMP:
                     if (matcher.find()) {
                         String timestamp = line.substring(matcher.start(), matcher.end());
-                        builder.timestamp(timestamp);
+                        eventBuilder.timestamp(timestamp);
                         line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
                     }
                     break;
                 case LEVEL:
                     String level = line.substring(0, line.indexOf(" "));
-                    builder.level(level);
+                    eventBuilder.level(level);
                     line = line.replace(level, "").replaceFirst("^\\s++", "");
                     break;
                 case EMITTER:
                     String emitter = line.substring(0, line.indexOf(" "));
-                    builder.emitter(emitter);
+                    eventBuilder.emitter(emitter);
                     line = line.replace(emitter, "").replaceFirst("^\\s++", "");
                     break;
                 case MESSAGE:
                     String message = line.substring(0, line.indexOf(System.lineSeparator()));
-                    builder.message(message);
+                    eventBuilder.message(message);
                     String stacktrace = line.substring(line.indexOf(System.lineSeparator())).replaceFirst("^\\s++", "");
-                    builder.stacktrace(stacktrace);
+                    eventBuilder.stacktrace(stacktrace);
                     break;
                 case THREAD:
                     String thread = line.substring(0, line.indexOf(" "));
-                    builder.thread(thread);
+                    eventBuilder.thread(thread);
                     line = line.replace(thread, "").replaceFirst("^\\s++", "");
                     break;
                 case MDC:
                     String mdc = line.substring(0, line.indexOf(" "));
-                    builder.mdc(mdc);
+                    eventBuilder.mdc(mdc);
                     line = line.replace(mdc, "").replaceFirst("^\\s++", "");
                     break;
             }
         }
-        return builder.build();
+        return eventBuilder.build();
     }
 
     /**
@@ -146,6 +146,9 @@ public class Parser {
                 }
             } catch (IOException e) {
                 System.out.println(e.getMessage());
+                NotificationService.
+                        addNotification(
+                                new EventNotification("Error while reading file", e.getMessage(), NotificationType.ERROR));
             }
         }
         return buffer;
