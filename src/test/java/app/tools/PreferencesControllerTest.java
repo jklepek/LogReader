@@ -3,7 +3,7 @@
  * @author jklepek
  */
 
-package app.utils;
+package app.tools;
 
 import org.junit.jupiter.api.Test;
 

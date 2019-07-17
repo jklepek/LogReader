@@ -1,4 +1,4 @@
-package app.utils.notifications;
+package app.tools.notifications;
 
 /**
  * Notification object

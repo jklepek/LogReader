@@ -3,9 +3,9 @@
  * @author jklepek
  */
 
-package app.utils;
+package app.tools;
 
-import app.utils.notifications.NotificationService;
+import app.tools.notifications.NotificationService;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.junit.jupiter.api.AfterEach;
@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 class DirectoryWatchServiceTest {
 
-    private static final File file = new File("src/test/java/app/utils/log4j.log");
-    private static final Path newFile = Paths.get("src/test/java/app/utils/log4j1.log");
+    private static final File file = new File("src/test/java/app/tools/log4j.log");
+    private static final Path newFile = Paths.get("src/test/java/app/tools/log4j1.log");
 
     @BeforeEach
     void setUp() {

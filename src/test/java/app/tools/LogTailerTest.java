@@ -3,7 +3,7 @@
  * @author jklepek
  */
 
-package app.utils;
+package app.tools;
 
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LogTailerTest {
 
-    private static final Path filePath = Paths.get("src/test/java/app/utils/log4j.log");
+    private static final Path filePath = Paths.get("src/test/java/app/tools/log4j.log");
     private static Parser parser;
 
     @BeforeAll

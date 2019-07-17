@@ -1,6 +1,6 @@
 package app.controllers;
 
-import app.utils.PreferencesRepository;
+import app.tools.PreferencesRepository;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

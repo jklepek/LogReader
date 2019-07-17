@@ -1,10 +1,10 @@
-package app.utils;
+package app.tools;
 
 import app.model.EmitterTreeItem;
 import app.model.LogEvent;
-import app.utils.notifications.EventNotification;
-import app.utils.notifications.NotificationService;
-import app.utils.notifications.NotificationType;
+import app.tools.notifications.EventNotification;
+import app.tools.notifications.NotificationService;
+import app.tools.notifications.NotificationType;
 
 import java.io.BufferedReader;
 import java.io.File;

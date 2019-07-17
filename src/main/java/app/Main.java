@@ -1,7 +1,7 @@
 package app;
 
-import app.utils.PreferencesRepository;
-import app.utils.notifications.NotificationService;
+import app.tools.PreferencesRepository;
+import app.tools.notifications.NotificationService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;

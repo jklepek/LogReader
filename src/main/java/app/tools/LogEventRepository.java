@@ -1,4 +1,4 @@
-package app.utils;
+package app.tools;
 
 import app.model.EmitterTreeItem;
 import app.model.LogEvent;
