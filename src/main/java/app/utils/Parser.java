@@ -115,7 +115,8 @@ public class Parser {
                     eventBuilder.stacktrace(stacktrace);
                     break;
                 case THREAD:
-                    String thread = line.substring(0, line.indexOf(" "));
+                    int rightBracketIndex = getEndingBracketIndex(line);
+                    String thread = line.substring(0, rightBracketIndex + 1);
                     eventBuilder.thread(thread);
                     line = line.replace(thread, "").replaceFirst("^\\s++", "");
                     break;
@@ -127,6 +128,24 @@ public class Parser {
             }
         }
         return eventBuilder.build();
+    }
+
+    private int getEndingBracketIndex(String line) {
+        int leftBracketCount = 0;
+        int rightBracketCount = 0;
+        Matcher matcher = Pattern.compile("[\\[\\]]").matcher(line);
+        while (matcher.find()) {
+            int i = matcher.start();
+            if (line.charAt(i) == '[') {
+                leftBracketCount++;
+            } else if (line.charAt(i) == ']') {
+                rightBracketCount++;
+            }
+            if (leftBracketCount == rightBracketCount) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     /**

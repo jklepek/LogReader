@@ -66,7 +66,12 @@ public class Controller {
     private void configureFileChooser(FileChooser chooser) {
         chooser.setTitle("Select log file");
         chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log"));
-        chooser.setInitialDirectory(new File(PreferencesRepository.getInitialDirectory()));
+        File preferredFolder = new File(PreferencesRepository.getInitialDirectory());
+        if (!preferredFolder.exists() || !preferredFolder.isDirectory()) {
+            chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+        } else {
+            chooser.setInitialDirectory(preferredFolder);
+        }
     }
 
 
