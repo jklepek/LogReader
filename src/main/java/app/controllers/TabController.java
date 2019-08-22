@@ -153,6 +153,7 @@ public class TabController {
         rootNode.getChildren().addAll(treeItems);
         initEventsChangeListeners();
         initTreeItemsChangeListener();
+        this.tab.setOnCloseRequest((event) -> logTailer.stopTailing());
     }
 
     /**

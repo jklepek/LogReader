@@ -10,25 +10,9 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class Main {
 
     public static void main(String[] args) {
-        launch(args);
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/mainWindow.fxml"));
-        primaryStage.setTitle("Log reader");
-        primaryStage.setScene(new Scene(root, primaryStage.getMaxWidth(), primaryStage.getMaxHeight()));
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/reader.png")));
-        primaryStage.show();
-        primaryStage.setOnCloseRequest(event -> {
-            PreferencesRepository.saveAllPreferences();
-            Platform.exit();
-            System.exit(0);
-        });
-        PreferencesRepository.loadPreferences();
-        NotificationService.startService();
+        FXApplication.main(args);
     }
 }
