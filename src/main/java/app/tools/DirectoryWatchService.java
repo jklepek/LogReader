@@ -66,7 +66,7 @@ public class DirectoryWatchService implements Runnable {
             try {
                 Thread.sleep(refreshInterval);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("File closed. Stopped watching directory.");
                 Thread.currentThread().interrupt();
                 break;
             }
