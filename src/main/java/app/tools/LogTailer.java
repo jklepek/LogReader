@@ -73,7 +73,7 @@ public class LogTailer implements Runnable {
                     }
                     lastPosition = randomAccess.getFilePointer();
                     if (buffer.length() > 0) {
-                        parser.parseBuffer(buffer, logFile.getName());
+                        parser.parseBuffer(buffer, logFile.getAbsolutePath());
                     }
                     buffer.setLength(0);
                 } catch (IOException e) {
@@ -83,7 +83,7 @@ public class LogTailer implements Runnable {
                 NotificationService.addNotification(new EventNotification("Log file reset", "Log has been reset", NotificationType.INFORMATION));
                 lastPosition = 0;
                 startFileLength = currentFileLength;
-                LogEventRepository.clearRepository(logFile.getName());
+                LogEventRepository.clearRepository(logFile.getAbsolutePath());
             }
         }
     }

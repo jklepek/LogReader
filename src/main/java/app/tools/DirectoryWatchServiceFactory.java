@@ -21,7 +21,7 @@ public class DirectoryWatchServiceFactory {
      */
     public static Optional<DirectoryWatchService> getDirectoryWatchService(File file) {
         File parentDir = file.getParentFile();
-        if (!DIRECTORIES.keySet().contains(parentDir)) {
+        if (!DIRECTORIES.containsKey(parentDir)) {
             DIRECTORIES.put(parentDir, 1);
             return Optional.of(new DirectoryWatchService(parentDir));
         } else {

@@ -21,7 +21,7 @@ class ParserTest {
     static void initTests() {
         PreferencesRepository.loadPreferences();
         PreferencesRepository.setCurrentLogPattern("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %THREAD %MESSAGE");
-        LogEventRepository.newRepository(repoName);
+        LogEventRepository.createNewRepository(repoName);
         parser = new Parser();
     }
 
@@ -32,7 +32,7 @@ class ParserTest {
 
     @Test
     void parseBufferTest() {
-        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n");
+        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException" + System.lineSeparator());
         parser.parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
@@ -44,14 +44,14 @@ class ParserTest {
 
     @Test
     void parseBufferWithStackTraceTest() {
-        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [[NewConnectionWizard] - 1] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)\n");
+        StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [[NewConnectionWizard] - 1] java.lang.InterruptedException" + System.lineSeparator() + "\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator());
         parser.parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
         assertEquals("ERROR", logEvent.getLevel());
         assertEquals("[[NewConnectionWizard] - 1]", logEvent.getThread());
         assertEquals("java.lang.InterruptedException", logEvent.getMessage());
-        assertEquals("at java.util.concurrent.FutureTask.report(FutureTask.java:122)\n", logEvent.getStacktrace());
+        assertEquals("at java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator(), logEvent.getStacktrace());
     }
 
     @Test

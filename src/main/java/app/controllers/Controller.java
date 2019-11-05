@@ -23,8 +23,7 @@ public class Controller {
     private Button settingsButton;
     @FXML
     private TabPane tabPane;
-    @FXML
-    private ProgressBar progressBar;
+
     private FileChooser fileChooser;
 
     public void initialize() {
@@ -39,25 +38,9 @@ public class Controller {
         Window window = borderPane.getScene().getWindow();
         File file = fileChooser.showOpenDialog(window);
         if (file != null) {
-            if (LogEventRepository.newRepository(file.getName())) {
-                progressBar.setVisible(true);
-                Task<Void> task = new Task<>() {
-                    @Override
-                    protected Void call() {
-                        new Parser().getLogEventsFromFile(file);
-                        return null;
-                    }
-                };
-                progressBar.progressProperty().bind(task.progressProperty());
-                task.setOnSucceeded(event -> progressBar.setVisible(false));
-                task.setOnFailed(event -> progressBar.setVisible(false));
-                Thread thread = new Thread(task);
-                thread.start();
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            if (LogEventRepository.isOpened(file.getAbsolutePath())) {
+                LogEventRepository.createNewRepository(file.getAbsolutePath());
+                new Parser().getLogEventsFromFile(file);
             }
             createTab(file);
         }
@@ -121,7 +104,7 @@ public class Controller {
             dirListener.ifPresent(DirectoryWatchService::startWatching);
         }
         tab.setOnCloseRequest(event -> {
-            LogEventRepository.removeRepository(file.getName());
+            LogEventRepository.removeRepository(file.getAbsolutePath());
             dirListener.ifPresent(DirectoryWatchService::stopWatching);
             DirectoryWatchServiceFactory.removeWatchedDir(file);
         });

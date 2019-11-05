@@ -179,9 +179,9 @@ public class Parser {
      * defines the repository
      *
      * @param buffer   content of the log file
-     * @param fileName name of the file
+     * @param absoluteFilePath path of the file
      */
-    public void parseBuffer(StringBuilder buffer, String fileName) {
+    public void parseBuffer(StringBuilder buffer, String absoluteFilePath) {
         Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
         Matcher matcher = dateTimePattern.matcher(buffer);
         List<Integer> lineNumbers = new ArrayList<>();
@@ -199,8 +199,8 @@ public class Parser {
                 line = buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1));
             }
             LogEvent event = parse(line, pattern);
-            LogEventRepository.addEvent(fileName, event);
-            LogEventRepository.addEmitterTreeItem(fileName, new EmitterTreeItem(event.getEmitter()));
+            LogEventRepository.addEvent(absoluteFilePath, event);
+            LogEventRepository.addEmitterTreeItem(absoluteFilePath, new EmitterTreeItem(event.getEmitter()));
         }
     }
 
@@ -210,8 +210,8 @@ public class Parser {
      * @param file log file to be parsed
      */
     public void getLogEventsFromFile(File file) {
-        String fileName = file.getName();
+        String absoluteFilePath = file.getAbsolutePath();
         StringBuilder buffer = readFileToBuffer(file);
-        parseBuffer(buffer, fileName);
+        parseBuffer(buffer, absoluteFilePath);
     }
 }

@@ -23,11 +23,11 @@ public class LogEventRepository {
     private static final Map<String, ObservableList<TreeItem<EmitterTreeItem>>> TREE_ITEMS = new HashMap<>();
 
     /**
-     * @param fileName is used as a key for storing in a map
+     * @param absoluteFilePath is used as a key for storing in a map
      * @param event    LogEvent to be stored
      */
-    public static void addEvent(String fileName, LogEvent event) {
-        REPOSITORY.get(fileName).add(event);
+    public static void addEvent(String absoluteFilePath, LogEvent event) {
+        REPOSITORY.get(absoluteFilePath).add(event);
     }
 
     /**
@@ -49,42 +49,47 @@ public class LogEventRepository {
     }
 
     /**
-     * Creates new REPOSITORY if there is not one for the opened file
+     * Returns whether file is already opened or not
      *
-     * @param fileName name of the opened log file
+     * @param absoluteFilePath absolute path of the opened log file
      * @return true if new REPOSITORY was created
      */
-    public static boolean newRepository(String fileName) {
-        if (REPOSITORY.containsKey(fileName)) {
-            return false;
-        }
+    public static boolean isOpened(String absoluteFilePath) {
+        return REPOSITORY.containsKey(absoluteFilePath);
+    }
+
+    /**
+     * Creates new repository for the opened file
+     *
+     * @param absoluteFilePath path of the opened file
+     */
+    public static void createNewRepository(String absoluteFilePath) {
         ObservableList<LogEvent> logEventList = FXCollections.observableArrayList();
-        REPOSITORY.put(fileName, logEventList);
+        REPOSITORY.put(absoluteFilePath, logEventList);
         ObservableList<TreeItem<EmitterTreeItem>> emitterTreeItems = FXCollections.observableArrayList();
-        TREE_ITEMS.put(fileName, emitterTreeItems);
-        return true;
+        TREE_ITEMS.put(absoluteFilePath, emitterTreeItems);
     }
 
     /**
      * Removes the entry from REPOSITORY map, if the file was closed
      *
-     * @param fileName name of the closed file
+     * @param absoluteFilePath name of the closed file
      */
-    public static void removeRepository(String fileName) {
-        REPOSITORY.remove(fileName);
-        TREE_ITEMS.remove(fileName);
+    public static void removeRepository(String absoluteFilePath) {
+        REPOSITORY.remove(absoluteFilePath);
+        TREE_ITEMS.remove(absoluteFilePath);
     }
 
 
-    public static void addEmitterTreeItem(String fileName, EmitterTreeItem item) {
-        if (TREE_ITEMS.get(fileName).stream().anyMatch(item1 -> item1.getValue().getName().equalsIgnoreCase(item.getName()))) {
-            TREE_ITEMS.get(fileName)
+    public static void addEmitterTreeItem(String absoluteFilePath, EmitterTreeItem item) {
+        if (TREE_ITEMS.get(absoluteFilePath).stream().anyMatch(item1 -> item1.getValue().getName().equalsIgnoreCase(item.getName()))) {
+            TREE_ITEMS.get(absoluteFilePath)
                     .stream()
                     .filter(item1 -> item1.getValue().getName().equalsIgnoreCase(item.getName()))
                     .findFirst()
                     .ifPresent(i -> i.getValue().incrementCount());
         } else {
-            TREE_ITEMS.get(fileName).add(new TreeItem<>(item));
+            TREE_ITEMS.get(absoluteFilePath).add(new TreeItem<>(item));
         }
     }
 
