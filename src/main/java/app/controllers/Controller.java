@@ -1,7 +1,6 @@
 package app.controllers;
 
 import app.tools.*;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -38,7 +37,7 @@ public class Controller {
         Window window = borderPane.getScene().getWindow();
         File file = fileChooser.showOpenDialog(window);
         if (file != null) {
-            if (LogEventRepository.isOpened(file.getAbsolutePath())) {
+            if (!LogEventRepository.isOpened(file.getAbsolutePath())) {
                 LogEventRepository.createNewRepository(file.getAbsolutePath());
                 new Parser().getLogEventsFromFile(file);
             }

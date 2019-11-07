@@ -2,24 +2,24 @@ package app.controllers;
 
 import app.model.EmitterTreeItem;
 import app.model.LogEvent;
+import app.model.LogEventPropertyFactory;
 import app.model.LogEventTableRow;
 import app.tools.LogEventRepository;
 import app.tools.LogTailer;
 import app.tools.Parser;
 import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import org.controlsfx.control.CheckComboBox;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,14 +54,16 @@ public class TabController {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
             LogEvent logEvent = tableView.getSelectionModel().getSelectedItem();
             if (logEvent != null) {
-                textArea.setText(logEvent.getStacktrace());
+                textArea.setText(logEvent.getProperty("stacktrace"));
             }
         });
         List<String> keywords = getKeywords();
         for (String keyword : keywords) {
-            TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
-            column.setCellValueFactory(new PropertyValueFactory<>(keyword.toLowerCase()));
-            tableView.getColumns().add(column);
+            if (!keyword.equalsIgnoreCase("stacktrace")) {
+                TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
+                column.setCellValueFactory(new LogEventPropertyFactory(keyword));
+                tableView.getColumns().add(column);
+            }
         }
         tableView.setRowFactory(tableView -> new LogEventTableRow());
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
@@ -84,10 +86,10 @@ public class TabController {
             return;
         }
         LogEvent event = tableView.getSelectionModel().getSelectedItem();
-        if (!event.getStacktrace().isEmpty()) {
+        if (!event.getProperty("stacktrace").isEmpty()) {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();
-            content.putString(event.getStacktrace());
+            content.putString(event.getProperty("stacktrace"));
             clipboard.setContent(content);
         }
     }
@@ -109,17 +111,14 @@ public class TabController {
      */
     private void filterEventBySeverity() {
         List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
-        filteredList.setPredicate(logEvent -> levels.contains((logEvent.getLevel())));
+        filteredList.setPredicate(logEvent -> levels.contains((logEvent.getProperty("level"))));
     }
 
     /**
      * @return list of keywords used in current log4j pattern
      */
     private List<String> getKeywords() {
-        return parser.getKeywords()
-                .stream()
-                .map(String::toUpperCase)
-                .collect(Collectors.toList());
+        return new ArrayList<>(parser.getKeywords());
     }
 
     /**
@@ -129,7 +128,7 @@ public class TabController {
         String property = filterCombo.getSelectionModel().getSelectedItem().toLowerCase();
         if (!property.isEmpty() && text != null) {
             filteredList.setPredicate(event -> {
-                String value = ((StringProperty) event.getPropertyByName(property)).getValue();
+                String value = event.getProperty(property);
                 return value.toUpperCase().contains(text.toUpperCase());
             });
         }
@@ -143,13 +142,12 @@ public class TabController {
      */
     public void initData(File logFile) {
         logTailer = new LogTailer(logFile, parser);
-        tab.setOnCloseRequest(event -> logTailer.stopTailing());
-        events = LogEventRepository.getLogEventList(logFile.getName());
+        events = LogEventRepository.getLogEventList(logFile.getAbsolutePath());
         filteredList = new FilteredList<>(events);
         tableView.setItems(filteredList);
         levelComboBox.getItems().addAll(getSeverityLevels());
         levelComboBox.getCheckModel().checkAll();
-        treeItems = LogEventRepository.getTreeItems(logFile.getName());
+        treeItems = LogEventRepository.getTreeItems(logFile.getAbsolutePath());
         rootNode.getChildren().addAll(treeItems);
         initEventsChangeListeners();
         initTreeItemsChangeListener();
@@ -162,7 +160,7 @@ public class TabController {
     private List<String> getSeverityLevels() {
         return events
                 .stream()
-                .map(LogEvent::getLevel)
+                .map(event -> event.getProperty("level"))
                 .distinct()
                 .collect(Collectors.toList());
     }
@@ -175,8 +173,8 @@ public class TabController {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(i -> Platform.runLater(() -> {
-                        if (!levelComboBox.getItems().contains(i.getLevel())) {
-                            levelComboBox.getItems().add(i.getLevel());
+                        if (!levelComboBox.getItems().contains(i.getProperty("level"))) {
+                            levelComboBox.getItems().add(i.getProperty("level"));
                             levelComboBox.getCheckModel().checkAll();
                         }
                     }));
@@ -198,7 +196,7 @@ public class TabController {
         treeView.setOnMouseClicked(event -> {
             TreeItem<EmitterTreeItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
             if (event.getClickCount() == 2 && selectedItem != null) {
-                filteredList.setPredicate(event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getEmitter()));
+                filteredList.setPredicate(event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getProperty("emitter")));
             }
         });
     }

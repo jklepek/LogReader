@@ -20,7 +20,7 @@ class ParserTest {
     @BeforeAll
     static void initTests() {
         PreferencesRepository.loadPreferences();
-        PreferencesRepository.setCurrentLogPattern("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %THREAD %MESSAGE");
+        PreferencesRepository.setCurrentLogPattern("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %THREAD %MESSAGE%N");
         LogEventRepository.createNewRepository(repoName);
         parser = new Parser();
     }
@@ -35,11 +35,11 @@ class ParserTest {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException" + System.lineSeparator());
         parser.parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
-        assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
-        assertEquals("ERROR", logEvent.getLevel());
-        assertEquals("[NewConnectionWizard]", logEvent.getThread());
-        assertEquals("java.lang.InterruptedException", logEvent.getMessage());
-        assertEquals("", logEvent.getStacktrace());
+        assertEquals("2018-12-10 12:07:43,330", logEvent.getProperty("TIMESTAMP"));
+        assertEquals("ERROR", logEvent.getProperty("LEVEL"));
+        assertEquals("[NewConnectionWizard]", logEvent.getProperty("THREAD"));
+        assertEquals("java.lang.InterruptedException", logEvent.getProperty("MESSAGE"));
+        assertEquals("", logEvent.getProperty("STACKTRACE"));
     }
 
     @Test
@@ -47,11 +47,11 @@ class ParserTest {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [[NewConnectionWizard] - 1] java.lang.InterruptedException" + System.lineSeparator() + "\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator());
         parser.parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
-        assertEquals("2018-12-10 12:07:43,330", logEvent.getTimestamp());
-        assertEquals("ERROR", logEvent.getLevel());
-        assertEquals("[[NewConnectionWizard] - 1]", logEvent.getThread());
-        assertEquals("java.lang.InterruptedException", logEvent.getMessage());
-        assertEquals("at java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator(), logEvent.getStacktrace());
+        assertEquals("2018-12-10 12:07:43,330", logEvent.getProperty("TIMESTAMP"));
+        assertEquals("ERROR", logEvent.getProperty("LEVEL"));
+        assertEquals("[[NewConnectionWizard] - 1]", logEvent.getProperty("THREAD"));
+        assertEquals("java.lang.InterruptedException", logEvent.getProperty("MESSAGE"));
+        assertEquals("at java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator(), logEvent.getProperty("STACKTRACE"));
     }
 
     @Test

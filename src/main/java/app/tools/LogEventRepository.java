@@ -24,18 +24,18 @@ public class LogEventRepository {
 
     /**
      * @param absoluteFilePath is used as a key for storing in a map
-     * @param event    LogEvent to be stored
+     * @param event            LogEvent to be stored
      */
     public static void addEvent(String absoluteFilePath, LogEvent event) {
         REPOSITORY.get(absoluteFilePath).add(event);
     }
 
     /**
-     * @param fileName name of the opened log file
+     * @param absoluteFilePath path of the opened log file
      * @return ObservableList<LogEvent>
      */
-    public static ObservableList<LogEvent> getLogEventList(String fileName) {
-        return REPOSITORY.get(fileName);
+    public static ObservableList<LogEvent> getLogEventList(String absoluteFilePath) {
+        return REPOSITORY.get(absoluteFilePath);
     }
 
     /**
