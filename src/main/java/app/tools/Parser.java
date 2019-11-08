@@ -17,17 +17,17 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static app.model.LogKeywords.valueOf;
-
 public class Parser {
 
-    private static String timestampPattern;
-    private static Map<Integer, String> pattern;
-    private static String dateTimeRegex;
+    private String timestampPattern;
+    private Map<Integer, String> keywords;
+    private String dateTimeRegex;
+    private String delimiter;
 
     public Parser() {
-        pattern = getKeywordsFromPattern();
+        keywords = getKeywordsFromPattern();
         dateTimeRegex = getTimestampRegex(timestampPattern);
+        delimiter = PreferencesRepository.getDelimiter();
     }
 
     /**
@@ -56,6 +56,8 @@ public class Parser {
                     if (word.toUpperCase().startsWith("D")) {
                         timestampPattern = word.substring(word.indexOf("{") + 1, word.indexOf("}"));
                         word = "TIMESTAMP";
+                    } else if (word.equalsIgnoreCase("N")) {
+                        word = "STACKTRACE";
                     }
                     map.put(count, word.toUpperCase().trim());
                     count++;
@@ -71,9 +73,9 @@ public class Parser {
      */
     public List<String> getKeywords() {
         List<String> keywords = new ArrayList<>();
-        if (!pattern.isEmpty()) {
-            for (int i = 0; i < pattern.size(); i++) {
-                keywords.add(pattern.get(i).toLowerCase());
+        if (!this.keywords.isEmpty()) {
+            for (int i = 0; i < this.keywords.size(); i++) {
+                keywords.add(this.keywords.get(i));
             }
         }
         return keywords;
@@ -82,52 +84,40 @@ public class Parser {
     /**
      * Parsing line from logfile and creating a new LogEvent object
      *
-     * @param line one line from the log4j log file
-     * @param map  map with the keywords
+     * @param line     one line from the log4j log file
+     * @param keywords map with the keywords
      * @return new LogEvent
      */
-    private LogEvent parse(String line, Map<Integer, String> map) {
-        LogEvent.Builder eventBuilder = new LogEvent.Builder();
+    private LogEvent parse(String line, Map<Integer, String> keywords) {
         Matcher matcher = Pattern.compile(dateTimeRegex).matcher(line);
-        for (String value : map.values()) {
-            switch (valueOf(value)) {
-                case TIMESTAMP:
-                    if (matcher.find()) {
-                        String timestamp = line.substring(matcher.start(), matcher.end());
-                        eventBuilder.timestamp(timestamp);
-                        line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
-                    }
-                    break;
-                case LEVEL:
-                    String level = line.substring(0, line.indexOf(" "));
-                    eventBuilder.level(level);
-                    line = line.replace(level, "").replaceFirst("^\\s++", "");
-                    break;
-                case EMITTER:
-                    String emitter = line.substring(0, line.indexOf(" "));
-                    eventBuilder.emitter(emitter);
-                    line = line.replace(emitter, "").replaceFirst("^\\s++", "");
-                    break;
-                case MESSAGE:
-                    String message = line.substring(0, line.indexOf(System.lineSeparator()));
-                    eventBuilder.message(message);
-                    String stacktrace = line.substring(line.indexOf(System.lineSeparator())).replaceFirst("^\\s++", "");
-                    eventBuilder.stacktrace(stacktrace);
-                    break;
-                case THREAD:
+        LogEvent logEvent = new LogEvent();
+        for (int i = 0; i < keywords.size(); i++) {
+            String keyword = keywords.get(i);
+            if (keyword.equalsIgnoreCase("TIMESTAMP")) {
+                if (matcher.find()) {
+                    String timestamp = line.substring(matcher.start(), matcher.end());
+                    logEvent.setProperty(keyword, timestamp);
+                    line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
+                }
+            } else if (i == keywords.size() - 2) {
+                String message = line.substring(0, line.indexOf(System.lineSeparator()));
+                logEvent.setProperty(keyword, message);
+                line = line.replace(message, "").replaceFirst("^\\s++", "");
+                logEvent.setProperty("STACKTRACE", line);
+                break;
+            } else {
+                String value;
+                if (line.startsWith("[")) {
                     int rightBracketIndex = getEndingBracketIndex(line);
-                    String thread = line.substring(0, rightBracketIndex + 1);
-                    eventBuilder.thread(thread);
-                    line = line.replace(thread, "").replaceFirst("^\\s++", "");
-                    break;
-                case MDC:
-                    String mdc = line.substring(0, line.indexOf(" "));
-                    eventBuilder.mdc(mdc);
-                    line = line.replace(mdc, "").replaceFirst("^\\s++", "");
-                    break;
+                    value = line.substring(0, rightBracketIndex + 1);
+                } else {
+                    value = line.substring(0, line.indexOf(delimiter));
+                }
+                line = line.replace(value, "").replaceFirst("^\\s++", "");
+                logEvent.setProperty(keyword, value);
             }
         }
-        return eventBuilder.build();
+        return logEvent;
     }
 
     private int getEndingBracketIndex(String line) {
@@ -175,10 +165,10 @@ public class Parser {
 
     /**
      * Parses the content of the log file and stores the LogEvent
-     * objects in repository, where the filename
+     * objects in repository, where the filepath
      * defines the repository
      *
-     * @param buffer   content of the log file
+     * @param buffer           content of the log file
      * @param absoluteFilePath path of the file
      */
     public void parseBuffer(StringBuilder buffer, String absoluteFilePath) {
@@ -198,9 +188,9 @@ public class Parser {
             } else {
                 line = buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1));
             }
-            LogEvent event = parse(line, pattern);
+            LogEvent event = parse(line, keywords);
             LogEventRepository.addEvent(absoluteFilePath, event);
-            LogEventRepository.addEmitterTreeItem(absoluteFilePath, new EmitterTreeItem(event.getEmitter()));
+            LogEventRepository.addEmitterTreeItem(absoluteFilePath, new EmitterTreeItem(event.getProperty("EMITTER")));
         }
     }
 

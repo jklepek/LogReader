@@ -24,6 +24,7 @@ public class PreferencesRepository {
     private static boolean WATCH_DIR_FOR_CHANGES;
     private static String CURRENT_LOG_PATTERN;
     private static Map<String, String> ALL_LOG_PATTERNS;
+    private static String DELIMITER;
 
     public static void loadPreferences() {
         AUTO_REFRESH_INTERVAL = PREFERENCES.getAutoRefreshInterval();
@@ -31,6 +32,7 @@ public class PreferencesRepository {
         WATCH_DIR_FOR_CHANGES = PREFERENCES.getWatchForDirChanges();
         CURRENT_LOG_PATTERN = PREFERENCES.getLogPattern();
         ALL_LOG_PATTERNS = PREFERENCES.getLogPatterns();
+        DELIMITER = PREFERENCES.getDelimiter();
     }
 
     public static long getAutoRefreshInterval() {
@@ -73,11 +75,20 @@ public class PreferencesRepository {
         ALL_LOG_PATTERNS.put(name, pattern);
     }
 
+    public static void setDelimiter(String delimiter) {
+        DELIMITER = delimiter;
+    }
+
+    public static String getDelimiter() {
+        return DELIMITER;
+    }
+
     public static void saveAllPreferences() {
         PREFERENCES.setAutoRefreshInterval(AUTO_REFRESH_INTERVAL);
         PREFERENCES.setInitialDir(INITIAL_DIRECTORY);
         PREFERENCES.setLogPattern(CURRENT_LOG_PATTERN);
         PREFERENCES.setWatchForDirChanges(WATCH_DIR_FOR_CHANGES);
+        PREFERENCES.setDelimiter(DELIMITER);
         for (Map.Entry<String, String> pattern : ALL_LOG_PATTERNS.entrySet()) {
             PREFERENCES.addLogPattern(pattern.getKey(), pattern.getValue());
         }

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.*?>
-<BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.controllers.Controller">
+<BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="app.controllers.Controller">
     <top>
         <HBox>
             <BorderPane.margin>
@@ -24,14 +24,9 @@
                     <Insets right="5.0"/>
                 </HBox.margin>
             </Button>
-            <ProgressBar fx:id="progressBar" visible="false">
-                <HBox.margin>
-                    <Insets top="5.0"/>
-                </HBox.margin>
-            </ProgressBar>
         </HBox>
     </top>
     <center>
-        <TabPane fx:id="tabPane" />
+        <TabPane fx:id="tabPane"/>
     </center>
 </BorderPane>

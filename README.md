@@ -6,8 +6,10 @@ When log file is reset, log entries in application are refreshed to mirror the a
 Parent directory of each opened file is being watched and when there is a new .log file, notification will pop up.
 For convenience, stacktrace can be copied to clipboard with a push of a button.
 Settings allow to set initial directory and auto-refresh interval, which is stored in user preferences.
-Multiple custom layout patterns can defined in settings like this "%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %EMITTER %MESSAGE"
-For now these keywords are supported: EMITTER, LEVEL, THREAD, MDC, MESSAGE and timestamp in SimpleDateFormat.
+Multiple custom layout patterns can defined in settings like this "%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %level %emitter %message%n"
+Keywords are now completely defined by user, only timestamp needs to be honored as "%D{...}" in SimpleDateFormat 
+and %n at the end of the pattern as stacktrace. All the keywords need to start with "%".
+The rest of the keywords can be named freely and will appear as columns in the app.
 Events now can be filtered by selected property, or by double-clicking on an item in the emitters TreeTable.
 
 
