@@ -1,9 +1,6 @@
 package app.tools.notifications;
 
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -18,36 +15,41 @@ import org.controlsfx.control.Notifications;
  * Service watches for changes in ObservableList of EventNotifications
  * if a new event is added, notification is displayed
  */
-public class NotificationService {
+public class NotificationService implements NotificationListener {
 
-    private static final ObservableList<EventNotification> NOTIFICATIONS = FXCollections.observableArrayList();
-    private static Stage stage;
+    private Stage stage;
 
-    /**
-     * Starts the service
-     */
-    public static void startService() {
-        NOTIFICATIONS.addListener((ListChangeListener<EventNotification>) c -> {
-                    while (c.next()) {
-                        if (c.wasAdded()) {
-                            EventNotification notification = NOTIFICATIONS.get(NOTIFICATIONS.size() - 1);
-                            createHiddenStage();
-                            Platform.runLater(() -> createNotification(notification));
-                        }
-                    }
-                }
-        );
+
+    private NotificationService() {
+        createHiddenStage();
+    }
+
+    public static NotificationService getInstance() {
+        return LazyHolder.INSTANCE;
+    }
+
+    private static class LazyHolder {
+
+        static final NotificationService INSTANCE = new NotificationService();
+    }
+
+    @Override
+    public void fireNotification(EventNotification notification) {
+        Platform.runLater(() -> createNotification(notification));
     }
 
     /**
      * Creates notification based on it's type
+     *
      * @param notification EventNotification
      */
-    private static void createNotification(EventNotification notification) {
+
+    private void createNotification(EventNotification notification) {
         switch (notification.getType()) {
             case ERROR:
                 Notifications
                         .create()
+                        .owner(stage)
                         .title(notification.getTitle())
                         .text(notification.getText())
                         .showError();
@@ -55,6 +57,7 @@ public class NotificationService {
             case WARNING:
                 Notifications
                         .create()
+                        .owner(stage)
                         .title(notification.getTitle())
                         .text(notification.getText())
                         .showWarning();
@@ -62,6 +65,7 @@ public class NotificationService {
             case INFORMATION:
                 Notifications
                         .create()
+                        .owner(stage)
                         .title(notification.getTitle())
                         .text(notification.getText())
                         .showInformation();
@@ -69,6 +73,7 @@ public class NotificationService {
             case CONFIRMATION:
                 Notifications
                         .create()
+                        .owner(stage)
                         .title(notification.getTitle())
                         .text(notification.getText())
                         .showConfirm();
@@ -77,23 +82,11 @@ public class NotificationService {
     }
 
     /**
-     * Adds new notification to the ObservableList
-     * @param notification EventNotification
-     */
-    public static void addNotification(EventNotification notification) {
-        NOTIFICATIONS.add(notification);
-    }
-
-    public static ObservableList<EventNotification> getNotifications() {
-        return NOTIFICATIONS;
-    }
-
-    /**
      * Hidden stage is necessary to avoid null pointer exception
      * when the application is minimized or not focused.
      * This hidden stage allows notifications to be displayed at all times.
      */
-    private static void createHiddenStage() {
+    private void createHiddenStage() {
         Platform.runLater(() -> {
             stage = new Stage(StageStyle.TRANSPARENT);
             StackPane root = new StackPane();

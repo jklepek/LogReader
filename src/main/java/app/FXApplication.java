@@ -1,7 +1,6 @@
 package app;
 
 import app.tools.PreferencesRepository;
-import app.tools.notifications.NotificationService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -28,6 +27,5 @@ public class FXApplication extends Application {
             System.exit(0);
         });
         PreferencesRepository.loadPreferences();
-        NotificationService.startService();
     }
 }

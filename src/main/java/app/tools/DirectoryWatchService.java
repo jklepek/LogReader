@@ -1,6 +1,7 @@
 package app.tools;
 
 import app.tools.notifications.EventNotification;
+import app.tools.notifications.NotificationListener;
 import app.tools.notifications.NotificationService;
 import app.tools.notifications.NotificationType;
 
@@ -23,6 +24,7 @@ public class DirectoryWatchService implements Runnable {
     private final long refreshInterval;
     private WatchService watchService;
     private Future taskHandle;
+    private NotificationListener listener = NotificationService.getInstance();
 
     public DirectoryWatchService(File directory) {
         this.dirPath = directory.toPath();
@@ -78,11 +80,9 @@ public class DirectoryWatchService implements Runnable {
                     String fileName = newFileName.toFile().getName();
                     if (fileName.endsWith(".log")) {
                         System.out.println("There is a new log file: " + newFileName);
-                        NotificationService
-                                .addNotification(
-                                        new EventNotification("New log",
-                                                "There is a new log file: " + fileName,
-                                                NotificationType.INFORMATION));
+                        listener.fireNotification(new EventNotification("New log",
+                                "There is a new log file: " + fileName,
+                                NotificationType.INFORMATION));
                     }
                 }
                 key.reset();
