@@ -1,6 +1,7 @@
 package app.tools;
 
 import app.tools.notifications.EventNotification;
+import app.tools.notifications.NotificationListener;
 import app.tools.notifications.NotificationService;
 import app.tools.notifications.NotificationType;
 
@@ -25,6 +26,7 @@ public class LogTailer implements Runnable {
     private long startFileLength;
     private Future taskHandle;
     private final Parser parser;
+    private NotificationListener listener = NotificationService.getInstance();
 
     public LogTailer(File logFile, Parser parser) {
         this.startFileLength = logFile.length();
@@ -80,7 +82,7 @@ public class LogTailer implements Runnable {
                     e.printStackTrace();
                 }
             } else {
-                NotificationService.addNotification(new EventNotification("Log file reset", "Log has been reset", NotificationType.INFORMATION));
+                listener.fireNotification(new EventNotification("Log file reset", "Log has been reset", NotificationType.INFORMATION));
                 lastPosition = 0;
                 startFileLength = currentFileLength;
                 LogEventRepository.clearRepository(logFile.getAbsolutePath());

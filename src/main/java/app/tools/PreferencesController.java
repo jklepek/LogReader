@@ -1,6 +1,7 @@
 package app.tools;
 
 import app.tools.notifications.EventNotification;
+import app.tools.notifications.NotificationListener;
 import app.tools.notifications.NotificationService;
 import app.tools.notifications.NotificationType;
 
@@ -30,6 +31,7 @@ public class PreferencesController {
     private final String delimiter = "DELIMITER";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
+    private final NotificationListener listener = NotificationService.getInstance();
 
     private static class LazyHolder {
         static final PreferencesController INSTANCE = new PreferencesController();
@@ -75,7 +77,7 @@ public class PreferencesController {
         Map<String, String> map = new HashMap<>();
         List<String> patterns = getPatterns();
         if (patterns.isEmpty()) {
-            NotificationService.addNotification(new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR));
+            listener.fireNotification(new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR));
         }
         for (String pattern : patterns) {
             map.put(pattern, logPatterns.get(pattern, ""));

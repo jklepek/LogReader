@@ -3,6 +3,7 @@ package app.tools;
 import app.model.EmitterTreeItem;
 import app.model.LogEvent;
 import app.tools.notifications.EventNotification;
+import app.tools.notifications.NotificationListener;
 import app.tools.notifications.NotificationService;
 import app.tools.notifications.NotificationType;
 
@@ -23,6 +24,7 @@ public class Parser {
     private Map<Integer, String> keywords;
     private String dateTimeRegex;
     private String delimiter;
+    private NotificationListener listener = NotificationService.getInstance();
 
     public Parser() {
         keywords = getKeywordsFromPattern();
@@ -155,9 +157,7 @@ public class Parser {
                 }
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                NotificationService.
-                        addNotification(
-                                new EventNotification("Error while reading file", e.getMessage(), NotificationType.ERROR));
+                listener.fireNotification(new EventNotification("Error while reading file", e.getMessage(), NotificationType.ERROR));
             }
         }
         return buffer;
@@ -179,7 +179,7 @@ public class Parser {
             lineNumbers.add(matcher.start());
         }
         if (lineNumbers.size() == 0) {
-            NotificationService.addNotification(new EventNotification("No events", "No events were parsed from file", NotificationType.WARNING));
+            listener.fireNotification(new EventNotification("No events", "No events were parsed from file", NotificationType.WARNING));
         }
         String line;
         for (int i = 0; i < lineNumbers.size(); i++) {
