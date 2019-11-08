@@ -22,10 +22,12 @@ public class Parser {
     private String timestampPattern;
     private Map<Integer, String> keywords;
     private String dateTimeRegex;
+    private String delimiter;
 
     public Parser() {
         keywords = getKeywordsFromPattern();
         dateTimeRegex = getTimestampRegex(timestampPattern);
+        delimiter = PreferencesRepository.getDelimiter();
     }
 
     /**
@@ -89,14 +91,15 @@ public class Parser {
     private LogEvent parse(String line, Map<Integer, String> keywords) {
         Matcher matcher = Pattern.compile(dateTimeRegex).matcher(line);
         LogEvent logEvent = new LogEvent();
-        for (String keyword : keywords.values()) {
+        for (int i = 0; i < keywords.size(); i++) {
+            String keyword = keywords.get(i);
             if (keyword.equalsIgnoreCase("TIMESTAMP")) {
                 if (matcher.find()) {
                     String timestamp = line.substring(matcher.start(), matcher.end());
                     logEvent.setProperty(keyword, timestamp);
                     line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
                 }
-            } else if (keyword.equalsIgnoreCase("MESSAGE")) {
+            } else if (i == keywords.size() - 2) {
                 String message = line.substring(0, line.indexOf(System.lineSeparator()));
                 logEvent.setProperty(keyword, message);
                 line = line.replace(message, "").replaceFirst("^\\s++", "");
@@ -108,7 +111,7 @@ public class Parser {
                     int rightBracketIndex = getEndingBracketIndex(line);
                     value = line.substring(0, rightBracketIndex + 1);
                 } else {
-                    value = line.substring(0, line.indexOf(" "));
+                    value = line.substring(0, line.indexOf(delimiter));
                 }
                 line = line.replace(value, "").replaceFirst("^\\s++", "");
                 logEvent.setProperty(keyword, value);

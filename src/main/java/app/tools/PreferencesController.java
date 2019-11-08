@@ -27,6 +27,7 @@ public class PreferencesController {
     private final String initialDir = "PREFERRED_DIR";
     private final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
     private final String logPattern = "CURRENT_LOG_PATTERN";
+    private final String delimiter = "DELIMITER";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
 
@@ -60,6 +61,14 @@ public class PreferencesController {
 
     public void addLogPattern(String name, String pattern) {
         logPatterns.put(name, pattern);
+    }
+
+    public String getDelimiter() {
+        return preferences.get(delimiter, " ");
+    }
+
+    public void setDelimiter(String delimiterValue) {
+        preferences.put(delimiter, delimiterValue);
     }
 
     public Map<String, String> getLogPatterns() {

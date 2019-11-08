@@ -2,6 +2,10 @@ package app.controllers;
 
 import app.tools.PreferencesRepository;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -21,6 +25,10 @@ public class SettingsDialogController {
     private static final String DELETE_ICON = "/icons/delete.png";
     private Tooltip dirErrorTooltip;
     private Tooltip intervalErrorTooltip;
+    @FXML
+    public TextField delimiterField;
+    @FXML
+    public TextField displayDelimiterField;
     @FXML
     private DialogPane dialogPane;
     @FXML
@@ -50,21 +58,7 @@ public class SettingsDialogController {
         initTooltips();
         initBindings();
         initListeners();
-        initialDirField.setText(PreferencesRepository.getInitialDirectory());
-        autoRefreshIntervalField.setText(String.valueOf(PreferencesRepository.getAutoRefreshInterval()));
-        watchDir.setSelected(PreferencesRepository.isWatchDirForChanges());
-        patternMap = PreferencesRepository.getAllLogPatterns();
-        patternsComboBox.getItems().addAll(patternMap.keySet());
-        patternsComboBox.setEditable(true);
-        String currentPattern = PreferencesRepository.getCurrentLogPattern();
-        if (!currentPattern.equals("")) {
-            patternField.setText(currentPattern);
-            patternMap.forEach((key, value) -> {
-                if (value.equals(currentPattern)) {
-                    patternsComboBox.getSelectionModel().select(key);
-                }
-            });
-        }
+        initFields();
     }
 
     public void savePreferences() {
@@ -72,13 +66,14 @@ public class SettingsDialogController {
                 && patternField.getText() != null && patternsComboBox.getValue() != null) {
             String dir = initialDirField.getText();
             PreferencesRepository.setInitialDirectory(dir);
-            PreferencesRepository.setAutoRefreshInterval(Long.valueOf(autoRefreshIntervalField.getText()));
+            PreferencesRepository.setAutoRefreshInterval(Long.parseLong(autoRefreshIntervalField.getText()));
             PreferencesRepository.setWatchDirForChanges(watchDir.isSelected());
             PreferencesRepository.addLogPattern(patternsComboBox.getValue(), patternField.getText());
             PreferencesRepository.setCurrentLogPattern(patternField.getText());
             for (String pattern : patternsToDelete) {
                 PreferencesRepository.removePattern(pattern);
             }
+            PreferencesRepository.setDelimiter(delimiterField.getText());
         }
     }
 
@@ -114,6 +109,31 @@ public class SettingsDialogController {
         dirErrorIV.setVisible(false);
         browseButton.setGraphic(new ImageView(openFolderImage));
         deletePatternButton.setGraphic(new ImageView(deleteImage));
+    }
+
+    private void initFields() {
+        initialDirField.setText(PreferencesRepository.getInitialDirectory());
+        autoRefreshIntervalField.setText(String.valueOf(PreferencesRepository.getAutoRefreshInterval()));
+        watchDir.setSelected(PreferencesRepository.isWatchDirForChanges());
+        patternMap = PreferencesRepository.getAllLogPatterns();
+        patternsComboBox.getItems().addAll(patternMap.keySet());
+        patternsComboBox.setEditable(true);
+        delimiterField.setText(PreferencesRepository.getDelimiter());
+        displayDelimiterField.setText("\"" + delimiterField.getText() + "\"");
+        delimiterField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!oldValue.equalsIgnoreCase(newValue)) {
+                displayDelimiterField.setText("\"" + newValue + "\"");
+            }
+        });
+        String currentPattern = PreferencesRepository.getCurrentLogPattern();
+        if (!currentPattern.equals("")) {
+            patternField.setText(currentPattern);
+            patternMap.forEach((key, value) -> {
+                if (value.equals(currentPattern)) {
+                    patternsComboBox.getSelectionModel().select(key);
+                }
+            });
+        }
     }
 
     private void initTooltips() {
