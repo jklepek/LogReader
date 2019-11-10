@@ -47,38 +47,25 @@ public class NotificationService implements NotificationListener {
     private void createNotification(EventNotification notification) {
         switch (notification.getType()) {
             case ERROR:
-                Notifications
-                        .create()
-                        .owner(stage)
-                        .title(notification.getTitle())
-                        .text(notification.getText())
-                        .showError();
+                buildNotification(notification).showError();
                 break;
             case WARNING:
-                Notifications
-                        .create()
-                        .owner(stage)
-                        .title(notification.getTitle())
-                        .text(notification.getText())
-                        .showWarning();
+                buildNotification(notification).showWarning();
                 break;
             case INFORMATION:
-                Notifications
-                        .create()
-                        .owner(stage)
-                        .title(notification.getTitle())
-                        .text(notification.getText())
-                        .showInformation();
+                buildNotification(notification).showInformation();
                 break;
             case CONFIRMATION:
-                Notifications
-                        .create()
-                        .owner(stage)
-                        .title(notification.getTitle())
-                        .text(notification.getText())
-                        .showConfirm();
+                buildNotification(notification).showConfirm();
                 break;
         }
+    }
+
+    private Notifications buildNotification(EventNotification notification) {
+        return Notifications.create()
+                .owner(stage)
+                .title(notification.getTitle())
+                .text(notification.getText());
     }
 
     /**

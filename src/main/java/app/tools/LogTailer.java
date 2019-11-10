@@ -1,13 +1,15 @@
 package app.tools;
 
 import app.tools.notifications.EventNotification;
+import app.tools.notifications.EventNotifier;
 import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationService;
 import app.tools.notifications.NotificationType;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,7 +19,7 @@ import java.util.concurrent.Future;
  * Class for reading new lines in the opened log file
  * and adding them to UI
  */
-public class LogTailer implements Runnable {
+public class LogTailer implements Runnable, EventNotifier {
 
     private final File logFile;
     private final long refreshInterval = PreferencesRepository.getAutoRefreshInterval();
@@ -26,7 +28,7 @@ public class LogTailer implements Runnable {
     private long startFileLength;
     private Future taskHandle;
     private final Parser parser;
-    private NotificationListener listener = NotificationService.getInstance();
+    private List<NotificationListener> listeners = new ArrayList<>();
 
     public LogTailer(File logFile, Parser parser) {
         this.startFileLength = logFile.length();
@@ -34,6 +36,7 @@ public class LogTailer implements Runnable {
         this.logFile = logFile;
         this.parser = parser;
     }
+
 
     /**
      * Starts checking the file for new content
@@ -82,7 +85,9 @@ public class LogTailer implements Runnable {
                     e.printStackTrace();
                 }
             } else {
-                listener.fireNotification(new EventNotification("Log file reset", "Log has been reset", NotificationType.INFORMATION));
+                listeners.forEach(listener ->
+                        listener.fireNotification(
+                                new EventNotification("Log file reset", "Log has been reset", NotificationType.INFORMATION)));
                 lastPosition = 0;
                 startFileLength = currentFileLength;
                 LogEventRepository.clearRepository(logFile.getAbsolutePath());
@@ -95,5 +100,10 @@ public class LogTailer implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             tail();
         }
+    }
+
+    @Override
+    public void addListener(NotificationListener listener) {
+        listeners.add(listener);
     }
 }

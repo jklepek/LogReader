@@ -3,8 +3,8 @@ package app.tools;
 import app.model.EmitterTreeItem;
 import app.model.LogEvent;
 import app.tools.notifications.EventNotification;
+import app.tools.notifications.EventNotifier;
 import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationService;
 import app.tools.notifications.NotificationType;
 
 import java.io.BufferedReader;
@@ -18,18 +18,23 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Parser {
+public class Parser implements EventNotifier {
 
     private String timestampPattern;
     private Map<Integer, String> keywords;
     private String dateTimeRegex;
     private String delimiter;
-    private NotificationListener listener = NotificationService.getInstance();
+    private List<NotificationListener> listeners = new ArrayList<>();
 
     public Parser() {
         keywords = getKeywordsFromPattern();
         dateTimeRegex = getTimestampRegex(timestampPattern);
         delimiter = PreferencesRepository.getDelimiter();
+    }
+
+    @Override
+    public void addListener(NotificationListener listener) {
+        listeners.add(listener);
     }
 
     /**
@@ -157,7 +162,9 @@ public class Parser {
                 }
             } catch (IOException e) {
                 System.out.println(e.getMessage());
-                listener.fireNotification(new EventNotification("Error while reading file", e.getMessage(), NotificationType.ERROR));
+                listeners.forEach(listener ->
+                        listener.fireNotification(
+                                new EventNotification("Error while reading file", e.getMessage(), NotificationType.ERROR)));
             }
         }
         return buffer;
@@ -179,7 +186,9 @@ public class Parser {
             lineNumbers.add(matcher.start());
         }
         if (lineNumbers.size() == 0) {
-            listener.fireNotification(new EventNotification("No events", "No events were parsed from file", NotificationType.WARNING));
+            listeners.forEach(listener ->
+                    listener.fireNotification(
+                            new EventNotification("No events", "No events were parsed from file", NotificationType.WARNING)));
         }
         String line;
         for (int i = 0; i < lineNumbers.size(); i++) {

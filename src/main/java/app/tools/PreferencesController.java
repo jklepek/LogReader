@@ -1,8 +1,8 @@
 package app.tools;
 
 import app.tools.notifications.EventNotification;
+import app.tools.notifications.EventNotifier;
 import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationService;
 import app.tools.notifications.NotificationType;
 
 import java.util.*;
@@ -15,7 +15,7 @@ import java.util.prefs.Preferences;
  * These methods are called at the start of the application
  * and at the closing of the application
  */
-public class PreferencesController {
+public class PreferencesController implements EventNotifier {
 
     private PreferencesController() {
     }
@@ -31,10 +31,15 @@ public class PreferencesController {
     private final String delimiter = "DELIMITER";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
-    private final NotificationListener listener = NotificationService.getInstance();
+    private final List<NotificationListener> listeners = new ArrayList<>();
 
     private static class LazyHolder {
         static final PreferencesController INSTANCE = new PreferencesController();
+    }
+
+    @Override
+    public void addListener(NotificationListener listener) {
+        listeners.add(listener);
     }
 
     public boolean getWatchForDirChanges() {
@@ -77,7 +82,9 @@ public class PreferencesController {
         Map<String, String> map = new HashMap<>();
         List<String> patterns = getPatterns();
         if (patterns.isEmpty()) {
-            listener.fireNotification(new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR));
+            listeners.forEach(listener ->
+                    listener.fireNotification(
+                            new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR)));
         }
         for (String pattern : patterns) {
             map.put(pattern, logPatterns.get(pattern, ""));

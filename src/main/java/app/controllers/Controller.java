@@ -1,6 +1,7 @@
 package app.controllers;
 
 import app.tools.*;
+import app.tools.notifications.NotificationService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -100,7 +101,10 @@ public class Controller {
     private void initDirectoryWatchService(Tab tab, File file) {
         Optional<DirectoryWatchService> dirListener = DirectoryWatchServiceFactory.getDirectoryWatchService(file);
         if (PreferencesRepository.isWatchDirForChanges()) {
-            dirListener.ifPresent(DirectoryWatchService::startWatching);
+            dirListener.ifPresent(directoryWatchService -> {
+                directoryWatchService.addListener(NotificationService.getInstance());
+                directoryWatchService.startWatching();
+            });
         }
         tab.setOnCloseRequest(event -> {
             LogEventRepository.removeRepository(file.getAbsolutePath());

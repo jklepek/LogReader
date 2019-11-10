@@ -7,6 +7,7 @@ import app.model.LogEventTableRow;
 import app.tools.LogEventRepository;
 import app.tools.LogTailer;
 import app.tools.Parser;
+import app.tools.notifications.NotificationService;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -72,6 +73,7 @@ public class TabController {
         filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
         textArea.setEditable(false);
         createTreeTableView();
+        parser.addListener(NotificationService.getInstance());
     }
 
     @FXML
@@ -143,6 +145,7 @@ public class TabController {
      */
     public void initData(File logFile) {
         logTailer = new LogTailer(logFile, parser);
+        logTailer.addListener(NotificationService.getInstance());
         events = LogEventRepository.getLogEventList(logFile.getAbsolutePath());
         filteredList = new FilteredList<>(events);
         tableView.setItems(filteredList);

@@ -1,13 +1,15 @@
 package app.tools;
 
 import app.tools.notifications.EventNotification;
+import app.tools.notifications.EventNotifier;
 import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationService;
 import app.tools.notifications.NotificationType;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,14 +19,14 @@ import java.util.concurrent.Future;
  * Service that watches the parent directory of the opened log file
  * for new log files
  */
-public class DirectoryWatchService implements Runnable {
+public class DirectoryWatchService implements Runnable, EventNotifier {
 
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private final Path dirPath;
     private final long refreshInterval;
     private WatchService watchService;
     private Future taskHandle;
-    private NotificationListener listener = NotificationService.getInstance();
+    private List<NotificationListener> listeners = new ArrayList<>();
 
     public DirectoryWatchService(File directory) {
         this.dirPath = directory.toPath();
@@ -80,9 +82,9 @@ public class DirectoryWatchService implements Runnable {
                     String fileName = newFileName.toFile().getName();
                     if (fileName.endsWith(".log")) {
                         System.out.println("There is a new log file: " + newFileName);
-                        listener.fireNotification(new EventNotification("New log",
-                                "There is a new log file: " + fileName,
-                                NotificationType.INFORMATION));
+                        listeners.forEach(listener ->
+                                listener.fireNotification(
+                                        new EventNotification("New log", "There is a new log file: " + fileName, NotificationType.INFORMATION)));
                     }
                 }
                 key.reset();
@@ -95,4 +97,8 @@ public class DirectoryWatchService implements Runnable {
         watchDirectory();
     }
 
+    @Override
+    public void addListener(NotificationListener listener) {
+        listeners.add(listener);
+    }
 }

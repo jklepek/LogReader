@@ -4,6 +4,8 @@
 
 package app.tools;
 
+import app.tools.notifications.NotificationService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,10 @@ public class PreferencesRepository {
     private static String CURRENT_LOG_PATTERN;
     private static Map<String, String> ALL_LOG_PATTERNS;
     private static String DELIMITER;
+
+    public PreferencesRepository() {
+        PreferencesController.getInstance().addListener(NotificationService.getInstance());
+    }
 
     public static void loadPreferences() {
         AUTO_REFRESH_INTERVAL = PREFERENCES.getAutoRefreshInterval();
