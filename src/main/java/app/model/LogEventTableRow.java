@@ -16,7 +16,7 @@ public class LogEventTableRow extends TableRow<LogEvent> {
     protected void updateItem(LogEvent item, boolean empty) {
         super.updateItem(item, empty);
         if (item != null) {
-            switch (LogLevel.valueOf(item.getProperty("level"))) {
+            switch (LogLevel.valueOf(item.getProperty(PatternKeywords.LEVEL.name()))) {
                 case ERROR:
                     setStyle("-fx-background-color: indianred;");
                     break;

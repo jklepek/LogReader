@@ -1,9 +1,9 @@
-package app.tools;
+package app.preferences;
 
-import app.tools.notifications.EventNotification;
-import app.tools.notifications.EventNotifier;
-import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationType;
+import app.notifications.EventNotification;
+import app.notifications.EventNotifier;
+import app.notifications.NotificationListener;
+import app.notifications.NotificationType;
 
 import java.util.*;
 import java.util.prefs.BackingStoreException;

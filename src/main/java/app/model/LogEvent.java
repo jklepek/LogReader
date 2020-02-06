@@ -22,6 +22,11 @@ public class LogEvent {
     }
 
     public String getProperty(String propertyName) {
-        return this.propertyMap.get(propertyName.toUpperCase()).getValue();
+        try {
+            return this.propertyMap.get(propertyName.toUpperCase()).getValue();
+        } catch (Exception e) {
+            System.out.println("No such property: " + propertyName);
+        }
+        return "";
     }
 }

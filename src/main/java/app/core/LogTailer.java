@@ -1,9 +1,10 @@
-package app.tools;
+package app.core;
 
-import app.tools.notifications.EventNotification;
-import app.tools.notifications.EventNotifier;
-import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationType;
+import app.notifications.EventNotification;
+import app.notifications.EventNotifier;
+import app.notifications.NotificationListener;
+import app.notifications.NotificationType;
+import app.preferences.PreferencesController;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.util.concurrent.Future;
 public class LogTailer implements Runnable, EventNotifier {
 
     private final File logFile;
-    private final long refreshInterval = PreferencesRepository.getAutoRefreshInterval();
+    private final long refreshInterval = PreferencesController.getInstance().getAutoRefreshInterval();
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private long lastPosition;
     private long startFileLength;

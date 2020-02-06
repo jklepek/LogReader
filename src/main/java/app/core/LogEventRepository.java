@@ -1,10 +1,8 @@
-package app.tools;
+package app.core;
 
-import app.model.EmitterTreeItem;
 import app.model.LogEvent;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.TreeItem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +17,6 @@ public class LogEventRepository {
      * Map where opened files are keys and each file has corresponding ObservableList
      */
     private static final Map<String, ObservableList<LogEvent>> REPOSITORY = new HashMap<>();
-
-    private static final Map<String, ObservableList<TreeItem<EmitterTreeItem>>> TREE_ITEMS = new HashMap<>();
 
     /**
      * @param absoluteFilePath is used as a key for storing in a map
@@ -45,7 +41,6 @@ public class LogEventRepository {
      */
     public static void clearRepository(String fileName) {
         REPOSITORY.get(fileName).clear();
-        TREE_ITEMS.get(fileName).clear();
     }
 
     /**
@@ -66,8 +61,6 @@ public class LogEventRepository {
     public static void createNewRepository(String absoluteFilePath) {
         ObservableList<LogEvent> logEventList = FXCollections.observableArrayList();
         REPOSITORY.put(absoluteFilePath, logEventList);
-        ObservableList<TreeItem<EmitterTreeItem>> emitterTreeItems = FXCollections.observableArrayList();
-        TREE_ITEMS.put(absoluteFilePath, emitterTreeItems);
     }
 
     /**
@@ -77,24 +70,5 @@ public class LogEventRepository {
      */
     public static void removeRepository(String absoluteFilePath) {
         REPOSITORY.remove(absoluteFilePath);
-        TREE_ITEMS.remove(absoluteFilePath);
     }
-
-
-    public static void addEmitterTreeItem(String absoluteFilePath, EmitterTreeItem item) {
-        if (TREE_ITEMS.get(absoluteFilePath).stream().anyMatch(item1 -> item1.getValue().getName().equalsIgnoreCase(item.getName()))) {
-            TREE_ITEMS.get(absoluteFilePath)
-                    .stream()
-                    .filter(item1 -> item1.getValue().getName().equalsIgnoreCase(item.getName()))
-                    .findFirst()
-                    .ifPresent(i -> i.getValue().incrementCount());
-        } else {
-            TREE_ITEMS.get(absoluteFilePath).add(new TreeItem<>(item));
-        }
-    }
-
-    public static ObservableList<TreeItem<EmitterTreeItem>> getTreeItems(String fileName) {
-        return TREE_ITEMS.get(fileName);
-    }
-
 }

@@ -1,11 +1,10 @@
-package app.tools;
+package app.core;
 
-import app.model.EmitterTreeItem;
 import app.model.LogEvent;
-import app.tools.notifications.EventNotification;
-import app.tools.notifications.EventNotifier;
-import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationType;
+import app.notifications.EventNotification;
+import app.notifications.EventNotifier;
+import app.notifications.NotificationListener;
+import app.notifications.NotificationType;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,18 +17,22 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static app.model.PatternKeywords.*;
+
 public class Parser implements EventNotifier {
 
-    private String timestampPattern;
+    private String timestampStringPattern;
     private Map<Integer, String> keywords;
     private String dateTimeRegex;
     private String delimiter;
     private List<NotificationListener> listeners = new ArrayList<>();
+    private Pattern timestampPattern;
 
-    public Parser() {
-        keywords = getKeywordsFromPattern();
-        dateTimeRegex = getTimestampRegex(timestampPattern);
-        delimiter = PreferencesRepository.getDelimiter();
+    public Parser(String pattern, String delimiter) {
+        keywords = getKeywordsFromPattern(pattern);
+        dateTimeRegex = getTimestampRegex(timestampStringPattern);
+        timestampPattern = Pattern.compile(dateTimeRegex);
+        this.delimiter = delimiter;
     }
 
     @Override
@@ -52,16 +55,15 @@ public class Parser implements EventNotifier {
      *
      * @return map
      */
-    private Map<Integer, String> getKeywordsFromPattern() {
+    private Map<Integer, String> getKeywordsFromPattern(String pattern) {
         Map<Integer, String> map = new TreeMap<>();
-        String pattern = PreferencesRepository.getCurrentLogPattern();
         if (!pattern.equals("")) {
             String[] keywords = pattern.split("%");
             int count = 0;
             for (String word : keywords) {
                 if (!word.isEmpty()) {
-                    if (word.toUpperCase().startsWith("D")) {
-                        timestampPattern = word.substring(word.indexOf("{") + 1, word.indexOf("}"));
+                    if (word.toUpperCase().startsWith("D{")) {
+                        timestampStringPattern = word.substring(word.indexOf("{") + 1, word.indexOf("}"));
                         word = "TIMESTAMP";
                     } else if (word.equalsIgnoreCase("N")) {
                         word = "STACKTRACE";
@@ -91,26 +93,25 @@ public class Parser implements EventNotifier {
     /**
      * Parsing line from logfile and creating a new LogEvent object
      *
-     * @param line     one line from the log4j log file
-     * @param keywords map with the keywords
+     * @param line one line from the log4j log file
      * @return new LogEvent
      */
-    private LogEvent parse(String line, Map<Integer, String> keywords) {
-        Matcher matcher = Pattern.compile(dateTimeRegex).matcher(line);
+    public LogEvent parse(String line) {
+        Matcher matcher = timestampPattern.matcher(line);
         LogEvent logEvent = new LogEvent();
         for (int i = 0; i < keywords.size(); i++) {
             String keyword = keywords.get(i);
-            if (keyword.equalsIgnoreCase("TIMESTAMP")) {
+            if (keyword.equals(TIMESTAMP.toString())) {
                 if (matcher.find()) {
                     String timestamp = line.substring(matcher.start(), matcher.end());
                     logEvent.setProperty(keyword, timestamp);
                     line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
                 }
-            } else if (i == keywords.size() - 2) {
+            } else if (keyword.equals(MESSAGE.toString())) {
                 String message = line.substring(0, line.indexOf(System.lineSeparator()));
                 logEvent.setProperty(keyword, message);
                 line = line.replace(message, "").replaceFirst("^\\s++", "");
-                logEvent.setProperty("STACKTRACE", line);
+                logEvent.setProperty(STACKTRACE.name(), line);
                 break;
             } else {
                 String value;
@@ -197,9 +198,8 @@ public class Parser implements EventNotifier {
             } else {
                 line = buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1));
             }
-            LogEvent event = parse(line, keywords);
+            LogEvent event = parse(line);
             LogEventRepository.addEvent(absoluteFilePath, event);
-            LogEventRepository.addEmitterTreeItem(absoluteFilePath, new EmitterTreeItem(event.getProperty("EMITTER")));
         }
     }
 

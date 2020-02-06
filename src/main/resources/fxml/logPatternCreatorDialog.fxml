@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<DialogPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:id="dialogPane"
+            fx:controller="app.controllers.LogPatternCreatorDialog"
+            prefHeight="400.0" prefWidth="600.0">
+    <content>
+        <GridPane hgap="10" vgap="10">
+            <Text text="Open file or insert a few lines from log file" GridPane.columnIndex="0"
+                  GridPane.rowIndex="0"/>
+            <Label text="Open file" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <Button fx:id="openFileButton" onAction="#openFile" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label text="Enter delimiter" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <TextField fx:id="delimiterField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label text="Enter pattern" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <HBox fx:id="buttonBox" GridPane.rowIndex="3">
+                <Button fx:id="plusButton" onAction="#addKeyword"/>
+            </HBox>
+            <Button fx:id="tryPatternButton" text="Try" onAction="#tryPattern" GridPane.columnIndex="1"
+                    GridPane.rowIndex="4"/>
+            <TextArea fx:id="sampleField" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+        </GridPane>
+    </content>
+</DialogPane>

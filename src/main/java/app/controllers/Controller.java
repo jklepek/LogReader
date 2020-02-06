@@ -1,7 +1,11 @@
 package app.controllers;
 
-import app.tools.*;
-import app.tools.notifications.NotificationService;
+import app.core.LogEventRepository;
+import app.core.Parser;
+import app.notifications.NotificationService;
+import app.preferences.PreferencesController;
+import app.tools.DirectoryWatchService;
+import app.tools.DirectoryWatchServiceFactory;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -40,7 +44,10 @@ public class Controller {
         if (file != null) {
             if (!LogEventRepository.isOpened(file.getAbsolutePath())) {
                 LogEventRepository.createNewRepository(file.getAbsolutePath());
-                new Parser().getLogEventsFromFile(file);
+                new Parser(
+                        PreferencesController.getInstance().getLogPattern(),
+                        PreferencesController.getInstance().getDelimiter()
+                ).getLogEventsFromFile(file);
             }
             createTab(file);
         }
@@ -49,7 +56,7 @@ public class Controller {
     private void configureFileChooser(FileChooser chooser) {
         chooser.setTitle("Select log file");
         chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log"));
-        File preferredFolder = new File(PreferencesRepository.getInitialDirectory());
+        File preferredFolder = new File(PreferencesController.getInstance().getInitialDir());
         if (!preferredFolder.exists() || !preferredFolder.isDirectory()) {
             chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
         } else {
@@ -100,7 +107,7 @@ public class Controller {
 
     private void initDirectoryWatchService(Tab tab, File file) {
         Optional<DirectoryWatchService> dirListener = DirectoryWatchServiceFactory.getDirectoryWatchService(file);
-        if (PreferencesRepository.isWatchDirForChanges()) {
+        if (PreferencesController.getInstance().getWatchForDirChanges()) {
             dirListener.ifPresent(directoryWatchService -> {
                 directoryWatchService.addListener(NotificationService.getInstance());
                 directoryWatchService.startWatching();

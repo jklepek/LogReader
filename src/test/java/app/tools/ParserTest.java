@@ -5,6 +5,8 @@
 
 package app.tools;
 
+import app.core.LogEventRepository;
+import app.core.Parser;
 import app.model.LogEvent;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,10 +21,8 @@ class ParserTest {
 
     @BeforeAll
     static void initTests() {
-        PreferencesRepository.loadPreferences();
-        PreferencesRepository.setCurrentLogPattern("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %THREAD %MESSAGE%N");
         LogEventRepository.createNewRepository(repoName);
-        parser = new Parser();
+        parser = new Parser("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %THREAD %MESSAGE%N", " ");
     }
 
     @BeforeEach
