@@ -1,28 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Text?>
-<DialogPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:id="dialogPane"
-            fx:controller="app.controllers.LogPatternCreatorDialog"
-            prefHeight="400.0" prefWidth="600.0">
+<DialogPane fx:id="dialogPane" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="app.controllers.LogPatternCreatorDialog">
     <content>
-        <GridPane hgap="10" vgap="10">
-            <Text text="Open file or insert a few lines from log file" GridPane.columnIndex="0"
-                  GridPane.rowIndex="0"/>
-            <Label text="Open file" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <Button fx:id="openFileButton" onAction="#openFile" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Label text="Enter delimiter" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <TextField fx:id="delimiterField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            <Label text="Enter pattern" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-            <HBox fx:id="buttonBox" GridPane.rowIndex="3">
-                <Button fx:id="plusButton" onAction="#addKeyword"/>
-            </HBox>
-            <Button fx:id="tryPatternButton" text="Try" onAction="#tryPattern" GridPane.columnIndex="1"
-                    GridPane.rowIndex="4"/>
-            <TextArea fx:id="sampleField" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-        </GridPane>
+        <TilePane prefHeight="500.0" prefWidth="800.0">
+            <padding>
+                <Insets left="10.0" top="10.0" />
+            </padding>
+            <GridPane hgap="5.0" maxWidth="630.0" prefHeight="160.0" prefWidth="630.0" vgap="5.0" TilePane.alignment="TOP_LEFT">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="481.0" minWidth="10.0" prefWidth="119.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="796.0" minWidth="4.0" prefWidth="497.0" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints maxHeight="52.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints maxHeight="52.0" minHeight="3.0" prefHeight="27.0" vgrow="SOMETIMES" />
+                    <RowConstraints maxHeight="44.0" minHeight="0.0" prefHeight="26.0" vgrow="SOMETIMES" />
+                    <RowConstraints maxHeight="44.0" minHeight="10.0" prefHeight="26.0" vgrow="SOMETIMES" />
+                </rowConstraints>
+                <Label text="Select file" />
+                <Label text="Delimiter" GridPane.rowIndex="2" />
+                <Button fx:id="openFileButton" mnemonicParsing="false" onAction="#openFile" text="Open" GridPane.columnIndex="1" />
+                <ComboBox fx:id="delimiterComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Timestamp pattern" GridPane.rowIndex="3" />
+                <TextField fx:id="timestampPatternField" maxWidth="200.0" prefHeight="27.0" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Label text="Pattern name" GridPane.rowIndex="1" />
+                <TextField maxWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            </GridPane>
+            <VBox prefHeight="162.0" prefWidth="450.0" spacing="10.0" TilePane.alignment="TOP_LEFT">
+                <HBox fx:id="buttonBox" maxHeight="40.0" prefHeight="30.0" prefWidth="648.0">
+                </HBox>
+            <TextArea fx:id="sampleField" prefHeight="200.0" prefWidth="200.0" />
+                <Button mnemonicParsing="false" onAction="#tryPattern" text="Try" />
+                <Label fx:id="result" text="LogEvent:" />
+            </VBox>
+        </TilePane>
     </content>
 </DialogPane>

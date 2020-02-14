@@ -2,8 +2,11 @@
  * Created 2019. Open source.
  */
 
-package app.model;
+package app.model.ui;
 
+import app.model.LogEvent;
+import app.model.LogLevel;
+import app.model.PatternKeywords;
 import javafx.scene.control.TableRow;
 
 /**

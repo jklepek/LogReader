@@ -65,8 +65,6 @@ public class Parser implements EventNotifier {
                     if (word.toUpperCase().startsWith("D{")) {
                         timestampStringPattern = word.substring(word.indexOf("{") + 1, word.indexOf("}"));
                         word = "TIMESTAMP";
-                    } else if (word.equalsIgnoreCase("N")) {
-                        word = "STACKTRACE";
                     }
                     map.put(count, word.toUpperCase().trim());
                     count++;
@@ -101,13 +99,13 @@ public class Parser implements EventNotifier {
         LogEvent logEvent = new LogEvent();
         for (int i = 0; i < keywords.size(); i++) {
             String keyword = keywords.get(i);
-            if (keyword.equals(TIMESTAMP.toString())) {
+            if (keyword.equals(TIMESTAMP.name())) {
                 if (matcher.find()) {
                     String timestamp = line.substring(matcher.start(), matcher.end());
                     logEvent.setProperty(keyword, timestamp);
                     line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
                 }
-            } else if (keyword.equals(MESSAGE.toString())) {
+            } else if (keyword.equals(MESSAGE.name())) {
                 String message = line.substring(0, line.indexOf(System.lineSeparator()));
                 logEvent.setProperty(keyword, message);
                 line = line.replace(message, "").replaceFirst("^\\s++", "");

@@ -61,7 +61,6 @@ public class SettingsDialogController {
         initBindings();
         initListeners();
         initFields();
-        createPattern.setOnMouseClicked(event -> dialogPane.getScene().getWindow().hide());
     }
 
     public void savePreferences() {

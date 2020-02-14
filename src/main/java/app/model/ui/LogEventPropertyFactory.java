@@ -1,5 +1,6 @@
-package app.model;
+package app.model.ui;
 
+import app.model.LogEvent;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
