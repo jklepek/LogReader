@@ -11,27 +11,26 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static app.model.PatternKeywords.*;
 
 public class Parser implements EventNotifier {
 
-    private String timestampStringPattern;
-    private Map<Integer, String> keywords;
+    private List<String> keywords;
     private String dateTimeRegex;
     private String delimiter;
     private List<NotificationListener> listeners = new ArrayList<>();
     private Pattern timestampPattern;
 
-    public Parser(String pattern, String delimiter) {
-        keywords = getKeywordsFromPattern(pattern);
-        dateTimeRegex = getTimestampRegex(timestampStringPattern);
-        timestampPattern = Pattern.compile(dateTimeRegex);
+    public Parser(List<String> keywords, String delimiter) {
+        this.keywords = getKeywordsFromPattern(keywords);
+        this.dateTimeRegex = getTimestampRegex(keywords);
+        this.timestampPattern = Pattern.compile(dateTimeRegex);
         this.delimiter = delimiter;
     }
 
@@ -44,9 +43,10 @@ public class Parser implements EventNotifier {
      * @param pattern string form of a timestamp pattern e.g. yyyy-MM-dd' 'HH:mm:SSS,S
      * @return timestamp regex
      */
-    private String getTimestampRegex(String pattern) {
-        pattern = pattern.replaceAll("'", "");
-        return pattern.replaceAll("[yYmMdDhHsS]", "\\\\d");
+    private String getTimestampRegex(List<String> keywords) {
+        String timestamp = keywords.stream().filter(k -> k.toUpperCase().startsWith("D{")).findFirst().orElse("");
+        timestamp = timestamp.replaceAll("'", "");
+        return timestamp.replaceAll("[yYmMdDhHsS]", "\\\\d");
     }
 
     /**
@@ -55,23 +55,18 @@ public class Parser implements EventNotifier {
      *
      * @return map
      */
-    private Map<Integer, String> getKeywordsFromPattern(String pattern) {
-        Map<Integer, String> map = new TreeMap<>();
-        if (!pattern.equals("")) {
-            String[] keywords = pattern.split("%");
-            int count = 0;
-            for (String word : keywords) {
-                if (!word.isEmpty()) {
-                    if (word.toUpperCase().startsWith("D{")) {
-                        timestampStringPattern = word.substring(word.indexOf("{") + 1, word.indexOf("}"));
-                        word = "TIMESTAMP";
-                    }
-                    map.put(count, word.toUpperCase().trim());
-                    count++;
-                }
-            }
+    private List<String> getKeywordsFromPattern(List<String> pattern) {
+        if (!pattern.isEmpty()) {
+            return pattern.stream()
+                    .map(s -> {
+                        if (s.toUpperCase().startsWith("D{")) {
+                            return s.replace(s, TIMESTAMP.name());
+                        }
+                        return s;
+                    })
+            .collect(Collectors.toList());
         }
-        return map;
+        return Collections.emptyList();
     }
 
 
@@ -79,13 +74,7 @@ public class Parser implements EventNotifier {
      * @return list of keywords used in the currently selected pattern
      */
     public List<String> getKeywords() {
-        List<String> keywords = new ArrayList<>();
-        if (!this.keywords.isEmpty()) {
-            for (int i = 0; i < this.keywords.size(); i++) {
-                keywords.add(this.keywords.get(i));
-            }
-        }
-        return keywords;
+        return this.keywords;
     }
 
     /**
@@ -97,8 +86,7 @@ public class Parser implements EventNotifier {
     public LogEvent parse(String line) {
         Matcher matcher = timestampPattern.matcher(line);
         LogEvent logEvent = new LogEvent();
-        for (int i = 0; i < keywords.size(); i++) {
-            String keyword = keywords.get(i);
+        for (String keyword : keywords) {
             if (keyword.equals(TIMESTAMP.name())) {
                 if (matcher.find()) {
                     String timestamp = line.substring(matcher.start(), matcher.end());

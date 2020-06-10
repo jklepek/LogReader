@@ -27,10 +27,10 @@ public class PreferencesController implements EventNotifier {
     private final String autoRefreshInterval = "REFRESH_INTERVAL";
     private final String initialDir = "PREFERRED_DIR";
     private final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
-    private final String logPattern = "CURRENT_LOG_PATTERN";
     private final String delimiter = "DELIMITER";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
+    private final Preferences currentLogPattern = preferences.node("CURRENT_LOG_PATTERN");
     private final List<NotificationListener> listeners = new ArrayList<>();
 
     private static class LazyHolder {
@@ -66,8 +66,11 @@ public class PreferencesController implements EventNotifier {
         preferences.put(initialDir, dir);
     }
 
-    public void addLogPattern(String name, String pattern) {
-        logPatterns.put(name, pattern);
+    public void addOrUpdateLogPattern(String name, List<String> pattern) {
+        Preferences node = logPatterns.node(name);
+        for (int i = 0; i < pattern.size(); i++) {
+            node.put(String.valueOf(i), pattern.get(i));
+        }
     }
 
     public String getDelimiter() {
@@ -105,11 +108,31 @@ public class PreferencesController implements EventNotifier {
         logPatterns.remove(name);
     }
 
-    public String getLogPattern() {
-        return preferences.get(logPattern, "");
+    public List<String> getCurrentLogPattern() {
+        try {
+            List<String> pattern = new ArrayList<>();
+            String[] keywords = currentLogPattern.keys();
+            for (String keyword : keywords) {
+                pattern.add(currentLogPattern.get(keyword, ""));
+            }
+            return pattern;
+        } catch (BackingStoreException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
-    public void setLogPattern(String pattern) {
-        preferences.put(logPattern, pattern);
+    public void setCurrentLogPattern(List<String> pattern) {
+        for (int i = 0; i < pattern.size(); i++) {
+            currentLogPattern.put(String.valueOf(i), pattern.get(i));
+        }
+    }
+
+    private String toString(List<String> pattern) {
+        StringBuilder builder = new StringBuilder();
+        pattern.forEach(s -> {
+            builder.append(s).append(" ");
+        });
+        return builder.toString();
     }
 }

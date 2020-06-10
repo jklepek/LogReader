@@ -43,8 +43,8 @@ public class SettingsDialogController {
     private ImageView dirErrorIV = new ImageView();
     @FXML
     private ImageView intervalErrorIV = new ImageView();
-    @FXML
-    private Button deletePatternButton;
+//    @FXML
+//    private Button deletePatternButton;
     @FXML
     private CheckBox watchDir = new CheckBox();
     @FXML
@@ -70,8 +70,8 @@ public class SettingsDialogController {
             PreferencesController.getInstance().setInitialDir(dir);
             PreferencesController.getInstance().setAutoRefreshInterval(Long.parseLong(autoRefreshIntervalField.getText()));
             PreferencesController.getInstance().setWatchForDirChanges(watchDir.isSelected());
-            PreferencesController.getInstance().addLogPattern(patternsComboBox.getValue(), patternField.getText());
-            PreferencesController.getInstance().setLogPattern(patternField.getText());
+//            PreferencesController.getInstance().addLogPattern(patternsComboBox.getValue(), patternField.getText());
+//            PreferencesController.getInstance().setCurrentLogPattern(patternField.getText());
             for (String pattern : patternsToDelete) {
                 PreferencesController.getInstance().removePattern(pattern);
             }
@@ -111,7 +111,7 @@ public class SettingsDialogController {
         dirErrorIV.setImage(errorImage);
         dirErrorIV.setVisible(false);
         browseButton.setGraphic(new ImageView(openFolderImage));
-        deletePatternButton.setGraphic(new ImageView(deleteImage));
+//        deletePatternButton.setGraphic(new ImageView(deleteImage));
         createPattern.setGraphic(new ImageView(plusImage));
     }
 
@@ -129,7 +129,9 @@ public class SettingsDialogController {
                 displayDelimiterField.setText("\"" + newValue + "\"");
             }
         });
-        String currentPattern = PreferencesController.getInstance().getLogPattern();
+        String currentPattern;
+        List<String> currentLogPattern = PreferencesController.getInstance().getCurrentLogPattern();
+        currentLogPattern.stream().forEach();
         if (!currentPattern.equals("")) {
             patternField.setText(currentPattern);
             patternMap.forEach((key, value) -> {

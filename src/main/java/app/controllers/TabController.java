@@ -57,7 +57,7 @@ public class TabController {
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
     private ObservableList<EventTreeItem> treeItems = FXCollections.observableArrayList();
-    private String pattern = PreferencesController.getInstance().getLogPattern();
+    private List<String> pattern = PreferencesController.getInstance().getCurrentLogPattern();
     private String delimiter = PreferencesController.getInstance().getDelimiter();
     private final Parser parser = new Parser(pattern, delimiter);
 

@@ -45,7 +45,7 @@ public class Controller {
             if (!LogEventRepository.isOpened(file.getAbsolutePath())) {
                 LogEventRepository.createNewRepository(file.getAbsolutePath());
                 new Parser(
-                        PreferencesController.getInstance().getLogPattern(),
+                        PreferencesController.getInstance().getCurrentLogPattern(),
                         PreferencesController.getInstance().getDelimiter()
                 ).getLogEventsFromFile(file);
             }
