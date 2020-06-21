@@ -36,7 +36,7 @@ class LogTailerTest {
     static void initTests() {
         PreferencesController.getInstance().setAutoRefreshInterval(100);
         LogEventRepository.createNewRepository(filePath.toAbsolutePath().toString());
-        parser = new Parser("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %EMITTER %MESSAGE", " ");
+        parser = new Parser("%d{yyyy-MM-dd' 'HH:mm:ss,SSS} %p %[t] %m%n");
     }
 
     @BeforeEach

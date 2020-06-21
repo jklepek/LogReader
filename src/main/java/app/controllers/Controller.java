@@ -45,8 +45,7 @@ public class Controller {
             if (!LogEventRepository.isOpened(file.getAbsolutePath())) {
                 LogEventRepository.createNewRepository(file.getAbsolutePath());
                 new Parser(
-                        PreferencesController.getInstance().getCurrentLogPattern(),
-                        PreferencesController.getInstance().getDelimiter()
+                        PreferencesController.getInstance().getCurrentLogPattern()
                 ).getLogEventsFromFile(file);
             }
             createTab(file);

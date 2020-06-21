@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static app.model.PatternKeywords.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ParserTest {
@@ -22,7 +23,7 @@ class ParserTest {
     @BeforeAll
     static void initTests() {
         LogEventRepository.createNewRepository(repoName);
-        parser = new Parser("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %THREAD %MESSAGE%N", " ");
+        parser = new Parser("%d{yyyy-MM-dd' 'HH:mm:ss,SSS} %p %[t] %m%n");
     }
 
     @BeforeEach
@@ -35,11 +36,10 @@ class ParserTest {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException" + System.lineSeparator());
         parser.parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
-        assertEquals("2018-12-10 12:07:43,330", logEvent.getProperty("TIMESTAMP"));
-        assertEquals("ERROR", logEvent.getProperty("LEVEL"));
-        assertEquals("[NewConnectionWizard]", logEvent.getProperty("THREAD"));
-        assertEquals("java.lang.InterruptedException", logEvent.getProperty("MESSAGE"));
-        assertEquals("", logEvent.getProperty("STACKTRACE"));
+        assertEquals("2018-12-10 12:07:43,330", logEvent.getProperty(TIMESTAMP.name()));
+        assertEquals("ERROR", logEvent.getProperty(LEVEL.name()));
+        assertEquals("[NewConnectionWizard]", logEvent.getProperty(THREAD.name()));
+        assertEquals("java.lang.InterruptedException" + System.lineSeparator(), logEvent.getProperty(MESSAGE.name()));
     }
 
     @Test
@@ -47,11 +47,10 @@ class ParserTest {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [[NewConnectionWizard] - 1] java.lang.InterruptedException" + System.lineSeparator() + "\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator());
         parser.parseBuffer(testString, repoName);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
-        assertEquals("2018-12-10 12:07:43,330", logEvent.getProperty("TIMESTAMP"));
-        assertEquals("ERROR", logEvent.getProperty("LEVEL"));
-        assertEquals("[[NewConnectionWizard] - 1]", logEvent.getProperty("THREAD"));
-        assertEquals("java.lang.InterruptedException", logEvent.getProperty("MESSAGE"));
-        assertEquals("at java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator(), logEvent.getProperty("STACKTRACE"));
+        assertEquals("2018-12-10 12:07:43,330", logEvent.getProperty(TIMESTAMP.name()));
+        assertEquals("ERROR", logEvent.getProperty(LEVEL.name()));
+        assertEquals("[[NewConnectionWizard] - 1]", logEvent.getProperty(THREAD.name()));
+        assertEquals("java.lang.InterruptedException" + System.lineSeparator() + "\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator(), logEvent.getProperty(MESSAGE.name()));
     }
 
     @Test

@@ -31,11 +31,9 @@ public class LogPatternCreatorDialog {
     @FXML
     public Button openFileButton;
     @FXML
-    public TextField timestampPatternField;
-    @FXML
-    public ComboBox<String> delimiterComboBox;
-    @FXML
     public Label result;
+    @FXML
+    public TextField patternField;
     private FileChooser fileChooser;
     private static final String OPEN_FOLDER_ICON = "/icons/openFolder.png";
     private Parser parser;
@@ -51,27 +49,6 @@ public class LogPatternCreatorDialog {
         fileChooser = new FileChooser();
         Image openFolderImage = new Image(getClass().getResourceAsStream(OPEN_FOLDER_ICON), 17, 17, true, true);
         openFileButton.setGraphic(new ImageView(openFolderImage));
-        List<String> list = Arrays.stream(PatternKeywords.values())
-                .map(Enum::name)
-                .sorted(String::compareToIgnoreCase)
-                .collect(Collectors.toList());
-        keywords = FXCollections.observableArrayList(list);
-        delimiterComboBox.getItems().addAll("/", " ", "-", ";");
-        buttonBox.getChildren().addListener((ListChangeListener<? super Node>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    ComboBox<String> button = (ComboBox<String>) buttonBox.getChildren().get(keywordComboCounter);
-                    button.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                        if (newValue != null && !newValue.isEmpty() && Integer.parseInt(button.getId()) == (keywordComboCounter)) {
-                            newKeywords.add(newValue);
-                            keywordComboCounter++;
-                            addKeywordButton(keywordComboCounter);
-                        }
-                    });
-                }
-            }
-        });
-        addKeywordButton(0);
     }
 
     public void openFile() {
@@ -83,13 +60,6 @@ public class LogPatternCreatorDialog {
         }
     }
 
-    public void addKeywordButton(int position) {
-        ComboBox<String> keywordBox = new ComboBox<>();
-        keywordBox.setItems(keywords);
-        List<Node> buttons = buttonBox.getChildren();
-        keywordBox.setId(String.valueOf(position));
-        buttons.add(keywordBox);
-    }
 
     private StringBuilder readFirstLines(File file) {
         StringBuilder buffer = new StringBuilder();
@@ -106,28 +76,9 @@ public class LogPatternCreatorDialog {
         return buffer;
     }
 
-    private String buildPatternFromKeywords() {
-        StringBuilder pattern = new StringBuilder();
-        buttonBox.getChildren()
-                .stream()
-                .sorted(Comparator.comparingInt(value -> Integer.parseInt(value.getId())))
-                .map(node -> ((ComboBox<String>) node).getSelectionModel().getSelectedItem())
-                .filter(Objects::nonNull)
-                .map(s -> {
-                    String timestampPattern;
-                    if (s.equals(PatternKeywords.TIMESTAMP.name())) {
-                        timestampPattern = s.replace(PatternKeywords.TIMESTAMP.name(), String.format("D{%s}", timestampPatternField.getText()));
-                        return timestampPattern;
-                    }
-                    return s;
-                })
-                .forEach(s -> pattern.append("%").append(s).append(" "));
-        return pattern.toString();
-    }
 
     public void tryPattern() {
-        String pattern = buildPatternFromKeywords();
-        parser = new Parser(pattern, delimiterComboBox.getSelectionModel().getSelectedItem());
+        parser = new Parser(patternField.getText());
         LogEvent event = parser.parse(sampleField.getText());
         StringBuilder s = new StringBuilder();
         for (String keyword : parser.getKeywords()) {

@@ -28,10 +28,6 @@ public class SettingsDialogController {
     @FXML
     public Button createPattern;
     @FXML
-    public TextField delimiterField;
-    @FXML
-    public TextField displayDelimiterField;
-    @FXML
     private DialogPane dialogPane;
     @FXML
     private TextField initialDirField;
@@ -43,7 +39,7 @@ public class SettingsDialogController {
     private ImageView dirErrorIV = new ImageView();
     @FXML
     private ImageView intervalErrorIV = new ImageView();
-//    @FXML
+    //    @FXML
 //    private Button deletePatternButton;
     @FXML
     private CheckBox watchDir = new CheckBox();
@@ -75,7 +71,6 @@ public class SettingsDialogController {
             for (String pattern : patternsToDelete) {
                 PreferencesController.getInstance().removePattern(pattern);
             }
-            PreferencesController.getInstance().setDelimiter(delimiterField.getText());
         }
     }
 
@@ -122,24 +117,8 @@ public class SettingsDialogController {
         patternMap = PreferencesController.getInstance().getLogPatterns();
         patternsComboBox.getItems().addAll(patternMap.keySet());
         patternsComboBox.setEditable(true);
-        delimiterField.setText(PreferencesController.getInstance().getDelimiter());
-        displayDelimiterField.setText("\"" + delimiterField.getText() + "\"");
-        delimiterField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!oldValue.equalsIgnoreCase(newValue)) {
-                displayDelimiterField.setText("\"" + newValue + "\"");
-            }
-        });
-        String currentPattern;
-        List<String> currentLogPattern = PreferencesController.getInstance().getCurrentLogPattern();
-        currentLogPattern.stream().forEach();
-        if (!currentPattern.equals("")) {
-            patternField.setText(currentPattern);
-            patternMap.forEach((key, value) -> {
-                if (value.equals(currentPattern)) {
-                    patternsComboBox.getSelectionModel().select(key);
-                }
-            });
-        }
+        String currentLogPattern = PreferencesController.getInstance().getCurrentLogPattern();
+        patternField.setText(currentLogPattern);
     }
 
     private void initTooltips() {

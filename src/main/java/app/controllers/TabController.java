@@ -57,20 +57,19 @@ public class TabController {
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
     private ObservableList<EventTreeItem> treeItems = FXCollections.observableArrayList();
-    private List<String> pattern = PreferencesController.getInstance().getCurrentLogPattern();
-    private String delimiter = PreferencesController.getInstance().getDelimiter();
-    private final Parser parser = new Parser(pattern, delimiter);
+    private String pattern = PreferencesController.getInstance().getCurrentLogPattern();
+    private final Parser parser = new Parser(pattern);
 
     public void initialize() {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
             LogEvent logEvent = tableView.getSelectionModel().getSelectedItem();
             if (logEvent != null) {
-                textArea.setText(logEvent.getProperty(STACKTRACE.name()));
+                textArea.setText(logEvent.getProperty(MESSAGE.name()));
             }
         });
         List<String> keywords = getKeywords();
         for (String keyword : keywords) {
-            if (!keyword.equalsIgnoreCase(STACKTRACE.name())) {
+            if (!keyword.equalsIgnoreCase(MESSAGE.name())) {
                 TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
                 column.setCellValueFactory(new LogEventPropertyFactory(keyword));
                 tableView.getColumns().add(column);
@@ -82,7 +81,7 @@ public class TabController {
         filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
         List<String> filteredKeywords = keywords
                 .stream()
-                .filter(s -> !(s.equals(TIMESTAMP.name()) || s.equals(STACKTRACE.name()) || s.equals(MESSAGE.name())))
+                .filter(s -> !(s.equals(TIMESTAMP.name()) || s.equals(MESSAGE.name()) || s.equals(MESSAGE.name())))
                 .collect(Collectors.toList());
         treeViewCBox.getItems().addAll(filteredKeywords);
         textArea.setEditable(false);
@@ -103,10 +102,10 @@ public class TabController {
             return;
         }
         LogEvent event = tableView.getSelectionModel().getSelectedItem();
-        if (!event.getProperty(STACKTRACE.name()).isEmpty()) {
+        if (!event.getProperty(MESSAGE.name()).isEmpty()) {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();
-            content.putString(event.getProperty(STACKTRACE.name()));
+            content.putString(event.getProperty(MESSAGE.name()));
             clipboard.setContent(content);
         }
     }

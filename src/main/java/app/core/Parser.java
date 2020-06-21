@@ -10,65 +10,29 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static app.model.PatternKeywords.*;
 
 public class Parser implements EventNotifier {
 
     private List<String> keywords;
-    private String dateTimeRegex;
-    private String delimiter;
-    private List<NotificationListener> listeners = new ArrayList<>();
-    private Pattern timestampPattern;
+    private final List<NotificationListener> listeners = new ArrayList<>();
+    private final PatternBuilder patternBuilder;
+    private final Pattern timestampPattern;
 
-    public Parser(List<String> keywords, String delimiter) {
-        this.keywords = getKeywordsFromPattern(keywords);
-        this.dateTimeRegex = getTimestampRegex(keywords);
-        this.timestampPattern = Pattern.compile(dateTimeRegex);
-        this.delimiter = delimiter;
+    public Parser(String pattern) {
+        this.patternBuilder = new PatternBuilder(pattern);
+        this.timestampPattern = patternBuilder.getTimestampPattern();
+        this.keywords = patternBuilder.getKeywords();
     }
 
     @Override
     public void addListener(NotificationListener listener) {
         listeners.add(listener);
     }
-
-    /**
-     * @param pattern string form of a timestamp pattern e.g. yyyy-MM-dd' 'HH:mm:SSS,S
-     * @return timestamp regex
-     */
-    private String getTimestampRegex(List<String> keywords) {
-        String timestamp = keywords.stream().filter(k -> k.toUpperCase().startsWith("D{")).findFirst().orElse("");
-        timestamp = timestamp.replaceAll("'", "");
-        return timestamp.replaceAll("[yYmMdDhHsS]", "\\\\d");
-    }
-
-    /**
-     * Takes stored pattern and saves individual keywords in a map,
-     * where the key is the order of the keyword
-     *
-     * @return map
-     */
-    private List<String> getKeywordsFromPattern(List<String> pattern) {
-        if (!pattern.isEmpty()) {
-            return pattern.stream()
-                    .map(s -> {
-                        if (s.toUpperCase().startsWith("D{")) {
-                            return s.replace(s, TIMESTAMP.name());
-                        }
-                        return s;
-                    })
-            .collect(Collectors.toList());
-        }
-        return Collections.emptyList();
-    }
-
 
     /**
      * @return list of keywords used in the currently selected pattern
@@ -94,10 +58,7 @@ public class Parser implements EventNotifier {
                     line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
                 }
             } else if (keyword.equals(MESSAGE.name())) {
-                String message = line.substring(0, line.indexOf(System.lineSeparator()));
-                logEvent.setProperty(keyword, message);
-                line = line.replace(message, "").replaceFirst("^\\s++", "");
-                logEvent.setProperty(STACKTRACE.name(), line);
+                logEvent.setProperty(keyword, line);
                 break;
             } else {
                 String value;
@@ -105,7 +66,7 @@ public class Parser implements EventNotifier {
                     int rightBracketIndex = getEndingBracketIndex(line);
                     value = line.substring(0, rightBracketIndex + 1);
                 } else {
-                    value = line.substring(0, line.indexOf(delimiter));
+                    value = line.substring(0, line.indexOf(" "));
                 }
                 line = line.replace(value, "").replaceFirst("^\\s++", "");
                 logEvent.setProperty(keyword, value);
@@ -166,8 +127,7 @@ public class Parser implements EventNotifier {
      * @param absoluteFilePath path of the file
      */
     public void parseBuffer(StringBuilder buffer, String absoluteFilePath) {
-        Pattern dateTimePattern = Pattern.compile(dateTimeRegex);
-        Matcher matcher = dateTimePattern.matcher(buffer);
+        Matcher matcher = timestampPattern.matcher(buffer);
         List<Integer> lineNumbers = new ArrayList<>();
         while (matcher.find()) {
             lineNumbers.add(matcher.start());
