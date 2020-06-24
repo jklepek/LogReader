@@ -34,8 +34,7 @@
                 <HBox fx:id="buttonBox" maxHeight="40.0" prefHeight="30.0" prefWidth="648.0">
                 </HBox>
                 <TextArea fx:id="sampleField" prefHeight="200.0" prefWidth="200.0"/>
-                <Button mnemonicParsing="false" onAction="#tryPattern" text="Try"/>
-                <Label fx:id="result" text="LogEvent:"/>
+                <TableView fx:id="exampleTable" prefHeight="200"/>
             </VBox>
         </TilePane>
     </content>

@@ -20,11 +20,10 @@ public class Parser implements EventNotifier {
 
     private List<String> keywords;
     private final List<NotificationListener> listeners = new ArrayList<>();
-    private final PatternBuilder patternBuilder;
     private final Pattern timestampPattern;
 
     public Parser(String pattern) {
-        this.patternBuilder = new PatternBuilder(pattern);
+        PatternBuilder patternBuilder = new PatternBuilder(pattern);
         this.timestampPattern = patternBuilder.getTimestampPattern();
         this.keywords = patternBuilder.getKeywords();
     }
@@ -50,27 +49,32 @@ public class Parser implements EventNotifier {
     public LogEvent parse(String line) {
         Matcher matcher = timestampPattern.matcher(line);
         LogEvent logEvent = new LogEvent();
-        for (String keyword : keywords) {
-            if (keyword.equals(TIMESTAMP.name())) {
-                if (matcher.find()) {
-                    String timestamp = line.substring(matcher.start(), matcher.end());
-                    logEvent.setProperty(keyword, timestamp);
-                    line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
-                }
-            } else if (keyword.equals(MESSAGE.name())) {
-                logEvent.setProperty(keyword, line);
-                break;
-            } else {
-                String value;
-                if (line.startsWith("[")) {
-                    int rightBracketIndex = getEndingBracketIndex(line);
-                    value = line.substring(0, rightBracketIndex + 1);
+        try {
+            for (String keyword : keywords) {
+                if (keyword.equals(TIMESTAMP.name())) {
+                    if (matcher.find()) {
+                        String timestamp = line.substring(matcher.start(), matcher.end());
+                        logEvent.setProperty(keyword, timestamp);
+                        line = line.replace(timestamp, "").replaceFirst("^\\s++", "");
+                    }
+                } else if (keyword.equals(MESSAGE.name())) {
+                    logEvent.setProperty(keyword, line);
+                    break;
                 } else {
-                    value = line.substring(0, line.indexOf(" "));
+                    String value;
+                    if (line.startsWith("[")) {
+                        int rightBracketIndex = getEndingBracketIndex(line);
+                        value = line.substring(0, rightBracketIndex + 1);
+                    } else {
+                        value = line.substring(0, line.indexOf(" "));
+                    }
+                    line = line.replace(value, "").replaceFirst("^\\s++", "");
+                    logEvent.setProperty(keyword, value);
                 }
-                line = line.replace(value, "").replaceFirst("^\\s++", "");
-                logEvent.setProperty(keyword, value);
             }
+        } catch (IndexOutOfBoundsException | NullPointerException e) {
+            listeners.forEach(listener -> listener.fireNotification(
+                    new EventNotification("Parsing error", "An error occured while parsing.", NotificationType.ERROR)));
         }
         return logEvent;
     }

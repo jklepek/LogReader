@@ -27,8 +27,15 @@ public class PatternBuilder {
      * @return timestamp regex
      */
     private String getTimestampRegex() {
-        String timestamp = timestampStringPattern.replaceAll("'", "");
-        return timestamp.replaceAll("[yYmMdDhHsS]", "\\\\d");
+        if (timestampStringPattern != null) {
+            try {
+                String timestamp = timestampStringPattern.replaceAll("'", "");
+                return timestamp.replaceAll("[yYmMdDhHsS]", "\\\\d");
+            } catch (NullPointerException e) {
+                System.out.println("Timestamp not complete");
+            }
+        }
+        return "";
     }
 
     /**

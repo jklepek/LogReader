@@ -2,12 +2,8 @@ package app.controllers;
 
 import app.core.Parser;
 import app.model.LogEvent;
-import app.model.PatternKeywords;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -19,8 +15,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class LogPatternCreatorDialog {
 
@@ -31,24 +28,33 @@ public class LogPatternCreatorDialog {
     @FXML
     public Button openFileButton;
     @FXML
-    public Label result;
-    @FXML
     public TextField patternField;
     private FileChooser fileChooser;
+    private List<String> keywords = new ArrayList<>();
     private static final String OPEN_FOLDER_ICON = "/icons/openFolder.png";
-    private Parser parser;
     @FXML
-    public Button tryPatternButton;
+    public TableView<LogEvent> exampleTable;
     @FXML
     public HBox buttonBox;
-    private ObservableList<String> keywords;
-    private List<String> newKeywords = new ArrayList<>();
-    private int keywordComboCounter = 0;
 
     public void initialize() {
         fileChooser = new FileChooser();
         Image openFolderImage = new Image(getClass().getResourceAsStream(OPEN_FOLDER_ICON), 17, 17, true, true);
         openFileButton.setGraphic(new ImageView(openFolderImage));
+        sampleField.setText("2015-09-27 16:13:22,925 main DEBUG Installed script engines");
+        initListener();
+    }
+
+    private void initListener() {
+        patternField.textProperty().addListener((observable, oldValue, newValue) -> {
+            LogEvent logEvent = tryPattern();
+            keywords.forEach(keyword -> exampleTable.getColumns().forEach(col -> {
+                if (!col.getText().equals(keyword)) {
+                    exampleTable.getColumns().add(new TableColumn<>(keyword));
+                }
+            }));
+            exampleTable.setItems(FXCollections.observableList(Collections.singletonList(logEvent)));
+        });
     }
 
     public void openFile() {
@@ -77,14 +83,10 @@ public class LogPatternCreatorDialog {
     }
 
 
-    public void tryPattern() {
-        parser = new Parser(patternField.getText());
-        LogEvent event = parser.parse(sampleField.getText());
-        StringBuilder s = new StringBuilder();
-        for (String keyword : parser.getKeywords()) {
-            s.append(event.getProperty(keyword)).append("--");
-        }
-        result.setText(s.toString());
+    public LogEvent tryPattern() {
+        Parser parser = new Parser(patternField.getText());
+        keywords = parser.getKeywords();
+        return parser.parse(sampleField.getText());
     }
 
 }
