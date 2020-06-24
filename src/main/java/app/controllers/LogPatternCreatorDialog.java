@@ -2,6 +2,7 @@ package app.controllers;
 
 import app.core.Parser;
 import app.model.LogEvent;
+import app.model.ui.LogEventPropertyFactory;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -48,11 +49,15 @@ public class LogPatternCreatorDialog {
     private void initListener() {
         patternField.textProperty().addListener((observable, oldValue, newValue) -> {
             LogEvent logEvent = tryPattern();
-            keywords.forEach(keyword -> exampleTable.getColumns().forEach(col -> {
-                if (!col.getText().equals(keyword)) {
+            List<String> columnNames = new ArrayList<>();
+            exampleTable.getColumns().forEach(col -> columnNames.add(col.getText()));
+            keywords.forEach(keyword -> {
+                if (!columnNames.contains(keyword)) {
+                    TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
+                    column.setCellValueFactory(new LogEventPropertyFactory(keyword));
                     exampleTable.getColumns().add(new TableColumn<>(keyword));
                 }
-            }));
+            });
             exampleTable.setItems(FXCollections.observableList(Collections.singletonList(logEvent)));
         });
     }

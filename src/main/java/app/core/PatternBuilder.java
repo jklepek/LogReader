@@ -52,8 +52,12 @@ public class PatternBuilder {
         if (!pattern.isEmpty()) {
             String[] parts = pattern.split("%");
             Stream.of(parts).forEach(part -> {
-                if (part.startsWith("d{")) {
-                    timestampStringPattern = part.substring(part.indexOf("{") + 1, part.indexOf("}"));
+                if (part.startsWith("d")) {
+                    try {
+                        timestampStringPattern = part.substring(part.indexOf("{") + 1, part.indexOf("}"));
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println("Could not get pattern");
+                    }
                     part = "d";
                 }
                 Matcher matcher = regex.matcher(part);

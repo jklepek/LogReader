@@ -69,11 +69,9 @@ public class TabController {
         });
         List<String> keywords = getKeywords();
         for (String keyword : keywords) {
-            if (!keyword.equalsIgnoreCase(MESSAGE.name())) {
-                TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
-                column.setCellValueFactory(new LogEventPropertyFactory(keyword));
-                tableView.getColumns().add(column);
-            }
+            TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
+            column.setCellValueFactory(new LogEventPropertyFactory(keyword));
+            tableView.getColumns().add(column);
         }
         tableView.setRowFactory(tableView -> new LogEventTableRow());
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
