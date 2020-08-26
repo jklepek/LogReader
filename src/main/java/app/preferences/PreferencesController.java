@@ -4,6 +4,7 @@ import app.notifications.EventNotification;
 import app.notifications.EventNotifier;
 import app.notifications.NotificationListener;
 import app.notifications.NotificationType;
+import javafx.beans.property.SimpleStringProperty;
 
 import java.util.*;
 import java.util.prefs.BackingStoreException;
@@ -28,6 +29,7 @@ public class PreferencesController implements EventNotifier {
     private final String initialDir = "PREFERRED_DIR";
     private final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
     private final String currentLogPattern = "CURRENT_LOG_PATTERN";
+    private final String currentPatternName = "CURRENT_PATTERN_NAME";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
     private final List<NotificationListener> listeners = new ArrayList<>();
@@ -65,15 +67,12 @@ public class PreferencesController implements EventNotifier {
         preferences.put(initialDir, dir);
     }
 
-    public void addOrUpdateLogPattern(String name, List<String> pattern) {
-        Preferences node = logPatterns.node(name);
-        for (int i = 0; i < pattern.size(); i++) {
-            node.put(String.valueOf(i), pattern.get(i));
-        }
+    public void addLogPattern(String name, String pattern) {
+        logPatterns.put(name, pattern);
     }
 
-    public Map<String, String> getLogPatterns() {
-        Map<String, String> map = new HashMap<>();
+    public Map<SimpleStringProperty, SimpleStringProperty> getLogPatterns() {
+        Map<SimpleStringProperty, SimpleStringProperty> map = new HashMap<>();
         List<String> patterns = getPatterns();
         if (patterns.isEmpty()) {
             listeners.forEach(listener ->
@@ -81,7 +80,7 @@ public class PreferencesController implements EventNotifier {
                             new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR)));
         }
         for (String pattern : patterns) {
-            map.put(pattern, logPatterns.get(pattern, ""));
+            map.put(new SimpleStringProperty(pattern), new SimpleStringProperty(logPatterns.get(pattern, "")));
         }
         return map;
     }
@@ -100,6 +99,18 @@ public class PreferencesController implements EventNotifier {
     }
 
     public String getCurrentLogPattern() {
-        return logPatterns.get(currentLogPattern, "");
+        return preferences.get(currentLogPattern, "");
+    }
+
+    public void setCurrentLogPattern(String pattern) {
+        preferences.put(currentLogPattern, pattern);
+    }
+
+    public void setCurrentPatternName(String name) {
+        preferences.put(currentPatternName, name);
+    }
+
+    public String getCurrentPatternName() {
+        return preferences.get(currentPatternName, "");
     }
 }

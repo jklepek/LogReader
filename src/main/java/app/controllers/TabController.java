@@ -79,7 +79,7 @@ public class TabController {
         filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
         List<String> filteredKeywords = keywords
                 .stream()
-                .filter(s -> !(s.equals(TIMESTAMP.name()) || s.equals(MESSAGE.name()) || s.equals(MESSAGE.name())))
+                .filter(s -> !(s.equals(TIMESTAMP.name()) || s.equals(MESSAGE.name())))
                 .collect(Collectors.toList());
         treeViewCBox.getItems().addAll(filteredKeywords);
         textArea.setEditable(false);

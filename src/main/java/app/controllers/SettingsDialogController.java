@@ -2,6 +2,11 @@ package app.controllers;
 
 import app.preferences.PreferencesController;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -9,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
+import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,19 +42,19 @@ public class SettingsDialogController {
     @FXML
     private Button browseButton;
     @FXML
-    private ImageView dirErrorIV = new ImageView();
+    private final ImageView dirErrorIV = new ImageView();
     @FXML
-    private ImageView intervalErrorIV = new ImageView();
+    private final ImageView intervalErrorIV = new ImageView();
     //    @FXML
 //    private Button deletePatternButton;
     @FXML
-    private CheckBox watchDir = new CheckBox();
+    private final CheckBox watchDir = new CheckBox();
     @FXML
-    private ComboBox<String> patternsComboBox = new ComboBox<>();
+    private final ComboBox<String> patternsComboBox = new ComboBox<>();
     @FXML
     private TextField patternField;
     private BooleanBinding validContent;
-    private Map<String, String> patternMap;
+    private Map<SimpleStringProperty, SimpleStringProperty> patternMap;
     private final List<String> patternsToDelete = new ArrayList<>();
 
     public void initialize() {
@@ -66,8 +72,8 @@ public class SettingsDialogController {
             PreferencesController.getInstance().setInitialDir(dir);
             PreferencesController.getInstance().setAutoRefreshInterval(Long.parseLong(autoRefreshIntervalField.getText()));
             PreferencesController.getInstance().setWatchForDirChanges(watchDir.isSelected());
-//            PreferencesController.getInstance().addLogPattern(patternsComboBox.getValue(), patternField.getText());
-//            PreferencesController.getInstance().setCurrentLogPattern(patternField.getText());
+            PreferencesController.getInstance().addLogPattern(patternsComboBox.getValue(), patternField.getText());
+            PreferencesController.getInstance().setCurrentLogPattern(patternField.getText());
             for (String pattern : patternsToDelete) {
                 PreferencesController.getInstance().removePattern(pattern);
             }
@@ -111,14 +117,17 @@ public class SettingsDialogController {
     }
 
     private void initFields() {
-        initialDirField.setText(PreferencesController.getInstance().getInitialDir());
-        autoRefreshIntervalField.setText(String.valueOf(PreferencesController.getInstance().getAutoRefreshInterval()));
-        watchDir.setSelected(PreferencesController.getInstance().getWatchForDirChanges());
-        patternMap = PreferencesController.getInstance().getLogPatterns();
-        patternsComboBox.getItems().addAll(patternMap.keySet());
+        PreferencesController instance = PreferencesController.getInstance();
+        initialDirField.setText(instance.getInitialDir());
+        autoRefreshIntervalField.setText(String.valueOf(instance.getAutoRefreshInterval()));
+        watchDir.setSelected(instance.getWatchForDirChanges());
+        patternMap = instance.getLogPatterns();
+        patternsComboBox.getItems().addAll(String.valueOf(patternMap.keySet()));
         patternsComboBox.setEditable(true);
-        String currentLogPattern = PreferencesController.getInstance().getCurrentLogPattern();
+        String currentLogPattern = instance.getCurrentLogPattern();
+        String currentPatternName = instance.getCurrentPatternName();
         patternField.setText(currentLogPattern);
+        patternsComboBox.getSelectionModel().select(currentPatternName);
     }
 
     private void initTooltips() {
@@ -143,6 +152,8 @@ public class SettingsDialogController {
         patternCreator.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         Optional<ButtonType> result = patternCreator.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
+            Pair<String, String> pattern = patternCreatorDialog.saveNewPattern();
+            patternMap.put(new SimpleStringProperty(pattern.getKey()), new SimpleStringProperty(pattern.getValue()));
         }
     }
 
@@ -166,7 +177,7 @@ public class SettingsDialogController {
                 Tooltip.uninstall(intervalErrorIV, intervalErrorTooltip);
             }
         });
-        patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> patternField.textProperty().setValue(patternMap.get(newValue)));
+        patternsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> patternField.textProperty().setValue(patternMap.get(newValue).getValue()));
     }
 
     private void initBindings() {
