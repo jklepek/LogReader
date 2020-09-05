@@ -2,9 +2,9 @@ package app.controllers;
 
 import app.core.Parser;
 import app.model.LogEvent;
+import app.model.LogPattern;
 import app.model.ui.LogEventPropertyFactory;
 import app.model.ui.LogEventTableRow;
-import app.preferences.PreferencesController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,7 +14,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import javafx.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -49,7 +48,6 @@ public class LogPatternCreatorDialog {
         fileChooser = new FileChooser();
         Image openFolderImage = new Image(getClass().getResourceAsStream(OPEN_FOLDER_ICON), 17, 17, true, true);
         openFileButton.setGraphic(new ImageView(openFolderImage));
-        sampleField.setText("2015-09-27 16:13:22,925 main DEBUG Installed script engines");
         initListener();
     }
 
@@ -106,8 +104,8 @@ public class LogPatternCreatorDialog {
         return parser.parse(sampleField.getText());
     }
 
-    public Pair<String, String> saveNewPattern() {
-        return new Pair<>(patternNameField.getText(), patternField.getText());
+    public LogPattern saveNewPattern() {
+        return new LogPattern(patternNameField.getText(), patternField.getText());
     }
 
 }

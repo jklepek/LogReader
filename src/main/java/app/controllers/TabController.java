@@ -56,8 +56,8 @@ public class TabController {
     private final TreeTableColumn<EventPropertyCounter, String> treeCountColumn = new TreeTableColumn<>("Count");
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
-    private ObservableList<EventTreeItem> treeItems = FXCollections.observableArrayList();
-    private String pattern = PreferencesController.getInstance().getCurrentLogPattern();
+    private final ObservableList<EventTreeItem> treeItems = FXCollections.observableArrayList();
+    private final String pattern = PreferencesController.getInstance().getCurrentLogPattern();
     private final Parser parser = new Parser(pattern);
 
     public void initialize() {

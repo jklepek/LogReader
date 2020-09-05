@@ -1,12 +1,15 @@
 package app.preferences;
 
+import app.model.LogPattern;
 import app.notifications.EventNotification;
 import app.notifications.EventNotifier;
 import app.notifications.NotificationListener;
 import app.notifications.NotificationType;
-import javafx.beans.property.SimpleStringProperty;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -71,18 +74,18 @@ public class PreferencesController implements EventNotifier {
         logPatterns.put(name, pattern);
     }
 
-    public Map<SimpleStringProperty, SimpleStringProperty> getLogPatterns() {
-        Map<SimpleStringProperty, SimpleStringProperty> map = new HashMap<>();
-        List<String> patterns = getPatterns();
-        if (patterns.isEmpty()) {
+    public List<LogPattern> getLogPatterns() {
+        List<LogPattern> patterns = new ArrayList<>();
+        List<String> patternNames = getPatterns();
+        if (patternNames.isEmpty()) {
             listeners.forEach(listener ->
                     listener.fireNotification(
                             new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR)));
         }
-        for (String pattern : patterns) {
-            map.put(new SimpleStringProperty(pattern), new SimpleStringProperty(logPatterns.get(pattern, "")));
+        for (String name : patternNames) {
+            patterns.add(new LogPattern(name, logPatterns.get(name, "")));
         }
-        return map;
+        return patterns;
     }
 
     private List<String> getPatterns() {
