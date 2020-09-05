@@ -13,13 +13,18 @@ import javafx.beans.property.StringProperty;
  * @author JKlepek
  * @project LogReader
  */
-public class EmitterTreeItem {
+public class EventPropertyCounter {
 
     private final StringProperty name = new SimpleStringProperty("");
     private final LongProperty count = new SimpleLongProperty(1L);
 
-    public EmitterTreeItem(String nameProperty) {
-        this.name.set(nameProperty);
+    public EventPropertyCounter(String propertyValue) {
+        this.name.set(propertyValue);
+    }
+
+    public EventPropertyCounter(String propertyValue, long count) {
+        this.name.set(propertyValue);
+        this.count.set(count);
     }
 
     public String getName() {
@@ -42,4 +47,11 @@ public class EmitterTreeItem {
         this.count.set(count.get() + 1);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof EventPropertyCounter) {
+            return  ((EventPropertyCounter) o).getName().equals(name.get());
+        }
+        return false;
+    }
 }

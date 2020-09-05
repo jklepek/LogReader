@@ -21,8 +21,11 @@
             </HBox>
         </top>
         <left>
-            <TreeTableView fx:id="treeView">
-            </TreeTableView>
+            <VBox>
+                <ComboBox fx:id="treeViewCBox" onAction="#populateTreeTable" promptText="Filter..."/>
+                <TreeTableView fx:id="treeView">
+                </TreeTableView>
+            </VBox>
         </left>
         <center>
             <TableView fx:id="tableView">

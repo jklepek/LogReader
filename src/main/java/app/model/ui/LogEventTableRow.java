@@ -2,9 +2,13 @@
  * Created 2019. Open source.
  */
 
-package app.model;
+package app.model.ui;
 
+import app.model.LogEvent;
+import app.model.LogLevel;
 import javafx.scene.control.TableRow;
+
+import static app.model.PatternKeywords.LEVEL;
 
 /**
  * @author JKlepek
@@ -15,8 +19,8 @@ public class LogEventTableRow extends TableRow<LogEvent> {
     @Override
     protected void updateItem(LogEvent item, boolean empty) {
         super.updateItem(item, empty);
-        if (item != null) {
-            switch (LogLevel.valueOf(item.getProperty("level"))) {
+        if (item != null && item.hasProperty(LEVEL.name())) {
+            switch (LogLevel.valueOf(item.getProperty(LEVEL.name()))) {
                 case ERROR:
                     setStyle("-fx-background-color: indianred;");
                     break;

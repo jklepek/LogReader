@@ -1,9 +1,10 @@
 package app.tools;
 
-import app.tools.notifications.EventNotification;
-import app.tools.notifications.EventNotifier;
-import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationType;
+import app.notifications.EventNotification;
+import app.notifications.EventNotifier;
+import app.notifications.NotificationListener;
+import app.notifications.NotificationType;
+import app.preferences.PreferencesController;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class DirectoryWatchService implements Runnable, EventNotifier {
 
     public DirectoryWatchService(File directory) {
         this.dirPath = directory.toPath();
-        this.refreshInterval = PreferencesRepository.getAutoRefreshInterval();
+        this.refreshInterval = PreferencesController.getInstance().getAutoRefreshInterval();
     }
 
     /**

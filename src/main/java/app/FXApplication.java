@@ -1,6 +1,5 @@
 package app;
 
-import app.tools.PreferencesRepository;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -22,10 +21,8 @@ public class FXApplication extends Application {
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/reader.png")));
         primaryStage.show();
         primaryStage.setOnCloseRequest(event -> {
-            PreferencesRepository.saveAllPreferences();
             Platform.exit();
             System.exit(0);
         });
-        PreferencesRepository.loadPreferences();
     }
 }

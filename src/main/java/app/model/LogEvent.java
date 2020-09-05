@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class LogEvent {
 
-    private Map<String, StringProperty> propertyMap;
+    private final Map<String, StringProperty> propertyMap;
 
     public LogEvent() {
         this.propertyMap = new HashMap<>();
@@ -22,6 +22,15 @@ public class LogEvent {
     }
 
     public String getProperty(String propertyName) {
-        return this.propertyMap.get(propertyName.toUpperCase()).getValue();
+        try {
+            return propertyMap.get(propertyName.toUpperCase()).getValue();
+        } catch (Exception e) {
+            System.out.println("No such property: " + propertyName);
+        }
+        return "";
+    }
+
+    public boolean hasProperty(String propertyName) {
+        return propertyMap.containsKey(propertyName);
     }
 }

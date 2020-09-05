@@ -5,6 +5,10 @@
 
 package app.tools;
 
+import app.core.LogEventRepository;
+import app.core.LogTailer;
+import app.core.Parser;
+import app.preferences.PreferencesController;
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.junit.jupiter.api.AfterEach;
@@ -24,17 +28,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LogTailerTest {
 
-    private static final Path filePath = Paths.get("src/test/java/app/tools/log4j.log");
+    private static final Path filePath = Paths.get("src/test/resources/log4j.log");
     private static Parser parser;
     private static String lineSeparator = System.lineSeparator();
 
     @BeforeAll
     static void initTests() {
-        PreferencesRepository.loadPreferences();
-        PreferencesRepository.setCurrentLogPattern("%D{yyyy-MM-dd' 'HH:mm:ss,SSS} %LEVEL %EMITTER %MESSAGE");
-        PreferencesRepository.setAutoRefreshInterval(100);
-        LogEventRepository.createNewRepository(filePath.toFile().getAbsolutePath());
-        parser = new Parser();
+        PreferencesController.getInstance().setAutoRefreshInterval(100);
+        LogEventRepository.createNewRepository(filePath.toAbsolutePath().toString());
+        parser = new Parser("%d{yyyy-MM-dd' 'HH:mm:ss,SSS} %p %[t] %m%n");
     }
 
     @BeforeEach
@@ -53,12 +55,12 @@ class LogTailerTest {
 
     @AfterEach
     void tearDown() {
-        LogEventRepository.clearRepository(filePath.toFile().getAbsolutePath());
+        LogEventRepository.clearRepository(filePath.toAbsolutePath().toString());
     }
 
     @Test
     void startTailTest() throws IOException {
-        File file = new File(filePath.toString());
+        File file = new File(filePath.toAbsolutePath().toString());
         parser.getLogEventsFromFile(file);
         assertEquals(2, LogEventRepository.getLogEventList(file.getAbsolutePath()).size());
         LogTailer logTailer = new LogTailer(file, parser);

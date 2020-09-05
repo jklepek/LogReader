@@ -1,14 +1,17 @@
 package app.controllers;
 
-import app.model.EmitterTreeItem;
+import app.core.LogEventRepository;
+import app.core.LogTailer;
+import app.core.Parser;
+import app.model.EventPropertyCounter;
+import app.model.EventTreeItem;
 import app.model.LogEvent;
-import app.model.LogEventPropertyFactory;
-import app.model.LogEventTableRow;
-import app.tools.LogEventRepository;
-import app.tools.LogTailer;
-import app.tools.Parser;
-import app.tools.notifications.NotificationService;
+import app.model.ui.LogEventPropertyFactory;
+import app.model.ui.LogEventTableRow;
+import app.notifications.NotificationService;
+import app.preferences.PreferencesController;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -17,6 +20,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.HBox;
 import org.controlsfx.control.CheckComboBox;
 
 import java.io.File;
@@ -24,9 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static app.model.PatternKeywords.*;
+
 public class TabController {
 
-    private final TreeItem<EmitterTreeItem> rootNode = new TreeItem<>();
+    private final EventTreeItem rootNode = new EventTreeItem(new EventPropertyCounter(""));
     @FXML
     private Tab tab;
     private LogTailer logTailer;
@@ -43,34 +49,39 @@ public class TabController {
     @FXML
     private TextField filterField;
     @FXML
-    private TreeTableView<EmitterTreeItem> treeView;
-    private final TreeTableColumn<EmitterTreeItem, String> treeNameColumn = new TreeTableColumn<>("Emitter");
-    private final TreeTableColumn<EmitterTreeItem, String> treeCountColumn = new TreeTableColumn<>("Count");
+    private ComboBox<String> treeViewCBox;
+    @FXML
+    private TreeTableView<EventPropertyCounter> treeView;
+    private final TreeTableColumn<EventPropertyCounter, String> treeNameColumn = new TreeTableColumn<>();
+    private final TreeTableColumn<EventPropertyCounter, String> treeCountColumn = new TreeTableColumn<>("Count");
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
-    private ObservableList<TreeItem<EmitterTreeItem>> treeItems;
-    private final Parser parser = new Parser();
-    private final String STACKTRACE = "stacktrace";
+    private final ObservableList<EventTreeItem> treeItems = FXCollections.observableArrayList();
+    private final String pattern = PreferencesController.getInstance().getCurrentLogPattern();
+    private final Parser parser = new Parser(pattern);
 
     public void initialize() {
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
             LogEvent logEvent = tableView.getSelectionModel().getSelectedItem();
             if (logEvent != null) {
-                textArea.setText(logEvent.getProperty(STACKTRACE));
+                textArea.setText(logEvent.getProperty(MESSAGE.name()));
             }
         });
         List<String> keywords = getKeywords();
         for (String keyword : keywords) {
-            if (!keyword.equalsIgnoreCase(STACKTRACE)) {
-                TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
-                column.setCellValueFactory(new LogEventPropertyFactory(keyword));
-                tableView.getColumns().add(column);
-            }
+            TableColumn<LogEvent, String> column = new TableColumn<>(keyword);
+            column.setCellValueFactory(new LogEventPropertyFactory(keyword));
+            tableView.getColumns().add(column);
         }
         tableView.setRowFactory(tableView -> new LogEventTableRow());
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
         filterCombo.getItems().addAll(keywords);
         filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
+        List<String> filteredKeywords = keywords
+                .stream()
+                .filter(s -> !(s.equals(TIMESTAMP.name()) || s.equals(MESSAGE.name())))
+                .collect(Collectors.toList());
+        treeViewCBox.getItems().addAll(filteredKeywords);
         textArea.setEditable(false);
         createTreeTableView();
         parser.addListener(NotificationService.getInstance());
@@ -89,10 +100,10 @@ public class TabController {
             return;
         }
         LogEvent event = tableView.getSelectionModel().getSelectedItem();
-        if (!event.getProperty(STACKTRACE).isEmpty()) {
+        if (!event.getProperty(MESSAGE.name()).isEmpty()) {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             ClipboardContent content = new ClipboardContent();
-            content.putString(event.getProperty(STACKTRACE));
+            content.putString(event.getProperty(MESSAGE.name()));
             clipboard.setContent(content);
         }
     }
@@ -114,7 +125,7 @@ public class TabController {
      */
     private void filterEventBySeverity() {
         List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
-        filteredList.setPredicate(logEvent -> levels.contains((logEvent.getProperty("level"))));
+        filteredList.setPredicate(logEvent -> levels.contains((logEvent.getProperty(LEVEL.name()))));
     }
 
     /**
@@ -128,13 +139,51 @@ public class TabController {
      * @param text filter events by selected property containing typed text
      */
     private void filterEvents(String text) {
-        String property = filterCombo.getSelectionModel().getSelectedItem().toLowerCase();
+        String property = filterCombo.getSelectionModel().getSelectedItem();
         if (!property.isEmpty() && text != null) {
             filteredList.setPredicate(event -> {
                 String value = event.getProperty(property);
                 return value.toUpperCase().contains(text.toUpperCase());
             });
         }
+    }
+
+    @FXML
+    public void populateTreeTable() {
+        treeItems.clear();
+        rootNode.getChildren().clear();
+        String property = treeViewCBox.getSelectionModel().getSelectedItem().toUpperCase();
+        getTreeItems(property);
+        rootNode.getChildren().addAll(treeItems);
+    }
+
+    /**
+     * This method takes all the events and maps them to a list of EventTreeItems
+     *
+     * @param property selected LegEvent property
+     */
+    private void getTreeItems(String property) {
+        events.stream()
+                .collect(Collectors.groupingBy(event -> event.getProperty(property), Collectors.counting()))
+                .entrySet()
+                .stream()
+                .map(entry -> new EventPropertyCounter(entry.getKey(), entry.getValue()))
+                .forEach(treeItem -> treeItems.add(new EventTreeItem(treeItem)));
+    }
+
+    /**
+     * Iterates through the list of EventTreeItems, updates existing ones and add new ones
+     *
+     * @param propertyValue value of the selected LogEvent property
+     */
+    private void updateTreeItem(String propertyValue) {
+        if (treeItems.contains(new EventTreeItem(new EventPropertyCounter(propertyValue)))) {
+            treeItems.stream()
+                    .filter(i -> i.getValue().getName().equals(propertyValue))
+                    .findFirst()
+                    .ifPresent(item -> item.getValue().incrementCount());
+        }
+        treeItems.add(new EventTreeItem(new EventPropertyCounter(propertyValue)));
     }
 
     /**
@@ -151,37 +200,41 @@ public class TabController {
         tableView.setItems(filteredList);
         levelComboBox.getItems().addAll(getSeverityLevels());
         levelComboBox.getCheckModel().checkAll();
-        treeItems = LogEventRepository.getTreeItems(logFile.getAbsolutePath());
-        rootNode.getChildren().addAll(treeItems);
         initEventsChangeListeners();
-        initTreeItemsChangeListener();
         this.tab.setOnCloseRequest((event) -> logTailer.stopTailing());
     }
 
     /**
-     * @return list of levels used in opened file
+     * @return list of levels used in the opened file
      */
     private List<String> getSeverityLevels() {
         return events
                 .stream()
-                .map(event -> event.getProperty("level"))
+                .map(event -> event.getProperty(String.valueOf(LEVEL)))
                 .distinct()
                 .collect(Collectors.toList());
     }
 
     /**
      * Adds new severity levels to the checkComboBox if there are any new and checks them
+     * Updates EventTreeItem list when there are new LogEvents
      */
     private void initEventsChangeListeners() {
         events.addListener((ListChangeListener<? super LogEvent>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(i -> Platform.runLater(() -> {
-                        if (!levelComboBox.getItems().contains(i.getProperty("level"))) {
-                            levelComboBox.getItems().add(i.getProperty("level"));
-                            levelComboBox.getCheckModel().checkAll();
+                    c.getAddedSubList().forEach(i -> {
+                        Platform.runLater(() -> {
+                            if (!levelComboBox.getItems().contains(i.getProperty(String.valueOf(LEVEL)))) {
+                                levelComboBox.getItems().add(i.getProperty(String.valueOf(LEVEL)));
+                                levelComboBox.getCheckModel().checkAll();
+                            }
+                        });
+                        String property = treeViewCBox.getSelectionModel().getSelectedItem();
+                        if (property != null) {
+                            updateTreeItem(i.getProperty(property));
                         }
-                    }));
+                    });
                 }
             }
         });
@@ -191,31 +244,19 @@ public class TabController {
      * Initializes the emitters TreeTableView
      */
     private void createTreeTableView() {
+        treeNameColumn.setGraphic(new HBox(treeViewCBox));
+        treeNameColumn.setMinWidth(110);
         treeView.getColumns().setAll(treeCountColumn, treeNameColumn);
-        treeNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory("name"));
-        treeCountColumn.setCellValueFactory(new TreeItemPropertyValueFactory("count"));
+        treeNameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
+        treeCountColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("count"));
         treeView.setRoot(rootNode);
         rootNode.setExpanded(true);
         treeView.setShowRoot(false);
         treeView.setOnMouseClicked(event -> {
-            TreeItem<EmitterTreeItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
+            TreeItem<EventPropertyCounter> selectedItem = treeView.getSelectionModel().getSelectedItem();
+            String selectedProperty = treeViewCBox.getSelectionModel().getSelectedItem();
             if (event.getClickCount() == 2 && selectedItem != null) {
-                filteredList.setPredicate(event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getProperty("emitter")));
-            }
-        });
-    }
-
-    /**
-     * Initializes change listener on TreeItem observable list, to handle removing or adding items to TreeTable
-     */
-    private void initTreeItemsChangeListener() {
-        treeItems.addListener((ListChangeListener<? super TreeItem<EmitterTreeItem>>) c -> {
-            while (c.next()) {
-                if (c.wasRemoved()) {
-                    rootNode.getChildren().removeAll(c.getRemoved());
-                } else if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(o -> rootNode.getChildren().add(o));
-                }
+                filteredList.setPredicate(event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getProperty(selectedProperty)));
             }
         });
     }

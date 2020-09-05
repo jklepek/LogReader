@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<DialogPane fx:id="dialogPane" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml" fx:controller="app.controllers.LogPatternCreatorDialog">
+    <content>
+        <TilePane prefHeight="500.0" prefWidth="800.0">
+            <padding>
+                <Insets left="10.0" top="10.0"/>
+            </padding>
+            <GridPane hgap="5.0" maxWidth="630.0" prefHeight="160.0" prefWidth="630.0" vgap="5.0"
+                      TilePane.alignment="TOP_LEFT">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="481.0" minWidth="10.0" prefWidth="119.0"/>
+                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="796.0" minWidth="4.0" prefWidth="497.0"/>
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints maxHeight="52.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    <RowConstraints maxHeight="52.0" minHeight="3.0" prefHeight="27.0" vgrow="SOMETIMES"/>
+                    <RowConstraints maxHeight="44.0" minHeight="0.0" prefHeight="26.0" vgrow="SOMETIMES"/>
+                    <RowConstraints maxHeight="44.0" minHeight="10.0" prefHeight="26.0" vgrow="SOMETIMES"/>
+                </rowConstraints>
+                <Label text="Select file"/>
+                <Button fx:id="openFileButton" mnemonicParsing="false" onAction="#openFile" text="Open"
+                        GridPane.columnIndex="1"/>
+                <Label text="Pattern name" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="patternNameField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Pattern layout" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <TextField fx:id="patternField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            </GridPane>
+            <VBox prefHeight="162.0" prefWidth="450.0" spacing="10.0" TilePane.alignment="TOP_LEFT">
+                <HBox fx:id="buttonBox" maxHeight="40.0" prefHeight="30.0" prefWidth="648.0">
+                </HBox>
+                <TextArea fx:id="sampleField" prefHeight="200.0" prefWidth="200.0"/>
+                <TableView fx:id="exampleTable" prefHeight="200"/>
+            </VBox>
+        </TilePane>
+    </content>
+</DialogPane>

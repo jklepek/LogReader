@@ -1,11 +1,15 @@
-package app.tools;
+package app.preferences;
 
-import app.tools.notifications.EventNotification;
-import app.tools.notifications.EventNotifier;
-import app.tools.notifications.NotificationListener;
-import app.tools.notifications.NotificationType;
+import app.model.LogPattern;
+import app.notifications.EventNotification;
+import app.notifications.EventNotifier;
+import app.notifications.NotificationListener;
+import app.notifications.NotificationType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -27,8 +31,8 @@ public class PreferencesController implements EventNotifier {
     private final String autoRefreshInterval = "REFRESH_INTERVAL";
     private final String initialDir = "PREFERRED_DIR";
     private final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
-    private final String logPattern = "CURRENT_LOG_PATTERN";
-    private final String delimiter = "DELIMITER";
+    private final String currentLogPattern = "CURRENT_LOG_PATTERN";
+    private final String currentPatternName = "CURRENT_PATTERN_NAME";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
     private final List<NotificationListener> listeners = new ArrayList<>();
@@ -70,26 +74,18 @@ public class PreferencesController implements EventNotifier {
         logPatterns.put(name, pattern);
     }
 
-    public String getDelimiter() {
-        return preferences.get(delimiter, " ");
-    }
-
-    public void setDelimiter(String delimiterValue) {
-        preferences.put(delimiter, delimiterValue);
-    }
-
-    public Map<String, String> getLogPatterns() {
-        Map<String, String> map = new HashMap<>();
-        List<String> patterns = getPatterns();
-        if (patterns.isEmpty()) {
+    public List<LogPattern> getLogPatterns() {
+        List<LogPattern> patterns = new ArrayList<>();
+        List<String> patternNames = getPatterns();
+        if (patternNames.isEmpty()) {
             listeners.forEach(listener ->
                     listener.fireNotification(
                             new EventNotification("No pattern found", "There is no pattern defined", NotificationType.ERROR)));
         }
-        for (String pattern : patterns) {
-            map.put(pattern, logPatterns.get(pattern, ""));
+        for (String name : patternNames) {
+            patterns.add(new LogPattern(name, logPatterns.get(name, "")));
         }
-        return map;
+        return patterns;
     }
 
     private List<String> getPatterns() {
@@ -105,11 +101,19 @@ public class PreferencesController implements EventNotifier {
         logPatterns.remove(name);
     }
 
-    public String getLogPattern() {
-        return preferences.get(logPattern, "");
+    public String getCurrentLogPattern() {
+        return preferences.get(currentLogPattern, "");
     }
 
-    public void setLogPattern(String pattern) {
-        preferences.put(logPattern, pattern);
+    public void setCurrentLogPattern(String pattern) {
+        preferences.put(currentLogPattern, pattern);
+    }
+
+    public void setCurrentPatternName(String name) {
+        preferences.put(currentPatternName, name);
+    }
+
+    public String getCurrentPatternName() {
+        return preferences.get(currentPatternName, "");
     }
 }

@@ -1,4 +1,4 @@
-package app.tools.notifications;
+package app.notifications;
 
 public enum NotificationType {
     CONFIRMATION, INFORMATION, ERROR, WARNING
