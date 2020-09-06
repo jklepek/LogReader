@@ -1,6 +1,8 @@
 package app.core;
 
 import app.model.PatternKeywords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class PatternBuilder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PatternBuilder.class);
 
     private final String pattern;
     private final List<String> keywords = new ArrayList<>();
@@ -32,7 +36,7 @@ public class PatternBuilder {
                 String timestamp = timestampStringPattern.replaceAll("'", "");
                 return timestamp.replaceAll("[yYmMdDhHsS]", "\\\\d");
             } catch (NullPointerException e) {
-                System.out.println("Timestamp not complete");
+                LOG.error("Incomplete timestamp", e);
             }
         }
         return "";
@@ -56,7 +60,7 @@ public class PatternBuilder {
                     try {
                         timestampStringPattern = part.substring(part.indexOf("{") + 1, part.indexOf("}"));
                     } catch (IndexOutOfBoundsException e) {
-                        System.out.println("Could not get pattern");
+                        LOG.error("Could not parse pattern", e);
                     }
                     part = "d";
                 }

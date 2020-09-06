@@ -22,6 +22,8 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import org.controlsfx.control.CheckComboBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,6 +33,8 @@ import java.util.stream.Collectors;
 import static app.model.PatternKeywords.*;
 
 public class TabController {
+
+    public static final Logger LOG = LoggerFactory.getLogger(TabController.class);
 
     private final EventTreeItem rootNode = new EventTreeItem(new EventPropertyCounter(""));
     @FXML
@@ -111,10 +115,10 @@ public class TabController {
     @FXML
     public void autoRefresh() {
         if (autoRefreshButton.isSelected()) {
-            System.out.println("Auto-refresh ON.");
+            LOG.info("Auto-refresh turned ON");
             logTailer.startTailing();
         } else if (!autoRefreshButton.isSelected()) {
-            System.out.println("Auto-refresh OFF.");
+            LOG.info("Auto-refresh turned OFF");
             logTailer.stopTailing();
         }
     }
@@ -193,6 +197,7 @@ public class TabController {
      * @param logFile opened log file
      */
     public void initData(File logFile) {
+        LOG.info("New tab for {}", logFile);
         logTailer = new LogTailer(logFile, parser);
         logTailer.addListener(NotificationService.getInstance());
         events = LogEventRepository.getLogEventList(logFile.getAbsolutePath());

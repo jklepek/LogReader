@@ -2,6 +2,8 @@ package app.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +12,8 @@ import java.util.Map;
  * LogEvent object is stored in ObservableList, to be displayed in UI table.
  */
 public class LogEvent {
+
+    public static final Logger LOG = LoggerFactory.getLogger(LogEvent.class);
 
     private final Map<String, StringProperty> propertyMap;
 
@@ -25,7 +29,7 @@ public class LogEvent {
         try {
             return propertyMap.get(propertyName.toUpperCase()).getValue();
         } catch (Exception e) {
-            System.out.println("No such property: " + propertyName);
+            LOG.warn("No such property: {}", propertyName);
         }
         return "";
     }

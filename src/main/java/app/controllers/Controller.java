@@ -14,12 +14,16 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
 public class Controller {
+
+    public static final Logger LOG = LoggerFactory.getLogger(Controller.class);
 
     @FXML
     private BorderPane borderPane;
@@ -93,8 +97,7 @@ public class Controller {
         try {
             tab = fxmlLoader.load();
         } catch (IOException e) {
-            System.out.println("Couldn't load fxml file.");
-            e.printStackTrace();
+            LOG.error("Could not load fxml file", e);
         }
         TabController tabController = fxmlLoader.getController();
         tabController.initData(file);

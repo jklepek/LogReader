@@ -5,6 +5,8 @@ import app.notifications.EventNotifier;
 import app.notifications.NotificationListener;
 import app.notifications.NotificationType;
 import app.preferences.PreferencesController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +24,8 @@ import java.util.concurrent.Future;
  */
 public class DirectoryWatchService implements Runnable, EventNotifier {
 
+    public static final Logger LOG = LoggerFactory.getLogger(DirectoryWatchService.class);
+
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private final Path dirPath;
     private final long refreshInterval;
@@ -38,7 +42,7 @@ public class DirectoryWatchService implements Runnable, EventNotifier {
      * Starts watching the directory
      */
     public void startWatching() {
-        System.out.println("Watching " + dirPath.toString());
+        LOG.info("Started watching {} directory for new log files", dirPath.toString());
         taskHandle = service.submit(this);
     }
 
@@ -71,7 +75,7 @@ public class DirectoryWatchService implements Runnable, EventNotifier {
             try {
                 Thread.sleep(refreshInterval);
             } catch (InterruptedException e) {
-                System.out.println("File closed. Stopped watching directory.");
+                LOG.warn("File was closed. Stopped watching for new files.", e);
                 Thread.currentThread().interrupt();
                 break;
             }
@@ -82,7 +86,7 @@ public class DirectoryWatchService implements Runnable, EventNotifier {
                     Path newFileName = (Path) event.context();
                     String fileName = newFileName.toFile().getName();
                     if (fileName.endsWith(".log")) {
-                        System.out.println("There is a new log file: " + newFileName);
+                        LOG.info("New logfile found: {}", newFileName);
                         listeners.forEach(listener ->
                                 listener.fireNotification(
                                         new EventNotification("New log", "There is a new log file: " + fileName, NotificationType.INFORMATION)));

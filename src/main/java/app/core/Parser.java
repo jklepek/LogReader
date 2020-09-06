@@ -5,6 +5,8 @@ import app.notifications.EventNotification;
 import app.notifications.EventNotifier;
 import app.notifications.NotificationListener;
 import app.notifications.NotificationType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +19,8 @@ import java.util.regex.Pattern;
 import static app.model.PatternKeywords.*;
 
 public class Parser implements EventNotifier {
+
+    public static final Logger LOG = LoggerFactory.getLogger(Parser.class);
 
     private List<String> keywords;
     private final List<NotificationListener> listeners = new ArrayList<>();
@@ -113,7 +117,7 @@ public class Parser implements EventNotifier {
                     buffer.append(currentLine).append(System.lineSeparator());
                 }
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                LOG.error("Error while reading file {}", log, e);
                 listeners.forEach(listener ->
                         listener.fireNotification(
                                 new EventNotification("Error while reading file", e.getMessage(), NotificationType.ERROR)));

@@ -5,8 +5,12 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LogEventPropertyFactory implements Callback<TableColumn.CellDataFeatures<LogEvent, String>, ObservableValue<String>> {
+
+    public static final Logger LOG = LoggerFactory.getLogger(LogEventPropertyFactory.class);
 
     private final String property;
 
@@ -27,8 +31,7 @@ public class LogEventPropertyFactory implements Callback<TableColumn.CellDataFea
             String value = event.getProperty(property);
             return new ReadOnlyObjectWrapper<>(value);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("No such property: " + property);
+            LOG.error("No such property: {}", property, e);
         }
         return null;
     }
