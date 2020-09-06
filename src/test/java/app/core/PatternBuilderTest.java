@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.ls.LSOutput;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,11 +21,13 @@ class PatternBuilderTest {
     @Test
     void getKeywordsFromPatternTest() {
         List<String> keywords = builder.getKeywords();
-        keywords.forEach(System.out::println);
+        assertEquals(keywords, List.of("TIMESTAMP", "THREAD", "LEVEL", "EMITTER", "MDC", "MESSAGE"));
     }
 
+    @Test
     void getTimestampRegexTest() {
-
+        Pattern timestampPattern = builder.getTimestampPattern();
+        assertEquals(timestampPattern.toString(), Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d,\\d\\d\\d").toString());
     }
 
 }

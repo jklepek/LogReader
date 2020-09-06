@@ -8,13 +8,13 @@ public enum PatternKeywords {
     THREAD("t"),
     MESSAGE("m"),
     EMITTER("c"),
-    MDC("X"),
+    MDC("x"),
     TIMESTAMP("d"),
     LINE("L"),
     LOCATION("l"),
     PID("pid");
 
-    private String label;
+    private final String label;
 
     PatternKeywords(String label) {
         this.label = label;
