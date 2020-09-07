@@ -28,11 +28,10 @@ public class PreferencesController implements EventNotifier {
         return LazyHolder.INSTANCE;
     }
 
-    private final String autoRefreshInterval = "REFRESH_INTERVAL";
-    private final String initialDir = "PREFERRED_DIR";
-    private final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
-    private final String currentLogPattern = "CURRENT_LOG_PATTERN";
-    private final String currentPatternName = "CURRENT_PATTERN_NAME";
+    private static final String autoRefreshInterval = "REFRESH_INTERVAL";
+    private static final String initialDir = "PREFERRED_DIR";
+    private static final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
+    private static final String currentLogPattern = "CURRENT_LOG_PATTERN";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
     private final List<NotificationListener> listeners = new ArrayList<>();
@@ -94,7 +93,7 @@ public class PreferencesController implements EventNotifier {
         } catch (BackingStoreException e) {
             e.printStackTrace();
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public void removePattern(String name) {
@@ -109,11 +108,4 @@ public class PreferencesController implements EventNotifier {
         preferences.put(currentLogPattern, pattern);
     }
 
-    public void setCurrentPatternName(String name) {
-        preferences.put(currentPatternName, name);
-    }
-
-    public String getCurrentPatternName() {
-        return preferences.get(currentPatternName, "");
-    }
 }

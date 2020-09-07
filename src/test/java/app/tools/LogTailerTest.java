@@ -30,7 +30,6 @@ class LogTailerTest {
 
     private static final Path filePath = Paths.get("src/test/resources/log4j.log");
     private static Parser parser;
-    private static String lineSeparator = System.lineSeparator();
 
     @BeforeAll
     static void initTests() {

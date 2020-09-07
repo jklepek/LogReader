@@ -13,6 +13,10 @@ import java.util.Map;
  */
 public class LogEventRepository {
 
+    private LogEventRepository() {
+        //empty private constructor to block direct initialization
+    }
+
     /**
      * Map where opened files are keys and each file has corresponding ObservableList
      */

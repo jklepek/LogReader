@@ -11,7 +11,7 @@ import javafx.beans.property.StringProperty;
 
 /**
  * @author JKlepek
- * @project LogReader
+ *
  */
 public class EventPropertyCounter {
 

@@ -33,7 +33,7 @@ public class PatternBuilder {
     private String getTimestampRegex() {
         if (timestampStringPattern != null) {
             try {
-                String timestamp = timestampStringPattern.replaceAll("'", "");
+                String timestamp = timestampStringPattern.replace("'", "");
                 return timestamp.replaceAll("[yYmMdDhHsS]", "\\\\d");
             } catch (NullPointerException e) {
                 LOG.error("Incomplete timestamp", e);

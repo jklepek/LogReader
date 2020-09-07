@@ -12,7 +12,7 @@ import static app.model.PatternKeywords.LEVEL;
 
 /**
  * @author JKlepek
- * @project LogReader
+ *
  */
 public class LogEventTableRow extends TableRow<LogEvent> {
 

@@ -77,7 +77,7 @@ public class TabController {
             column.setCellValueFactory(new LogEventPropertyFactory(keyword));
             tableView.getColumns().add(column);
         }
-        tableView.setRowFactory(tableView -> new LogEventTableRow());
+        tableView.setRowFactory(tView -> new LogEventTableRow());
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
         filterCombo.getItems().addAll(keywords);
         filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
@@ -206,7 +206,7 @@ public class TabController {
         levelComboBox.getItems().addAll(getSeverityLevels());
         levelComboBox.getCheckModel().checkAll();
         initEventsChangeListeners();
-        this.tab.setOnCloseRequest((event) -> logTailer.stopTailing());
+        this.tab.setOnCloseRequest(event -> logTailer.stopTailing());
     }
 
     /**
@@ -230,8 +230,8 @@ public class TabController {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(i -> {
                         Platform.runLater(() -> {
-                            if (!levelComboBox.getItems().contains(i.getProperty(String.valueOf(LEVEL)))) {
-                                levelComboBox.getItems().add(i.getProperty(String.valueOf(LEVEL)));
+                            if (!levelComboBox.getItems().contains(i.getProperty(LEVEL.name()))) {
+                                levelComboBox.getItems().add(i.getProperty(LEVEL.name()));
                                 levelComboBox.getCheckModel().checkAll();
                             }
                         });

@@ -12,17 +12,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static app.model.PatternKeywords.*;
+import static app.model.PatternKeywords.MESSAGE;
+import static app.model.PatternKeywords.TIMESTAMP;
 
 public class Parser implements EventNotifier {
 
     public static final Logger LOG = LoggerFactory.getLogger(Parser.class);
 
-    private List<String> keywords;
+    private final List<String> keywords;
     private final List<NotificationListener> listeners = new ArrayList<>();
     private final Pattern timestampPattern;
 
@@ -140,7 +142,7 @@ public class Parser implements EventNotifier {
         while (matcher.find()) {
             lineNumbers.add(matcher.start());
         }
-        if (lineNumbers.size() == 0) {
+        if (lineNumbers.isEmpty()) {
             listeners.forEach(listener ->
                     listener.fireNotification(
                             new EventNotification("No events", "No events were parsed from file", NotificationType.WARNING)));

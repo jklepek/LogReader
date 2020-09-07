@@ -14,9 +14,10 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Service that watches the parent directory of the opened log file
@@ -26,24 +27,25 @@ public class DirectoryWatchService implements Runnable, EventNotifier {
 
     public static final Logger LOG = LoggerFactory.getLogger(DirectoryWatchService.class);
 
-    private final ExecutorService service = Executors.newSingleThreadExecutor();
+    private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
     private final Path dirPath;
     private final long refreshInterval;
     private WatchService watchService;
-    private Future taskHandle;
-    private List<NotificationListener> listeners = new ArrayList<>();
+    private ScheduledFuture<?> taskHandle;
+    private final List<NotificationListener> listeners = new ArrayList<>();
 
     public DirectoryWatchService(File directory) {
         this.dirPath = directory.toPath();
         this.refreshInterval = PreferencesController.getInstance().getAutoRefreshInterval();
+        registerDir();
     }
 
     /**
      * Starts watching the directory
      */
     public void startWatching() {
-        LOG.info("Started watching {} directory for new log files", dirPath.toString());
-        taskHandle = service.submit(this);
+        LOG.info("Started watching {} directory for new log files", dirPath);
+        taskHandle = service.scheduleAtFixedRate(this, refreshInterval, refreshInterval, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -61,7 +63,7 @@ public class DirectoryWatchService implements Runnable, EventNotifier {
             watchService = FileSystems.getDefault().newWatchService();
             dirPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Could not register folder for watch service", e);
         }
     }
 
@@ -70,31 +72,22 @@ public class DirectoryWatchService implements Runnable, EventNotifier {
      * and fires a notification when there is a new log file
      */
     private void watchDirectory() {
-        registerDir();
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                Thread.sleep(refreshInterval);
-            } catch (InterruptedException e) {
-                LOG.warn("File was closed. Stopped watching for new files.", e);
-                Thread.currentThread().interrupt();
-                break;
-            }
-            WatchKey key;
-            key = watchService.poll();
-            if (key != null) {
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    Path newFileName = (Path) event.context();
-                    String fileName = newFileName.toFile().getName();
-                    if (fileName.endsWith(".log")) {
-                        LOG.info("New logfile found: {}", newFileName);
-                        listeners.forEach(listener ->
-                                listener.fireNotification(
-                                        new EventNotification("New log", "There is a new log file: " + fileName, NotificationType.INFORMATION)));
-                    }
+        WatchKey key;
+        key = watchService.poll();
+        if (key != null) {
+            for (WatchEvent<?> event : key.pollEvents()) {
+                Path newFileName = (Path) event.context();
+                String fileName = newFileName.toFile().getName();
+                if (fileName.endsWith(".log")) {
+                    LOG.info("New logfile found: {}", newFileName);
+                    listeners.forEach(listener ->
+                            listener.fireNotification(
+                                    new EventNotification("New log", "There is a new log file: " + fileName, NotificationType.INFORMATION)));
                 }
-                key.reset();
             }
+            key.reset();
         }
+
     }
 
     @Override

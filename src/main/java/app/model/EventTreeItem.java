@@ -4,7 +4,7 @@ import javafx.scene.control.TreeItem;
 
 public class EventTreeItem extends TreeItem<EventPropertyCounter> {
 
-    private EventPropertyCounter eventPropertyCounter;
+    private final EventPropertyCounter eventPropertyCounter;
 
     public EventTreeItem(EventPropertyCounter value) {
         super(value);

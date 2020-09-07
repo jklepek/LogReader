@@ -12,6 +12,10 @@ public class DirectoryWatchServiceFactory {
 
     private static final Map<File, Integer> DIRECTORIES = new HashMap<>();
 
+    private DirectoryWatchServiceFactory(){
+        //empty private constructor to block direct initialization
+    }
+
     /**
      * If the parent directory of the log file already has watch service assigned,
      * empty Optional is returned
