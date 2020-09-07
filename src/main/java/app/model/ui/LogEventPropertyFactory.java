@@ -1,6 +1,7 @@
 package app.model.ui;
 
 import app.model.LogEvent;
+import app.model.PatternKeywords;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
@@ -29,6 +30,10 @@ public class LogEventPropertyFactory implements Callback<TableColumn.CellDataFea
         }
         try {
             String value = event.getProperty(property);
+            if (property.equals(PatternKeywords.MESSAGE.name())) {
+                String message = value.substring(0, value.indexOf(System.lineSeparator()));
+                return new ReadOnlyObjectWrapper<>(message);
+            }
             return new ReadOnlyObjectWrapper<>(value);
         } catch (Exception e) {
             LOG.error("No such property: {}", property, e);
