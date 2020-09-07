@@ -60,6 +60,7 @@ public class TabController {
     private final TreeTableColumn<EventPropertyCounter, String> treeCountColumn = new TreeTableColumn<>("Count");
     private ObservableList<LogEvent> events;
     private FilteredList<LogEvent> filteredList;
+    private ObservableList<String> severityLevels = null;
     private final ObservableList<EventTreeItem> treeItems = FXCollections.observableArrayList();
     private final String pattern = PreferencesController.getInstance().getCurrentLogPattern();
     private final Parser parser = new Parser(pattern);
@@ -78,6 +79,7 @@ public class TabController {
             tableView.getColumns().add(column);
         }
         tableView.setRowFactory(tView -> new LogEventTableRow());
+        severityLevels = levelComboBox.getItems();
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
         filterCombo.getItems().addAll(keywords);
         filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
@@ -115,10 +117,8 @@ public class TabController {
     @FXML
     public void autoRefresh() {
         if (autoRefreshButton.isSelected()) {
-            LOG.info("Auto-refresh turned ON");
             logTailer.startTailing();
         } else if (!autoRefreshButton.isSelected()) {
-            LOG.info("Auto-refresh turned OFF");
             logTailer.stopTailing();
         }
     }
@@ -203,7 +203,7 @@ public class TabController {
         events = LogEventRepository.getLogEventList(logFile.getAbsolutePath());
         filteredList = new FilteredList<>(events);
         tableView.setItems(filteredList);
-        levelComboBox.getItems().addAll(getSeverityLevels());
+        severityLevels.setAll(getSeverityLevels());
         levelComboBox.getCheckModel().checkAll();
         initEventsChangeListeners();
         this.tab.setOnCloseRequest(event -> logTailer.stopTailing());
@@ -220,6 +220,14 @@ public class TabController {
                 .collect(Collectors.toList());
     }
 
+    private void updateLevelsComboBox(LogEvent event) {
+        String level = event.getProperty(LEVEL.name());
+        if (!severityLevels.contains(level)) {
+            severityLevels.add(level);
+            Platform.runLater(() -> levelComboBox.getCheckModel().checkAll());
+        }
+    }
+
     /**
      * Adds new severity levels to the checkComboBox if there are any new and checks them
      * Updates EventTreeItem list when there are new LogEvents
@@ -229,12 +237,7 @@ public class TabController {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(i -> {
-                        Platform.runLater(() -> {
-                            if (!levelComboBox.getItems().contains(i.getProperty(LEVEL.name()))) {
-                                levelComboBox.getItems().add(i.getProperty(LEVEL.name()));
-                                levelComboBox.getCheckModel().checkAll();
-                            }
-                        });
+                        updateLevelsComboBox(i);
                         String property = treeViewCBox.getSelectionModel().getSelectedItem();
                         if (property != null) {
                             updateTreeItem(i.getProperty(property));

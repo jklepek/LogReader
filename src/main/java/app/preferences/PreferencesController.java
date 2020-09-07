@@ -28,10 +28,10 @@ public class PreferencesController implements EventNotifier {
         return LazyHolder.INSTANCE;
     }
 
-    private static final String autoRefreshInterval = "REFRESH_INTERVAL";
-    private static final String initialDir = "PREFERRED_DIR";
-    private static final String watchForDirChanges = "WATCH_FOR_DIR_CHANGES";
-    private static final String currentLogPattern = "CURRENT_LOG_PATTERN";
+    private static final String AUTO_REFRESH_INTERVAL = "REFRESH_INTERVAL";
+    private static final String INITIAL_DIR = "PREFERRED_DIR";
+    private static final String WATCH_FOR_DIR_CHANGES = "WATCH_FOR_DIR_CHANGES";
+    private static final String CURRENT_LOG_PATTERN = "CURRENT_LOG_PATTERN";
     private final Preferences preferences = Preferences.userRoot().node(this.getClass().getName());
     private final Preferences logPatterns = preferences.node("LogPatterns");
     private final List<NotificationListener> listeners = new ArrayList<>();
@@ -46,27 +46,27 @@ public class PreferencesController implements EventNotifier {
     }
 
     public boolean getWatchForDirChanges() {
-        return preferences.getBoolean(watchForDirChanges, true);
+        return preferences.getBoolean(WATCH_FOR_DIR_CHANGES, true);
     }
 
     public void setWatchForDirChanges(boolean watch) {
-        preferences.putBoolean(watchForDirChanges, watch);
+        preferences.putBoolean(WATCH_FOR_DIR_CHANGES, watch);
     }
 
     public long getAutoRefreshInterval() {
-        return preferences.getLong(autoRefreshInterval, 1000);
+        return preferences.getLong(AUTO_REFRESH_INTERVAL, 1000);
     }
 
     public void setAutoRefreshInterval(long value) {
-        preferences.putLong(autoRefreshInterval, value);
+        preferences.putLong(AUTO_REFRESH_INTERVAL, value);
     }
 
     public String getInitialDir() {
-        return preferences.get(initialDir, System.getProperty("user.dir"));
+        return preferences.get(INITIAL_DIR, System.getProperty("user.dir"));
     }
 
     public void setInitialDir(String dir) {
-        preferences.put(initialDir, dir);
+        preferences.put(INITIAL_DIR, dir);
     }
 
     public void addLogPattern(String name, String pattern) {
@@ -101,11 +101,11 @@ public class PreferencesController implements EventNotifier {
     }
 
     public String getCurrentLogPattern() {
-        return preferences.get(currentLogPattern, "");
+        return preferences.get(CURRENT_LOG_PATTERN, "");
     }
 
     public void setCurrentLogPattern(String pattern) {
-        preferences.put(currentLogPattern, pattern);
+        preferences.put(CURRENT_LOG_PATTERN, pattern);
     }
 
 }
