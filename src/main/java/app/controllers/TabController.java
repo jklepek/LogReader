@@ -181,13 +181,15 @@ public class TabController {
      * @param propertyValue value of the selected LogEvent property
      */
     private void updateTreeItem(String propertyValue) {
-        if (treeItems.contains(new EventTreeItem(new EventPropertyCounter(propertyValue)))) {
+        EventTreeItem eventTreeItem = new EventTreeItem(new EventPropertyCounter(propertyValue));
+        if (treeItems.contains(eventTreeItem)) {
             treeItems.stream()
                     .filter(i -> i.getValue().getName().equals(propertyValue))
                     .findFirst()
                     .ifPresent(item -> item.getValue().incrementCount());
+        } else {
+            treeItems.add(eventTreeItem);
         }
-        treeItems.add(new EventTreeItem(new EventPropertyCounter(propertyValue)));
     }
 
     /**
