@@ -76,6 +76,7 @@ public class TabController {
 
     public void initialize() {
         progressBar.setVisible(false);
+        textArea.setWrapText(true);
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
             LogEvent logEvent = tableView.getSelectionModel().getSelectedItem();
             if (logEvent != null) {
