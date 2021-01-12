@@ -6,6 +6,7 @@ import app.notifications.NotificationService;
 import app.preferences.PreferencesController;
 import app.tools.DirectoryWatchService;
 import app.tools.DirectoryWatchServiceFactory;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -31,6 +32,8 @@ public class Controller {
     private Button settingsButton;
     @FXML
     private TabPane tabPane;
+    @FXML
+    private ProgressBar progressBar;
 
     private FileChooser fileChooser;
 
@@ -38,6 +41,9 @@ public class Controller {
         fileChooser = new FileChooser();
         Image settingsImage = new Image(getClass().getResourceAsStream("/icons/settings.png"), 17, 17, true, true);
         settingsButton.setGraphic(new ImageView(settingsImage));
+        progressBar.setVisible(false);
+        long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        LOG.info("Memory consumption: {} MB", usedMemory / 1000000);
     }
 
     @FXML
@@ -45,20 +51,40 @@ public class Controller {
         configureFileChooser(fileChooser);
         Window window = borderPane.getScene().getWindow();
         File file = fileChooser.showOpenDialog(window);
-        if (file != null) {
-            if (!LogEventRepository.isOpened(file.getAbsolutePath())) {
-                LogEventRepository.createNewRepository(file.getAbsolutePath());
-                new Parser(
-                        PreferencesController.getInstance().getCurrentLogPattern()
-                ).getLogEventsFromFile(file);
-            }
-            createTab(file);
+        if (file != null && !LogEventRepository.isOpened(file.getAbsolutePath())) {
+            progressBar.setVisible(true);
+            LogEventRepository.createNewRepository(file.getAbsolutePath());
+            long start = System.currentTimeMillis();
+            Task<Void> task = new Task<>() {
+                @Override
+                protected Void call() {
+                    new Parser(
+                            PreferencesController.getInstance().getCurrentLogPattern()
+                    ).getLogEventsFromFile(file);
+                    return null;
+                }
+            };
+            progressBar.progressProperty().bind(task.progressProperty());
+            task.setOnSucceeded(e -> {
+                progressBar.setVisible(false);
+                createTab(file);
+                long end = System.currentTimeMillis();
+                LOG.info("Loaded {} in {} ms.", file.getAbsolutePath(), end - start);
+                long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+                LOG.info("Memory consumption: {} MB", usedMemory / 1000000);
+            });
+            task.setOnFailed(e -> {
+                progressBar.setVisible(false);
+                LOG.error("Failed to load {}", file.getAbsolutePath());
+            });
+            LOG.info("Loading {} ...", file.getAbsolutePath());
+            new Thread(task).start();
         }
     }
 
     private void configureFileChooser(FileChooser chooser) {
         chooser.setTitle("Select log file");
-        chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log"));
+        chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Log", "*.log", "*.txt"));
         File preferredFolder = new File(PreferencesController.getInstance().getInitialDir());
         if (!preferredFolder.exists() || !preferredFolder.isDirectory()) {
             chooser.setInitialDirectory(new File(System.getProperty("user.dir")));

@@ -5,6 +5,7 @@ import app.notifications.EventNotification;
 import app.notifications.EventNotifier;
 import app.notifications.NotificationListener;
 import app.notifications.NotificationType;
+import javafx.collections.ObservableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +81,7 @@ public class Parser implements EventNotifier {
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             listeners.forEach(listener -> listener.fireNotification(
-                    new EventNotification("Parsing error", "An error occured while parsing.", NotificationType.ERROR)));
+                    new EventNotification("Parsing error", "An error occurred while parsing.", NotificationType.ERROR)));
         }
         return logEvent;
     }
@@ -139,6 +140,7 @@ public class Parser implements EventNotifier {
     public void parseBuffer(StringBuilder buffer, String absoluteFilePath) {
         Matcher matcher = timestampPattern.matcher(buffer);
         List<Integer> lineNumbers = new ArrayList<>();
+        ObservableList<LogEvent> logEventList = LogEventRepository.getLogEventList(absoluteFilePath);
         while (matcher.find()) {
             lineNumbers.add(matcher.start());
         }
@@ -155,7 +157,7 @@ public class Parser implements EventNotifier {
                 line = buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1));
             }
             LogEvent event = parse(line);
-            LogEventRepository.addEvent(absoluteFilePath, event);
+            logEventList.add(event);
         }
     }
 

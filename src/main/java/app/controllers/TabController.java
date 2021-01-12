@@ -10,22 +10,27 @@ import app.model.ui.LogEventPropertyFactory;
 import app.model.ui.LogEventTableRow;
 import app.notifications.NotificationService;
 import app.preferences.PreferencesController;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
+import javafx.util.Duration;
 import org.controlsfx.control.CheckComboBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,6 +61,10 @@ public class TabController {
     private ComboBox<String> treeViewCBox;
     @FXML
     private TreeTableView<EventPropertyCounter> treeView;
+    @FXML
+    private Label rowsCount;
+    @FXML
+    private ProgressBar progressBar;
     private final TreeTableColumn<EventPropertyCounter, String> treeNameColumn = new TreeTableColumn<>();
     private final TreeTableColumn<EventPropertyCounter, String> treeCountColumn = new TreeTableColumn<>("Count");
     private ObservableList<LogEvent> events;
@@ -66,6 +75,7 @@ public class TabController {
     private final Parser parser = new Parser(pattern);
 
     public void initialize() {
+        progressBar.setVisible(false);
         tableView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<? super LogEvent>) c -> {
             LogEvent logEvent = tableView.getSelectionModel().getSelectedItem();
             if (logEvent != null) {
@@ -82,7 +92,24 @@ public class TabController {
         severityLevels = levelComboBox.getItems();
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
         filterCombo.getItems().addAll(keywords);
-        filterField.textProperty().addListener((observable, oldValue, newValue) -> filterEvents(newValue));
+        PauseTransition transition = new PauseTransition(Duration.millis(1000));
+        filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+            progressBar.setVisible(true);
+            transition.setOnFinished(event -> {
+                Task<Void> task = new Task<>() {
+                    @Override
+                    protected Void call() {
+                        filterEvents(newValue);
+                        return null;
+                    }
+                };
+                progressBar.progressProperty().bind(task.progressProperty());
+                task.setOnSucceeded(event1 -> progressBar.setVisible(false));
+                task.setOnFailed(event1 -> progressBar.setVisible(false));
+                Platform.runLater(task);
+            });
+            transition.playFromStart();
+        });
         List<String> filteredKeywords = keywords
                 .stream()
                 .filter(s -> !(s.equals(TIMESTAMP.name()) || s.equals(MESSAGE.name())))
@@ -144,7 +171,7 @@ public class TabController {
      */
     private void filterEvents(String text) {
         String property = filterCombo.getSelectionModel().getSelectedItem();
-        if (!property.isEmpty() && text != null) {
+        if (property != null && text != null) {
             filteredList.setPredicate(event -> {
                 String value = event.getProperty(property);
                 return value.toUpperCase().contains(text.toUpperCase());
@@ -206,9 +233,16 @@ public class TabController {
         filteredList = new FilteredList<>(events);
         tableView.setItems(filteredList);
         severityLevels.setAll(getSeverityLevels());
+        NumberFormat format = getFormat();
+        tableView.getItems().addListener((InvalidationListener) c ->
+                rowsCount.setText(format.format(tableView.getItems().size())));
         levelComboBox.getCheckModel().checkAll();
         initEventsChangeListeners();
-        this.tab.setOnCloseRequest(event -> logTailer.stopTailing());
+        tab.setOnClosed(event -> logTailer.stopTailing());
+    }
+
+    private NumberFormat getFormat() {
+        return NumberFormat.getInstance();
     }
 
     /**

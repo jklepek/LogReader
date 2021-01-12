@@ -18,6 +18,9 @@
                 <ComboBox fx:id="filterCombo" promptText="Filter by..."/>
                 <TextField fx:id="filterField"/>
                 <Button text="Reset filters" onAction="#resetFilters"/>
+                <Label text="Rows count: " wrapText="true" prefHeight="28"/>
+                <Label fx:id="rowsCount" wrapText="true" prefHeight="28"/>
+                <ProgressBar fx:id="progressBar" BorderPane.alignment="CENTER_RIGHT" prefHeight="28"/>
             </HBox>
         </top>
         <left>
