@@ -13,6 +13,7 @@ import app.preferences.PreferencesController;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -93,24 +94,7 @@ public class TabController {
         severityLevels = levelComboBox.getItems();
         levelComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<? super String>) observable -> filterEventBySeverity());
         filterCombo.getItems().addAll(keywords);
-        PauseTransition transition = new PauseTransition(Duration.millis(1000));
-        filterField.textProperty().addListener((observable, oldValue, newValue) -> {
-            progressBar.setVisible(true);
-            transition.setOnFinished(event -> {
-                Task<Void> task = new Task<>() {
-                    @Override
-                    protected Void call() {
-                        filterEvents(newValue);
-                        return null;
-                    }
-                };
-                progressBar.progressProperty().bind(task.progressProperty());
-                task.setOnSucceeded(event1 -> progressBar.setVisible(false));
-                task.setOnFailed(event1 -> progressBar.setVisible(false));
-                Platform.runLater(task);
-            });
-            transition.playFromStart();
-        });
+        initFilterListener();
         List<String> filteredKeywords = keywords
                 .stream()
                 .filter(s -> !(s.equals(TIMESTAMP.name()) || s.equals(MESSAGE.name())))
@@ -121,11 +105,35 @@ public class TabController {
         parser.addListener(NotificationService.getInstance());
     }
 
+    private void initFilterListener() {
+        PauseTransition transition = new PauseTransition(Duration.millis(500));
+        ChangeListener<String> listener = (observable, oldValue, newValue) -> {
+            progressBar.setVisible(true);
+            transition.setOnFinished(event -> {
+                Task<Void> task = new Task<>() {
+                    @Override
+                    protected Void call() {
+                        filterEvents();
+                        return null;
+                    }
+                };
+                progressBar.progressProperty().bind(task.progressProperty());
+                task.setOnSucceeded(event1 -> progressBar.setVisible(false));
+                task.setOnFailed(event1 -> progressBar.setVisible(false));
+                Platform.runLater(task);
+            });
+            transition.playFromStart();
+        };
+        filterField.textProperty().addListener(listener);
+        filterCombo.valueProperty().addListener(listener);
+    }
+
     @FXML
     public void resetFilters() {
         filteredList.setPredicate(event -> true);
         filterField.clear();
         levelComboBox.getCheckModel().checkAll();
+        treeView.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -168,11 +176,12 @@ public class TabController {
     }
 
     /**
-     * @param text filter events by selected property containing typed text
+     * Filters events based on search text and selected property
      */
-    private void filterEvents(String text) {
+    private void filterEvents() {
+        String text = filterField.getText();
         String property = filterCombo.getSelectionModel().getSelectedItem();
-        if (property != null && text != null) {
+        if (property != null && text != null && !text.isEmpty()) {
             filteredList.setPredicate(event -> {
                 String value = event.getProperty(property);
                 return value.toUpperCase().contains(text.toUpperCase());
@@ -234,9 +243,8 @@ public class TabController {
         filteredList = new FilteredList<>(events);
         tableView.setItems(filteredList);
         severityLevels.setAll(getSeverityLevels());
-        NumberFormat format = getFormat();
         tableView.getItems().addListener((InvalidationListener) c ->
-                rowsCount.setText(format.format(tableView.getItems().size())));
+                rowsCount.setText(getFormat().format(tableView.getItems().size())));
         levelComboBox.getCheckModel().checkAll();
         initEventsChangeListeners();
         tab.setOnClosed(event -> logTailer.stopTailing());

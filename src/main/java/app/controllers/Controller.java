@@ -42,8 +42,6 @@ public class Controller {
         Image settingsImage = new Image(getClass().getResourceAsStream("/icons/settings.png"), 17, 17, true, true);
         settingsButton.setGraphic(new ImageView(settingsImage));
         progressBar.setVisible(false);
-        long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        LOG.info("Memory consumption: {} MB", usedMemory / 1000000);
     }
 
     @FXML
@@ -71,7 +69,7 @@ public class Controller {
                 long end = System.currentTimeMillis();
                 LOG.info("Loaded {} in {} ms.", file.getAbsolutePath(), end - start);
                 long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-                LOG.info("Memory consumption: {} MB", usedMemory / 1000000);
+                LOG.debug("Memory consumption: {} MB", usedMemory / 1000000);
             });
             task.setOnFailed(e -> {
                 progressBar.setVisible(false);
