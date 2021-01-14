@@ -33,7 +33,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static app.model.PatternKeywords.*;
@@ -74,6 +76,10 @@ public class TabController {
     private final ObservableList<EventTreeItem> treeItems = FXCollections.observableArrayList();
     private final String pattern = PreferencesController.getInstance().getCurrentLogPattern();
     private final Parser parser = new Parser(pattern);
+    private final List<Predicate<LogEvent>> predicates = new ArrayList<>();
+    private Predicate<LogEvent> filterTextPredicate = logEvent -> true;
+    private Predicate<LogEvent> severityLevelPredicate = logEvent -> true;
+    private Predicate<LogEvent> treeItemPredicate = logEvent -> true;
 
     public void initialize() {
         progressBar.setVisible(false);
@@ -130,7 +136,9 @@ public class TabController {
 
     @FXML
     public void resetFilters() {
-        filteredList.setPredicate(event -> true);
+        predicates.removeAll(Arrays.asList(filterTextPredicate, severityLevelPredicate, treeItemPredicate));
+        Predicate<LogEvent> superPredicate = predicates.stream().reduce(Predicate::and).orElse(e -> true);
+        filteredList.setPredicate(superPredicate);
         filterField.clear();
         levelComboBox.getCheckModel().checkAll();
         treeView.getSelectionModel().clearSelection();
@@ -165,7 +173,11 @@ public class TabController {
      */
     private void filterEventBySeverity() {
         List<String> levels = levelComboBox.getCheckModel().getCheckedItems();
-        filteredList.setPredicate(logEvent -> levels.contains((logEvent.getProperty(LEVEL.name()))));
+        predicates.remove(severityLevelPredicate);
+        severityLevelPredicate = logEvent -> levels.contains((logEvent.getProperty(LEVEL.name())));
+        predicates.add(severityLevelPredicate);
+        Predicate<LogEvent> superPredicate = predicates.stream().reduce(Predicate::and).orElse(e -> true);
+        filteredList.setPredicate(superPredicate);
     }
 
     /**
@@ -181,11 +193,15 @@ public class TabController {
     private void filterEvents() {
         String text = filterField.getText();
         String property = filterCombo.getSelectionModel().getSelectedItem();
-        if (property != null && text != null && !text.isEmpty()) {
-            filteredList.setPredicate(event -> {
-                String value = event.getProperty(property);
-                return value.toUpperCase().contains(text.toUpperCase());
-            });
+        predicates.remove(filterTextPredicate);
+        filterTextPredicate = event -> {
+            String value = event.getProperty(property);
+            return value.toUpperCase().contains(text.toUpperCase());
+        };
+        if (property != null && text != null) {
+            predicates.add(filterTextPredicate);
+            Predicate<LogEvent> superPredicate = predicates.stream().reduce(Predicate::and).orElse(e -> true);
+            filteredList.setPredicate(superPredicate);
         }
     }
 
@@ -241,6 +257,8 @@ public class TabController {
         logTailer.addListener(NotificationService.getInstance());
         events = LogEventRepository.getLogEventList(logFile.getAbsolutePath());
         filteredList = new FilteredList<>(events);
+        predicates.addAll(Arrays.asList(filterTextPredicate, severityLevelPredicate, treeItemPredicate));
+        filteredList.setPredicate(logEvent -> true);
         tableView.setItems(filteredList);
         severityLevels.setAll(getSeverityLevels());
         tableView.getItems().addListener((InvalidationListener) c ->
@@ -309,7 +327,11 @@ public class TabController {
             TreeItem<EventPropertyCounter> selectedItem = treeView.getSelectionModel().getSelectedItem();
             String selectedProperty = treeViewCBox.getSelectionModel().getSelectedItem();
             if (event.getClickCount() == 2 && selectedItem != null) {
-                filteredList.setPredicate(event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getProperty(selectedProperty)));
+                predicates.remove(treeItemPredicate);
+                treeItemPredicate = event1 -> selectedItem.getValue().getName().equalsIgnoreCase(event1.getProperty(selectedProperty));
+                predicates.add(treeItemPredicate);
+                Predicate<LogEvent> superPredicate = predicates.stream().reduce(Predicate::and).orElse(e -> true);
+                filteredList.setPredicate(superPredicate);
             }
         });
     }
