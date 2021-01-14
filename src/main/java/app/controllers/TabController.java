@@ -84,7 +84,7 @@ public class TabController {
     private static final String TREE_ITEM_PREDICATE = "treeItemPredicate";
     private Predicate<LogEvent> treeItemPredicate = logEvent -> true;
     private static final String BASIC_PREDICATE = "basicPredicate";
-    private Predicate<LogEvent> basicPredicate = logEvent -> true;
+    private final Predicate<LogEvent> basicPredicate = logEvent -> true;
 
     public void initialize() {
         progressBar.setVisible(false);
@@ -282,7 +282,7 @@ public class TabController {
     private List<String> getSeverityLevels() {
         return events
                 .stream()
-                .map(event -> event.getProperty(String.valueOf(LEVEL)))
+                .map(event -> event.getProperty(LEVEL.name()))
                 .distinct()
                 .collect(Collectors.toList());
     }
