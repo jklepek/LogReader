@@ -15,8 +15,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +28,6 @@ public class Parser implements EventNotifier {
     private final List<String> keywords;
     private final List<NotificationListener> listeners = new ArrayList<>();
     private final Pattern timestampPattern;
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public Parser(String pattern) {
         PatternBuilder patternBuilder = new PatternBuilder(pattern);
