@@ -15,6 +15,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +30,7 @@ public class Parser implements EventNotifier {
     private final List<String> keywords;
     private final List<NotificationListener> listeners = new ArrayList<>();
     private final Pattern timestampPattern;
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public Parser(String pattern) {
         PatternBuilder patternBuilder = new PatternBuilder(pattern);
@@ -139,25 +142,31 @@ public class Parser implements EventNotifier {
      */
     public void parseBuffer(StringBuilder buffer, String absoluteFilePath) {
         Matcher matcher = timestampPattern.matcher(buffer);
-        List<Integer> lineNumbers = new ArrayList<>();
         ObservableList<LogEvent> logEventList = LogEventRepository.getLogEventList(absoluteFilePath);
-        while (matcher.find()) {
-            lineNumbers.add(matcher.start());
-        }
-        if (lineNumbers.isEmpty()) {
-            listeners.forEach(listener ->
-                    listener.fireNotification(
-                            new EventNotification("No events", "No events were parsed from file", NotificationType.WARNING)));
-        }
-        String line;
-        for (int i = 0; i < lineNumbers.size(); i++) {
-            if (i + 1 >= lineNumbers.size()) {
-                line = buffer.substring(lineNumbers.get(i));
+        boolean parsed = false;
+        boolean first = true;
+        int start;
+        int end = 0;
+        while (!parsed) {
+            if (matcher.find()) {
+                start = matcher.start();
+                // here the matcher is already one match ahead, so we have to parse from the previous match
+                if (!first) {
+                    LogEvent previousEvent = parse(buffer.substring(end, start));
+                    logEventList.add(previousEvent);
+                }
+                if (matcher.find()) {
+                    first = false;
+                    end = matcher.start();
+                } else {
+                    end = buffer.length();
+                    parsed = true;
+                }
+                LogEvent logEvent = parse(buffer.substring(start, end));
+                logEventList.add(logEvent);
             } else {
-                line = buffer.substring(lineNumbers.get(i), lineNumbers.get(i + 1));
+                parsed = true;
             }
-            LogEvent event = parse(line);
-            logEventList.add(event);
         }
     }
 

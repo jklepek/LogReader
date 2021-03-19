@@ -8,6 +8,7 @@ package app.tools;
 import app.core.LogEventRepository;
 import app.core.Parser;
 import app.model.LogEvent;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ class ParserTest {
     void parseBufferTest() {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException" + System.lineSeparator());
         parser.parseBuffer(testString, repoName);
+        Awaitility.await().until(() -> LogEventRepository.getLogEventList(repoName).size() != 0);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getProperty(TIMESTAMP.name()));
         assertEquals("ERROR", logEvent.getProperty(LEVEL.name()));
@@ -46,6 +48,7 @@ class ParserTest {
     void parseBufferWithStackTraceTest() {
         StringBuilder testString = new StringBuilder("2018-12-10 12:07:43,330 ERROR [[NewConnectionWizard] - 1] java.lang.InterruptedException" + System.lineSeparator() + "\tat java.util.concurrent.FutureTask.report(FutureTask.java:122)" + System.lineSeparator());
         parser.parseBuffer(testString, repoName);
+        Awaitility.await().until(() -> LogEventRepository.getLogEventList(repoName).size() != 0);
         LogEvent logEvent = LogEventRepository.getLogEventList(repoName).get(0);
         assertEquals("2018-12-10 12:07:43,330", logEvent.getProperty(TIMESTAMP.name()));
         assertEquals("ERROR", logEvent.getProperty(LEVEL.name()));

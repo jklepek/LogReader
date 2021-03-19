@@ -199,7 +199,6 @@ public class TabController {
     private void filterEvents() {
         String text = filterField.getText();
         String property = filterCombo.getSelectionModel().getSelectedItem();
-        predicates.remove(filterTextPredicate);
         filterTextPredicate = event -> {
             String value = event.getProperty(property);
             return value.toUpperCase().contains(text.toUpperCase());
