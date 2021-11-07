@@ -60,7 +60,7 @@ public class PatternBuilder {
                     try {
                         timestampStringPattern = part.substring(part.indexOf("{") + 1, part.indexOf("}"));
                     } catch (IndexOutOfBoundsException e) {
-                        LOG.error("Could not parse pattern", e);
+                        LOG.warn("Could not parse pattern", e);
                     }
                     part = "d";
                 }

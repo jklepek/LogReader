@@ -10,7 +10,7 @@ import app.core.LogTailer;
 import app.core.Parser;
 import app.preferences.PreferencesController;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,9 +64,9 @@ class LogTailerTest {
         assertEquals(2, LogEventRepository.getLogEventList(file.getAbsolutePath()).size());
         LogTailer logTailer = new LogTailer(file, parser);
         logTailer.startTailing();
-        Awaitility.await().atMost(Duration.ONE_HUNDRED_MILLISECONDS);
+        Awaitility.await().atMost(Durations.ONE_HUNDRED_MILLISECONDS);
         Files.write(filePath, "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.APPEND);
-        Awaitility.await().atMost(Duration.FIVE_HUNDRED_MILLISECONDS).untilAsserted(() -> assertEquals(3, LogEventRepository.getLogEventList(file.getAbsolutePath()).size()));
+        Awaitility.await().atMost(Durations.FIVE_HUNDRED_MILLISECONDS).untilAsserted(() -> assertEquals(3, LogEventRepository.getLogEventList(file.getAbsolutePath()).size()));
         logTailer.stopTailing();
     }
 
@@ -80,7 +80,7 @@ class LogTailerTest {
         Files.write(filePath, "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.APPEND);
         Awaitility.await().untilAsserted(() -> assertEquals(3, LogEventRepository.getLogEventList(file.getAbsolutePath()).size()));
         logTailer.stopTailing();
-        Awaitility.await().atMost(Duration.TWO_HUNDRED_MILLISECONDS);
+        Awaitility.await().atMost(Durations.TWO_HUNDRED_MILLISECONDS);
         Files.write(filePath, "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.APPEND);
         Awaitility.await().untilAsserted(() -> assertEquals(3, LogEventRepository.getLogEventList(file.getAbsolutePath()).size()));
     }
@@ -92,7 +92,7 @@ class LogTailerTest {
         assertEquals(2, LogEventRepository.getLogEventList(file.getAbsolutePath()).size());
         LogTailer logTailer = new LogTailer(file, parser);
         logTailer.startTailing();
-        Awaitility.await().atMost(Duration.TWO_HUNDRED_MILLISECONDS);
+        Awaitility.await().atMost(Durations.TWO_HUNDRED_MILLISECONDS);
         Files.write(filePath, "2018-12-10 12:07:43,330 ERROR [NewConnectionWizard] java.lang.InterruptedException\r\n\tat java.util.concurrent.FutureTask.get(FutureTask.java:206)\n".getBytes(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
         Awaitility.await().untilAsserted(() -> assertEquals(1, LogEventRepository.getLogEventList(file.getAbsolutePath()).size()));
     }
